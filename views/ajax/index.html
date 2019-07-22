@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>AJAX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="utils/toastr/toastr.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="../resources/js/security/js/common/dialog/dialog.css" rel="stylesheet">
+</head>
+
+<body class="container">
+<section class="row">
+    <h1>AJAX接口测试</h1>
+
+    <div class="well row">
+        <div class="row">
+            <div class="span4">
+                <form id="form" action="">
+                    <div class="control-group">
+                        <div class="controls">
+                            <label class="control-label" for="url">URL</label>
+                            <input id="url" name="url" type="text" class="input-large width-280" placeholder="请输入URL ..." />
+                            <label class="control-label" for="params">参数</label>
+                            <textarea class="input-large width-280" id="params" name="params" rows="8" placeholder="请输入参数 ..."></textarea>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls link">
+                            <span>类型：</span>
+                            <label>
+                                <input type="radio" name="type" value="get">
+                                <span>GET</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="type" value="post" checked="">
+                                <span>POST</span>
+                            </label>
+                        </div>
+
+                        <div class="controls link m_t-10">
+                            <span>模式：</span>
+                            <label class="m_r-11">
+                                <input type="radio" name="mode" value="default" checked>
+                                <span>常规</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="mode" value="page" >
+                                <span>分页</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="mode" value="upload" >
+                                <span>上传</span>
+                            </label>
+                        </div>
+                        <div id="pageNum" class="controls link m_t-10 hide">
+                            <span>页数：</span>
+                            <input type="number" name="pageNum" value="1" class="m_r-11 width-60">
+                        </div>
+                        <div class="controls link m_t-10 upload hide">
+                            <span>名称：</span>
+                            <input type="text" name="uploadName" value="file" class="m_r-11 width-280">
+                        </div>
+                        <div class="controls link m_t-10 upload hide" >
+                            <span>文件：</span>
+                            <button type="button" id="fileName" class="btn btn-warning">选择文件</button>
+                            <input type="file" hidden>
+                        </div>
+
+                        <div class="row p_l-6 m_t-30">
+                            <button type="button" class="btn btn-primary" id="showtoast">查询</button>
+                            <button type="button" class="btn btn-danger" id="cleartoasts">清除</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="span7">
+                <div id="Canvas"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script src="../resources/core/plugins/jquery/jquery.js"></script>
+<script src="../resources/js/common/jquery_extend.js"></script>
+<script src="js/jsonUtils.js"></script>
+<script src="utils/toastr/toastr.min.js"></script>
+<script src="../resources/base/msg/message_zh.js"></script>
+<script src="../resources/js/security/js/common/dialog/dialog.js"></script>
+<script src="js/ajax.js"></script>
+</body>
+</html>
+<!-- 以下是统计及其他信息，与演示无关，不必理会 -->
