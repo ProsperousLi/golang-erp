@@ -21,12 +21,55 @@ type Supplier struct {
 	Taxnum      string `json:"taxnum" orm:"column(taxnum)"`           //税号
 }
 
+func QuerySupplier(querystr string) []Supplier {
+	var (
+		custs1, custs2 []Supplier
+	)
+
+	if querystr != "" {
+		num, err := OSQL.Raw("select * from "+
+			util.SUPPLIER_TABLE_NAME+
+			" where name like %?% order by id asc", querystr).QueryRows(&custs1)
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+			return custs1
+		}
+		logs.FileLogs.Info("num1=%v", num)
+
+		num, err = OSQL.Raw("select * from "+
+			util.SUPPLIER_TABLE_NAME+
+			" where suppcode like %?% order by id asc", querystr).QueryRows(&custs2)
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+			return custs1
+		}
+		logs.FileLogs.Info("num2=%v", num)
+	} else {
+		num, err := OSQL.Raw("select * from " +
+			util.SUPPLIER_TABLE_NAME +
+			" order by id asc",
+		).QueryRows(&custs1)
+
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+		}
+		logs.FileLogs.Info("num=%v", num)
+	}
+
+	if len(custs2) > 0 {
+		custs1 = append(custs1, custs2...)
+	}
+
+	return custs1
+}
+
 func GetSupplierBypage(pageNum, pageSize int64) []Supplier {
 	var (
 		pas []Supplier
 	)
-	err := OSQL.Raw("select * from "+util.SUPPLIER_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&pas)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.SUPPLIER_TABLE_NAME+" order by id asc limit ?,?",
+		begin, pageSize).QueryRows(&pas)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -56,7 +99,9 @@ func EditSupplierById(pa Supplier) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&pa)
+	args := editArgs_supp(pa)
+
+	num, err2 := OSQL.Update(&pa, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.SUPPLIER_EDIT_FAILED
@@ -64,6 +109,58 @@ func EditSupplierById(pa Supplier) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func editArgs_supp(pa Supplier) []string {
+	var (
+		args []string
+	)
+
+	if pa.Address != "" {
+		args = append(args, "address")
+	}
+
+	if pa.Bankaccount != "" {
+		args = append(args, "bankaccount")
+	}
+
+	if pa.Depositbank != "" {
+		args = append(args, "depositbank")
+	}
+
+	if pa.Fax != "" {
+		args = append(args, "fax")
+	}
+
+	if pa.Name != "" {
+		args = append(args, "name")
+	}
+
+	if pa.Paymethod != "" {
+		args = append(args, "paymethod")
+	}
+
+	if pa.Suppcode != "" {
+		args = append(args, "suppcode")
+	}
+
+	if pa.Taxnum != "" {
+		args = append(args, "taxnum")
+	}
+
+	if pa.Taxrate != "" {
+		args = append(args, "taxrate")
+	}
+
+	if pa.Website != "" {
+		args = append(args, "website")
+	}
+
+	if pa.Zipcode != "" {
+		args = append(args, "zipcode")
+	}
+
+	return args
 }
 
 func AddSupplier(pa Supplier) (errorCode int64) {

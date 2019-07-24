@@ -8,20 +8,20 @@ import (
 	"erpweb/util"
 )
 
-type CustomerController struct {
+type SupplierController struct {
 	BaseController
 }
 
-func (c *CustomerController) QueryCustomer() {
+func (c *SupplierController) QuerySupplier() {
 	querystr := c.GetString("querystr")
-	rets := models.QueryCustomer(querystr)
+	rets := models.QuerySupplier(querystr)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
-func (c *CustomerController) GetCustomers() {
+func (c *SupplierController) GetSuppliers() {
 	var (
 		param = make(map[string]int64)
 	)
@@ -41,14 +41,14 @@ func (c *CustomerController) GetCustomers() {
 	if pageSize == 0 {
 		pageSize = 10
 	}
-	rets := models.GetCustomerBypage(pageNum, pageSize)
+	rets := models.GetSupplierBypage(pageNum, pageSize)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
-func (c *CustomerController) GetCustomerById() {
+func (c *SupplierController) GetSupplierById() {
 	var (
 		param = make(map[string]int64)
 	)
@@ -64,16 +64,16 @@ func (c *CustomerController) GetCustomerById() {
 	id := param["id"]
 
 	logs.FileLogs.Info("%v ---id = ", id)
-	ret, _ := models.GetCustomerById(id)
+	ret, _ := models.GetSupplierById(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
-func (c *CustomerController) EditCustomerById() {
+func (c *SupplierController) EditSupplierById() {
 	var (
-		param models.Customer
+		param models.Supplier
 	)
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
@@ -85,16 +85,15 @@ func (c *CustomerController) EditCustomerById() {
 		return
 
 	}
-	code := models.EditCustomerById(param)
+	code := models.EditSupplierById(param)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
-//{"cardid":"123","name":"小李","sex":0,"compID":10,"deptID":1,"dutyID":1,"health":"very good","height":"170","nativeplace":"安徽省","nation":"汉","maritalstatus":"未婚","education":"本科","university":"大连东软","major":"计算  机","qualification":"666","trialsalary":2000,"salary":6000,"idnumber":"341182","address1":"1111","postcode1":"www111","address2":"2222","postcode2":"www222","contactnumber":"17615002988","phonenumber":"110","email":"www666","emergencycontact":"1323654222","c  ontactnumber1":"1323654222","address3":"33333","trialexpired":"2019-05-28 15:03:03","entrydate":"2019-05-28   15:03:03","birthday":"2019-05-28 15:03:03","contractbegindate":"2019-05-28 15:03:03","contractenddate":"2019-05-28 15:03:03"}
-func (c *CustomerController) AddCustomer() {
+func (c *SupplierController) AddSupplier() {
 	var (
-		param models.Customer
+		param models.Supplier
 	)
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
@@ -107,13 +106,13 @@ func (c *CustomerController) AddCustomer() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
-	code := models.AddCustomer(param)
+	code := models.AddSupplier(param)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
-func (c *CustomerController) DeleteCustomer() {
+func (c *SupplierController) DeleteSupplier() {
 	var (
 		param = make(map[string]int64)
 	)
@@ -129,7 +128,7 @@ func (c *CustomerController) DeleteCustomer() {
 	id := param["id"]
 
 	logs.FileLogs.Info("%v ---", id)
-	code := models.DeleteCustomer(id)
+	code := models.DeleteSupplier(id)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()

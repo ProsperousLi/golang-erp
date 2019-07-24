@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"erpweb/logs"
+	"erpweb/models"
 	"erpweb/util"
 
 	"github.com/astaxie/beego"
@@ -19,9 +20,22 @@ func (c *BaseController) Prepare() {
 	//从Session里获取数据 设置用户信息
 	//c.adapterUserInfo()
 	c.getInfo()
+
 	//init res struct
 	var newRes util.Result
 	util.RetContent = newRes
+
+	if c.Ctx.Request.Method != "/api/basedata/Login" {
+		message, code := c.checkToken()
+		if code != util.SUCESSFUL {
+			util.RetContent.Code = code
+			util.RetContent.Message = message
+			c.Data["json"] = util.RetContent
+			c.ServeJSON()
+			c.StopRun()
+		}
+	}
+
 }
 
 //从session里取用户信息
@@ -45,4 +59,10 @@ func (c *BaseController) getInfo() {
 		logs.FileLogs.Info("%v=%v", k, v)
 	}
 
+}
+
+func (c *BaseController) checkToken() (string, int64) {
+	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+	err, code := models.SSOLogin(webToken)
+	return err.Error(), code
 }

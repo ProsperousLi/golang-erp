@@ -35,6 +35,12 @@ func init() {
 }
 
 func Account() {
+	beego.Router("/"+PROJECT+"/Login",
+		&controllers.AccountController{}, POST+":Login")
+
+	beego.Router("/"+PROJECT+"/Loginout",
+		&controllers.AccountController{}, GET+":Loginout")
+
 	beego.Router("/"+PROJECT+"/account/getAccounts",
 		&controllers.AccountController{}, POST+":GetAccounts")
 
@@ -52,6 +58,9 @@ func Account() {
 }
 
 func Customer() {
+	beego.Router("/"+PROJECT+"/queryCustomer",
+		&controllers.CustomerController{}, GET+":QueryCustomer")
+
 	beego.Router("/"+PROJECT+"/customer/getCustomers",
 		&controllers.CustomerController{}, POST+":GetCustomers")
 
@@ -274,20 +283,23 @@ func Stock() {
 }
 
 func Supplier() {
-	// beego.Router("/"+PROJECT+"/supplier/getSuppliers",
-	// 	&controllers.SupplierController{}, POST+":GetSuppliers")
+	beego.Router("/"+PROJECT+"/querySupplier",
+		&controllers.SupplierController{}, GET+":QuerySupplier")
 
-	// beego.Router("/"+PROJECT+"/supplier/getSupplierById",
-	// 	&controllers.SupplierController{}, POST+":GetSupplierById")
+	beego.Router("/"+PROJECT+"/supplier/getSuppliers",
+		&controllers.SupplierController{}, POST+":GetSuppliers")
 
-	// beego.Router("/"+PROJECT+"/supplier/editSupplierById",
-	// 	&controllers.SupplierController{}, POST+":EditSupplierById")
+	beego.Router("/"+PROJECT+"/supplier/getSupplierById",
+		&controllers.SupplierController{}, POST+":GetSupplierById")
 
-	// beego.Router("/"+PROJECT+"/supplier/addSupplier",
-	// 	&controllers.SupplierController{}, POST+":AddSupplier")
+	beego.Router("/"+PROJECT+"/supplier/editSupplierById",
+		&controllers.SupplierController{}, POST+":EditSupplierById")
 
-	// beego.Router("/"+PROJECT+"/supplier/deleteSupplier",
-	// 	&controllers.SupplierController{}, POST+":DeleteSupplier")
+	beego.Router("/"+PROJECT+"/supplier/addSupplier",
+		&controllers.SupplierController{}, POST+":AddSupplier")
+
+	beego.Router("/"+PROJECT+"/supplier/deleteSupplier",
+		&controllers.SupplierController{}, POST+":DeleteSupplier")
 }
 
 func Supplyrelation() {

@@ -20,6 +20,48 @@ type Customer struct {
 	Remark          string `json:"remark" orm:"column(remark)"`                   //备注
 }
 
+func QueryCustomer(querystr string) []Customer {
+	var (
+		custs1, custs2 []Customer
+	)
+
+	if querystr != "" {
+		num, err := OSQL.Raw("select * from "+
+			util.CUSTOMER_TABLE_NAME+
+			" where name like %?% order by id asc", querystr).QueryRows(&custs1)
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+			return custs1
+		}
+		logs.FileLogs.Info("num1=%v", num)
+
+		num, err = OSQL.Raw("select * from "+
+			util.CUSTOMER_TABLE_NAME+
+			" where custcode like %?% order by id asc", querystr).QueryRows(&custs2)
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+			return custs1
+		}
+		logs.FileLogs.Info("num2=%v", num)
+	} else {
+		num, err := OSQL.Raw("select * from " +
+			util.CUSTOMER_TABLE_NAME +
+			" order by id asc",
+		).QueryRows(&custs1)
+
+		if err != nil {
+			logs.FileLogs.Error("%s", err)
+		}
+		logs.FileLogs.Info("num=%v", num)
+	}
+
+	if len(custs2) > 0 {
+		custs1 = append(custs1, custs2...)
+	}
+
+	return custs1
+}
+
 func GetCustomerBypage(pageNum, pageSize int64) []Customer {
 	var (
 		custs []Customer

@@ -101,6 +101,17 @@ func GetEmployees(pageNum, pageSize int64) []Employee {
 	return emps
 }
 
+func GetEmployeeByCardid(cardid string) (emp Employee, errorCode int64) {
+	errorCode = util.SUCESSFUL
+	emp.Cardid = cardid
+	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where cardid=?", cardid).QueryRow(&emp)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+
+	return emp, errorCode
+}
+
 func GetEmployeeById(id int64) (emp Employee, errorCode int64) {
 	errorCode = util.SUCESSFUL
 	emp.Id = id

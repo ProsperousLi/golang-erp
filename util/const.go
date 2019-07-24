@@ -24,7 +24,7 @@ const (
 	Marketcontract_TABLE_NAME  = "marketcontract"
 	Reviewresult_TABLE_NAME    = "reviewresult"
 
-	SUCESSFUL = 10000
+	SUCESSFUL = 20000
 	//20000 begin
 	EMPLOYEE_EDIT_FAILED   = 20001
 	EMPLOYEE_ADD_FAILED    = 20002
@@ -116,7 +116,7 @@ var (
 )
 
 type Result struct {
-	Code  int64       `json:"code"`
-	Data  interface{} `json:"data"`
-	Total int64       `json:"total,omitempty"`
+	Code    int64       `json:"code"`
+	Data    interface{} `json:"data"`
+	Message string      `json:"message"`
 }
