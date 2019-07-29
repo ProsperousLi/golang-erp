@@ -34,8 +34,10 @@ func GetPutinstoreBypage(pageNum, pageSize int64) []Putinstore {
 	var (
 		params []Putinstore
 	)
-	err := OSQL.Raw("select * from "+util.Putinstore_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Putinstore_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -65,7 +67,9 @@ func EditPutinstoreById(param Putinstore) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_putinstore(param)
+
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Putinstore_EDIT_FAILED
@@ -73,6 +77,37 @@ func EditPutinstoreById(param Putinstore) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_putinstore(param Putinstore) (args []string) {
+	if param.Incode != "" {
+		args = append(args, "incode")
+	}
+
+	if param.Indate != "" {
+		args = append(args, "indate")
+	}
+
+	if param.Purchasehandler != "" {
+		args = append(args, "purchasehandler")
+	}
+
+	if param.Relatedcode != "" {
+		args = append(args, "relatedcode")
+	}
+
+	if param.Source != 0 {
+		args = append(args, "source")
+	}
+
+	if param.Storehandler != "" {
+		args = append(args, "storehandler")
+	}
+
+	if param.Warehouseid != 0 {
+		args = append(args, "warehouseid")
+	}
+	return args
 }
 
 func AddPutinstore(param Putinstore) (errorCode int64) {

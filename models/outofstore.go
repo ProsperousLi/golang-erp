@@ -40,8 +40,9 @@ func GetOutofstoreBypage(pageNum, pageSize int64) []Outofstore {
 	var (
 		outofstores []Outofstore
 	)
-	err := OSQL.Raw("select * from "+util.Outofstore_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&outofstores)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Outofstore_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&outofstores)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -71,7 +72,9 @@ func EditOutofstoreById(outofstore Outofstore) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&outofstore)
+	args := edit_outofstore(outofstore)
+
+	num, err2 := OSQL.Update(&outofstore, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Outofstore_EDIT_FAILED
@@ -79,6 +82,50 @@ func EditOutofstoreById(outofstore Outofstore) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_outofstore(param Outofstore) (args []string) {
+	if param.Contractcode != "" {
+		args = append(args, "contractcode")
+	}
+
+	if param.Itemname != "" {
+		args = append(args, "itemname")
+	}
+
+	if param.Outcode != "" {
+		args = append(args, "outcode")
+	}
+
+	if param.Outdate != "" {
+		args = append(args, "outdate")
+	}
+
+	if param.Pickhandler != "" {
+		args = append(args, "pickhandler")
+	}
+
+	if param.Relatedcode != "" {
+		args = append(args, "relatedcode")
+	}
+
+	if param.Storehandler != "" {
+		args = append(args, "storehandler")
+	}
+
+	if param.Type != 0 {
+		args = append(args, "type")
+	}
+
+	if param.Vehiclecode != "" {
+		args = append(args, "vehiclecode")
+	}
+
+	if param.Warehouseid != 0 {
+		args = append(args, "warehouseid")
+	}
+
+	return args
 }
 
 func AddOutofstore(outofstore Outofstore) (errorCode int64) {

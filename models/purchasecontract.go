@@ -54,8 +54,9 @@ func GetPurchasecontractBypage(pageNum, pageSize int64) []Purchasecontract {
 	var (
 		purchasecontracts []Purchasecontract
 	)
-	err := OSQL.Raw("select * from "+util.Purchasecontract_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&purchasecontracts)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Purchasecontract_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&purchasecontracts)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -85,7 +86,9 @@ func EditPurchasecontractById(purchasecontract Purchasecontract) (errorCode int6
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&purchasecontract)
+	args := edit_purchasecontract(purchasecontract)
+
+	num, err2 := OSQL.Update(&purchasecontract, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Purchasecontract_EDIT_FAILED
@@ -93,6 +96,78 @@ func EditPurchasecontractById(purchasecontract Purchasecontract) (errorCode int6
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_purchasecontract(param Purchasecontract) (args []string) {
+	if param.Amount != 0 {
+		args = append(args, "amount")
+	}
+
+	if param.Contractcode != "" {
+		args = append(args, "contractcode")
+	}
+
+	if param.Currentreviewer != "" {
+		args = append(args, "currentreviewer")
+	}
+
+	if param.Currentreviewindex != 0 {
+		args = append(args, "currentreviewindex")
+	}
+
+	if param.Handler != "" {
+		args = append(args, "handler")
+	}
+
+	if param.Ralatedinquirycode != "" {
+		args = append(args, "ralatedinquirycode")
+	}
+
+	if param.Receiveaddress != "" {
+		args = append(args, "receiveaddress")
+	}
+
+	if param.Receiver != "" {
+		args = append(args, "receiver")
+	}
+
+	if param.Receiverphone != "" {
+		args = append(args, "receiverphone")
+	}
+
+	if param.Relatedcode != "" {
+		args = append(args, "relatedcode")
+	}
+
+	if param.Settleamount != 0 {
+		args = append(args, "settleamount")
+	}
+
+	if param.Settlestatus != 0 {
+		args = append(args, "settlestatus")
+	}
+
+	if param.Status != 0 {
+		args = append(args, "status")
+	}
+
+	if param.Suppcode != 0 {
+		args = append(args, "suppcode")
+	}
+
+	if param.Taxrate != 0 {
+		args = append(args, "taxrate")
+	}
+
+	if param.Taxsign != 0 {
+		args = append(args, "taxsign")
+	}
+
+	if param.Type != "" {
+		args = append(args, "type")
+	}
+
+	return args
 }
 
 func AddPurchasecontract(purchasecontract Purchasecontract) (errorCode int64) {

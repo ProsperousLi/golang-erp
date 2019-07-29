@@ -15,9 +15,13 @@ func init() {
 	beego.Router("/", &controllers.MainController{}, GET+":Index")
 	Employee()
 	Account()
+	Arrivalbill()
+	Arrivaldetail()
 	Customer()
 	Department()
 	Duty()
+	Financeflow()
+	Inquiry()
 	Leave()
 	Marketcontract()
 	Matter()
@@ -55,6 +59,41 @@ func Account() {
 
 	beego.Router("/"+PROJECT+"/account/deleteAccount",
 		&controllers.AccountController{}, POST+":DeleteAccount")
+}
+
+func Arrivalbill() {
+	beego.Router("/"+PROJECT+"/arrivalbill/getArrivalbills",
+		&controllers.ArrivalbillController{}, POST+":GetArrivalbills")
+
+	beego.Router("/"+PROJECT+"/arrivalbill/getArrivalbillById",
+		&controllers.ArrivalbillController{}, POST+":GetArrivalbillById")
+
+	beego.Router("/"+PROJECT+"/arrivalbill/editArrivalbillById",
+		&controllers.ArrivalbillController{}, POST+":EditArrivalbillById")
+
+	beego.Router("/"+PROJECT+"/arrivalbill/addArrivalbill",
+		&controllers.ArrivalbillController{}, POST+":AddArrivalbill")
+
+	beego.Router("/"+PROJECT+"/arrivalbill/deleteArrivalbill",
+		&controllers.ArrivalbillController{}, POST+":DeleteArrivalbill")
+}
+
+func Arrivaldetail() {
+	preRoute := "arrivaldetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getArrivaldetails",
+		&controllers.ArrivaldetailController{}, POST+":GetArrivaldetails")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getArrivaldetailById",
+		&controllers.ArrivaldetailController{}, POST+":GetArrivaldetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editArrivaldetailById",
+		&controllers.ArrivaldetailController{}, POST+":EditArrivaldetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addArrivaldetail",
+		&controllers.ArrivaldetailController{}, POST+":AddArrivaldetail")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteArrivaldetail",
+		&controllers.ArrivaldetailController{}, POST+":DeleteArrivaldetail")
 }
 
 func Customer() {
@@ -109,6 +148,42 @@ func Duty() {
 
 	beego.Router("/"+PROJECT+"/duty/deleteDuty",
 		&controllers.DutyController{}, POST+":DeleteDuty")
+}
+
+func Financeflow() {
+	preRoute := "financeflow"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getFinanceflows",
+		&controllers.FinanceflowController{}, POST+":GetFinanceflows")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getFinanceflowById",
+		&controllers.FinanceflowController{}, POST+":GetFinanceflowById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editFinanceflowById",
+		&controllers.FinanceflowController{}, POST+":EditFinanceflowById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addFinanceflow",
+		&controllers.FinanceflowController{}, POST+":AddFinanceflow")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteFinanceflow",
+		&controllers.FinanceflowController{}, POST+":DeleteFinanceflow")
+}
+
+func Inquiry() {
+	preRoute := "inquiry"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getInquirys",
+		&controllers.InquiryController{}, POST+":GetInquirys")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getInquiryById",
+		&controllers.InquiryController{}, POST+":GetInquiryById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editInquiryById",
+		&controllers.InquiryController{}, POST+":EditInquiryById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addInquiry",
+		&controllers.InquiryController{}, POST+":AddInquiry")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteInquiry",
+		&controllers.InquiryController{}, POST+":DeleteInquiry")
 }
 
 //人员信息 employee

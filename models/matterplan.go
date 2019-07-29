@@ -24,15 +24,16 @@ func GetMatterplanBypage(pageNum, pageSize int64) []Matterplan {
 	var (
 		matterplans []Matterplan
 	)
-	err := OSQL.Raw("select * from "+util.Matterplan_TABLE_NAME+" order by itemid desc limit ?,?",
-		pageNum, pageSize).QueryRow(&matterplans)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Matterplan_TABLE_NAME+" order by itemid desc limit ?,?",
+		begin, pageSize).QueryRows(&matterplans)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return matterplans
 }
 
-func GetMatterplanByID(itemid int64) (matterplan Matterplan, err error) {
+func GetMatterplanById(itemid int64) (matterplan Matterplan, err error) {
 	matterplan.Itemid = itemid
 	err = OSQL.Read(&matterplan, "itemid")
 	if err != nil {
@@ -97,7 +98,7 @@ func DeleteMatterplan(itemid int64) (errorCode int64) {
 	_, err := OSQL.Delete(&temp, "itemid")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
-		errorCode = util.Inquirydetail_DELETE_FAILED
+		errorCode = util.Matterplan_DELETE_FAILED
 	}
 
 	return errorCode

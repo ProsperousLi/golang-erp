@@ -31,8 +31,9 @@ func GetPutindetailBypage(pageNum, pageSize int64) []Putindetail {
 	var (
 		putindetails []Putindetail
 	)
-	err := OSQL.Raw("select * from "+util.Putindetail_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&putindetails)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Putindetail_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&putindetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -62,7 +63,9 @@ func EditPutindetailById(putindetail Putindetail) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&putindetail)
+	args := edit_putindetail(putindetail)
+
+	num, err2 := OSQL.Update(&putindetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Putindetail_EDIT_FAILED
@@ -70,6 +73,34 @@ func EditPutindetailById(putindetail Putindetail) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_putindetail(param Putindetail) (args []string) {
+	if param.Incode != "" {
+		args = append(args, "incode")
+	}
+
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+
+	if param.Realnum != 0 {
+		args = append(args, "realnum")
+	}
+
+	if param.Value != 0 {
+		args = append(args, "value")
+	}
+
+	return args
 }
 
 func AddPutindetail(putindetail Putindetail) (errorCode int64) {

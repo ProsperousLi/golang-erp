@@ -29,8 +29,10 @@ func GetOutofdetailBypage(pageNum, pageSize int64) []Outofdetail {
 	var (
 		outofdetails []Outofdetail
 	)
-	err := OSQL.Raw("select * from "+util.Outofdetail_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&outofdetails)
+
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Outofdetail_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&outofdetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -60,7 +62,9 @@ func EditOutofdetailById(outofdetail Outofdetail) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&outofdetail)
+	args := edit_outofdetail(outofdetail)
+
+	num, err2 := OSQL.Update(&outofdetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Outofdetail_EDIT_FAILED
@@ -68,6 +72,29 @@ func EditOutofdetailById(outofdetail Outofdetail) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_outofdetail(param Outofdetail) (args []string) {
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+
+	if param.Outcode != "" {
+		args = append(args, "outcode")
+	}
+
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+
+	if param.Value != 0 {
+		args = append(args, "value")
+	}
+	return args
 }
 
 func AddOutofdetail(outofdetail Outofdetail) (errorCode int64) {

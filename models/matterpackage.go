@@ -9,15 +9,16 @@ import (
 //维修套餐表
 type Matterpackage struct {
 	Id   int64  `json:"id" orm:"column(id)"`
-	name string `json:"name" orm:"column(name)"` //套餐名称
+	Name string `json:"name" orm:"column(name)"` //套餐名称
 }
 
 func GetMatterpackageBypage(pageNum, pageSize int64) []Matterpackage {
 	var (
 		mas []Matterpackage
 	)
-	err := OSQL.Raw("select * from "+util.MATTERPACKAGE_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&mas)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.MATTERPACKAGE_TABLE_NAME+" order by id asc limit ?,?",
+		begin, pageSize).QueryRows(&mas)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -47,7 +48,9 @@ func EditMatterpackageById(ma Matterpackage) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&ma)
+	args := edit_Matterpackage(ma)
+
+	num, err2 := OSQL.Update(&ma, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.MATTERPACKAGE_EDIT_FAILED
@@ -55,6 +58,13 @@ func EditMatterpackageById(ma Matterpackage) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_Matterpackage(param Matterpackage) (args []string) {
+	if param.Name != "" {
+		args = append(args, "name")
+	}
+	return args
 }
 
 func AddMatterpackage(ma Matterpackage) (errorCode int64) {
@@ -65,15 +75,15 @@ func AddMatterpackage(ma Matterpackage) (errorCode int64) {
 	temp.Id = ma.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", ma.Id)
-		errorCode = util.PACKAGERALATION_ADD_FAILED
+		logs.FileLogs.Error("matterpackage have this id=%v", ma.Id)
+		errorCode = util.MATTERPACKAGE_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&ma)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
-		errorCode = util.PACKAGERALATION_ADD_FAILED
+		errorCode = util.MATTERPACKAGE_ADD_FAILED
 		return errorCode
 	}
 	logs.FileLogs.Info("num=%v", num)
@@ -89,7 +99,7 @@ func DeleteMatterpackage(id int64) (errorCode int64) {
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		errorCode = util.PACKAGERALATION_DELETE_FAILED
+		errorCode = util.MATTERPACKAGE_DELETE_FAILED
 		return errorCode
 	}
 	logs.FileLogs.Info("num=%v", num)

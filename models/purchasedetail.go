@@ -27,8 +27,9 @@ func GetPurchasedetailBypage(pageNum, pageSize int64) []Purchasedetail {
 	var (
 		purchasedetails []Purchasedetail
 	)
-	err := OSQL.Raw("select * from "+util.Purchasedetail_TABLE_NAME+" order by contractcode desc limit ?,?",
-		pageNum, pageSize).QueryRow(&purchasedetails)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Purchasedetail_TABLE_NAME+" order by contractcode desc limit ?,?",
+		begin, pageSize).QueryRows(&purchasedetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -58,7 +59,9 @@ func EditPurchasedetailById(purchasedetail Purchasedetail) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&purchasedetail)
+	args := edit_purchasedetail(purchasedetail)
+
+	num, err2 := OSQL.Update(&purchasedetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Purchasedetail_EDIT_FAILED
@@ -66,6 +69,25 @@ func EditPurchasedetailById(purchasedetail Purchasedetail) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_purchasedetail(param Purchasedetail) (args []string) {
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+
+	if param.Value != 0 {
+		args = append(args, "value")
+	}
+	return args
 }
 
 func AddPurchasedetail(purchasedetail Purchasedetail) (errorCode int64) {

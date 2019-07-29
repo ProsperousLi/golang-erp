@@ -26,15 +26,16 @@ func GetInquirydetailBypage(pageNum, pageSize int64) []Inquirydetail {
 	var (
 		inquirydetails []Inquirydetail
 	)
-	err := OSQL.Raw("select * from "+util.Inquirydetail_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&inquirydetails)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Inquirydetail_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&inquirydetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return inquirydetails
 }
 
-func GetInquirydetailByUserID(inquirycode int64) (inquirydetail Inquirydetail, err error) {
+func GetInquirydetailId(inquirycode int64) (inquirydetail Inquirydetail, err error) {
 	inquirydetail.Inquirycode = inquirycode
 	err = OSQL.Read(&inquirydetail, "inquirycode")
 	if err != nil {
@@ -56,7 +57,9 @@ func EditInquirydetailById(inquirydetail Inquirydetail) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&inquirydetail)
+	args := edit_Inquirydetail(inquirydetail)
+
+	num, err2 := OSQL.Update(&inquirydetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Inquirydetail_EDIT_FAILED
@@ -66,6 +69,19 @@ func EditInquirydetailById(inquirydetail Inquirydetail) (errorCode int64) {
 	logs.FileLogs.Info("num=%v err=%v", num, err2)
 
 	return errorCode
+}
+
+func edit_Inquirydetail(param Inquirydetail) (args []string) {
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+	return args
 }
 
 func AddInquirydetail(inquirydetail Inquirydetail) (errorCode int64) {
