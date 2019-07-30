@@ -12,7 +12,7 @@ type RepairitemController struct {
 	BaseController
 }
 
-func (c *RepairitemController) GetRepaircosts() {
+func (c *RepairitemController) GetRepairitems() {
 	var (
 		param = make(map[string]int64)
 	)
@@ -39,7 +39,7 @@ func (c *RepairitemController) GetRepaircosts() {
 	c.ServeJSON()
 }
 
-func (c *RepairitemController) GetRepaircostById() {
+func (c *RepairitemController) GetRepairitemById() {
 	var (
 		param = make(map[string]string)
 	)
@@ -62,7 +62,7 @@ func (c *RepairitemController) GetRepaircostById() {
 	c.ServeJSON()
 }
 
-func (c *RepairitemController) EditRepaircostById() {
+func (c *RepairitemController) EditRepairitemById() {
 	var (
 		param models.Repairitem
 	)
@@ -82,7 +82,7 @@ func (c *RepairitemController) EditRepaircostById() {
 	c.ServeJSON()
 }
 
-func (c *RepairitemController) AddRepaircost() {
+func (c *RepairitemController) AddRepairitem() {
 	var (
 		param models.Repairitem
 	)
@@ -103,7 +103,7 @@ func (c *RepairitemController) AddRepaircost() {
 	c.ServeJSON()
 }
 
-func (c *RepairitemController) DeleteRepaircost() {
+func (c *RepairitemController) DeleteRepairitem() {
 	var (
 		param = make(map[string]string)
 	)

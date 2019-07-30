@@ -13,28 +13,39 @@ const (
 
 func init() {
 	beego.Router("/", &controllers.MainController{}, GET+":Index")
-	Employee()
 	Account()
 	Arrivalbill()
 	Arrivaldetail()
 	Customer()
 	Department()
 	Duty()
+	Employee()
 	Financeflow()
 	Inquiry()
+	Inquirydetail()
 	Leave()
 	Marketcontract()
 	Matter()
+	Matterplan()
 	Menu()
-	//test
 	Operlog()
+	Outofdetail()
+	Outofstore()
 	Permission()
-	//controller
+	Purchasecontract()
+	Purchasedetail()
+	Putindetail()
+	Putinstore()
+	Repaircontract()
+	Repaircost()
+	Repairitem()
+	Review()
 	Reviewresult()
 	Saledetail()
 	Stock()
 	Supplier()
-	//end
+	Supplyrelation()
+	Vehicle()
 	Warehouse()
 }
 
@@ -186,6 +197,24 @@ func Inquiry() {
 		&controllers.InquiryController{}, POST+":DeleteInquiry")
 }
 
+func Inquirydetail() {
+	preRoute := "inquirydetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getInquirydetails",
+		&controllers.InquirydetailController{}, POST+":GetInquirydetails")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getInquirydetailById",
+		&controllers.InquirydetailController{}, POST+":GetInquirydetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editInquirydetailById",
+		&controllers.InquirydetailController{}, POST+":EditInquirydetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addInquirydetail",
+		&controllers.InquirydetailController{}, POST+":AddInquirydetail")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteInquirydetail",
+		&controllers.InquirydetailController{}, POST+":DeleteInquirydetail")
+}
+
 //人员信息 employee
 func Employee() {
 	//get persons by page
@@ -267,6 +296,24 @@ func Matter() {
 		&controllers.MatterController{}, POST+":DeleteMatter")
 }
 
+func Matterplan() {
+	preRoute := "matterplan"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getMatterplans",
+		&controllers.MatterplanController{}, POST+":GetMatterplans")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getMatterplanById",
+		&controllers.MatterplanController{}, POST+":GetMatterplanById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editMatterplanById",
+		&controllers.MatterplanController{}, POST+":EditMatterplanById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addMatterplan",
+		&controllers.MatterplanController{}, POST+":AddMatterplan")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteMatterplan",
+		&controllers.MatterplanController{}, POST+":DeleteMatterplan")
+}
+
 func Menu() {
 	beego.Router("/"+PROJECT+"/queryMenu",
 		&controllers.MenuController{}, GET+":GetMenus")
@@ -289,6 +336,42 @@ func Operlog() {
 		&controllers.OperlogController{}, POST+":DeleteOperlog")
 }
 
+func Outofdetail() {
+	preRoute := "outofdetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getOutofdetails",
+		&controllers.OutofdetailController{}, POST+":GetOutofdetails")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getOutofdetailById",
+		&controllers.OutofdetailController{}, POST+":GetOutofdetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editOutofdetailById",
+		&controllers.OutofdetailController{}, POST+":EditOutofdetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addOutofdetail",
+		&controllers.OutofdetailController{}, POST+":AddOutofdetail")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteOutofdetail",
+		&controllers.OutofdetailController{}, POST+":DeleteOutofdetail")
+}
+
+func Outofstore() {
+	preRoute := "outofstore"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getOutofstores",
+		&controllers.OutofstoreController{}, POST+":GetOutofstores")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getOutofstoreById",
+		&controllers.OutofstoreController{}, POST+":GetOutofstoreById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editOutofstoreById",
+		&controllers.OutofstoreController{}, POST+":EditOutofstoreById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addOutofstore",
+		&controllers.OutofstoreController{}, POST+":AddOutofstore")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteOutofstore",
+		&controllers.OutofstoreController{}, POST+":DeleteOutofstore")
+}
+
 func Permission() {
 	beego.Router("/"+PROJECT+"/permission/getPermissions",
 		&controllers.PermissionController{}, POST+":GetPermissions")
@@ -306,55 +389,197 @@ func Permission() {
 		&controllers.PermissionController{}, POST+":DeletePermission")
 }
 
+func Purchasecontract() {
+	preRoute := "purchasecontract"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPurchasecontracts",
+		&controllers.PurchasecontractController{}, POST+":GetPurchasecontracts")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPurchasecontractById",
+		&controllers.PurchasecontractController{}, POST+":GetPurchasecontractById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editPurchasecontractById",
+		&controllers.PurchasecontractController{}, POST+":EditPurchasecontractById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addPurchasecontract",
+		&controllers.PurchasecontractController{}, POST+":AddPurchasecontract")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePurchasecontract",
+		&controllers.PurchasecontractController{}, POST+":DeletePurchasecontract")
+}
+
+func Purchasedetail() {
+	preRoute := "purchasedetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPurchasedetails",
+		&controllers.PurchasedetailController{}, POST+":GetPurchasedetails")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPurchasedetailById",
+		&controllers.PurchasedetailController{}, POST+":GetPurchasedetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editPurchasedetailById",
+		&controllers.PurchasedetailController{}, POST+":EditPurchasedetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addPurchasedetail",
+		&controllers.PurchasedetailController{}, POST+":AddPurchasedetail")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePurchasedetail",
+		&controllers.PurchasedetailController{}, POST+":DeletePurchasedetail")
+}
+
+func Putindetail() {
+	preRoute := "putindetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutindetails",
+		&controllers.PutindetailController{}, POST+":GetPutindetails")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutindetailById",
+		&controllers.PutindetailController{}, POST+":GetPutindetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editPutindetailById",
+		&controllers.PutindetailController{}, POST+":EditPutindetailById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addPutindetail",
+		&controllers.PutindetailController{}, POST+":AddPutindetail")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePutindetail",
+		&controllers.PutindetailController{}, POST+":DeletePutindetail")
+}
+func Putinstore() {
+	preRoute := "putinstore"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutinstores",
+		&controllers.PutinstoreController{}, POST+":GetPutinstores")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutinstoreById",
+		&controllers.PutinstoreController{}, POST+":GetPutinstoreById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editPutinstoreById",
+		&controllers.PutinstoreController{}, POST+":EditPutinstoreById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addPutinstore",
+		&controllers.PutinstoreController{}, POST+":AddPutinstore")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePutinstore",
+		&controllers.PutinstoreController{}, POST+":DeletePutinstore")
+}
+func Repaircontract() {
+	preRoute := "repaircontract"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircontracts",
+		&controllers.RepaircontractController{}, POST+":GetRepaircontracts")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircontractById",
+		&controllers.RepaircontractController{}, POST+":GetRepaircontractById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editRepaircontractById",
+		&controllers.RepaircontractController{}, POST+":EditRepaircontractById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepaircontract",
+		&controllers.RepaircontractController{}, POST+":AddRepaircontract")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteRepaircontract",
+		&controllers.RepaircontractController{}, POST+":DeleteRepaircontract")
+}
+func Repaircost() {
+	preRoute := "repaircost"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircosts",
+		&controllers.RepaircostController{}, POST+":GetRepaircosts")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircostById",
+		&controllers.RepaircostController{}, POST+":GetRepaircostById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editRepaircostById",
+		&controllers.RepaircostController{}, POST+":EditRepaircostById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepaircost",
+		&controllers.RepaircostController{}, POST+":AddRepaircost")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteRepaircost",
+		&controllers.RepaircostController{}, POST+":DeleteRepaircost")
+}
+func Repairitem() {
+	preRoute := "repairitem"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepairitems",
+		&controllers.RepairitemController{}, POST+":GetRepairitems")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepairitemById",
+		&controllers.RepairitemController{}, POST+":GetRepairitemById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editRepairitemById",
+		&controllers.RepairitemController{}, POST+":EditRepairitemById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepairitem",
+		&controllers.RepairitemController{}, POST+":AddRepairitem")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteRepairitem",
+		&controllers.RepairitemController{}, POST+":DeleteRepairitem")
+}
+func Review() {
+	preRoute := "review"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getReviews",
+		&controllers.ReviewController{}, POST+":GetReviews")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getReviewById",
+		&controllers.ReviewController{}, POST+":GetReviewById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editReviewById",
+		&controllers.ReviewController{}, POST+":EditReviewById")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addReview",
+		&controllers.ReviewController{}, POST+":AddReview")
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteReview",
+		&controllers.ReviewController{}, POST+":DeleteReview")
+}
+
 func Reviewresult() {
-	// beego.Router("/"+PROJECT+"/reviewresult/getReviewresults",
-	// 	&controllers.ReviewresultController{}, POST+":GetReviewresults")
+	preRoute := "reviewresult"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getReviewresults",
+		&controllers.ReviewresultController{}, POST+":GetReviewresults")
 
-	// beego.Router("/"+PROJECT+"/reviewresult/getReviewresultById",
-	// 	&controllers.ReviewresultController{}, POST+":GetReviewresultById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getReviewresultById",
+		&controllers.ReviewresultController{}, POST+":GetReviewresultById")
 
-	// beego.Router("/"+PROJECT+"/reviewresult/editReviewresultById",
-	// 	&controllers.ReviewresultController{}, POST+":EditReviewresultById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editReviewresultById",
+		&controllers.ReviewresultController{}, POST+":EditReviewresultById")
 
-	// beego.Router("/"+PROJECT+"/reviewresult/addReviewresult",
-	// 	&controllers.ReviewresultController{}, POST+":AddReviewresult")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addReviewresult",
+		&controllers.ReviewresultController{}, POST+":AddReviewresult")
 
-	// beego.Router("/"+PROJECT+"/reviewresult/deleteReviewresult",
-	// 	&controllers.ReviewresultController{}, POST+":DeleteReviewresult")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteReviewresult",
+		&controllers.ReviewresultController{}, POST+":DeleteReviewresult")
 }
 
 func Saledetail() {
-	// beego.Router("/"+PROJECT+"/saledetail/getSaledetails",
-	// 	&controllers.SaledetailController{}, POST+":GetSaledetails")
+	preRoute := "saledetail"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getSaledetails",
+		&controllers.SaledetailController{}, POST+":GetSaledetails")
 
-	// beego.Router("/"+PROJECT+"/saledetail/getSaledetailById",
-	// 	&controllers.SaledetailController{}, POST+":GetSaledetailById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getSaledetailById",
+		&controllers.SaledetailController{}, POST+":GetSaledetailById")
 
-	// beego.Router("/"+PROJECT+"/saledetail/editSaledetailById",
-	// 	&controllers.SaledetailController{}, POST+":EditSaledetailById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editSaledetailById",
+		&controllers.SaledetailController{}, POST+":EditSaledetailById")
 
-	// beego.Router("/"+PROJECT+"/saledetail/addSaledetail",
-	// 	&controllers.SaledetailController{}, POST+":AddSaledetail")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addSaledetail",
+		&controllers.SaledetailController{}, POST+":AddSaledetail")
 
-	// beego.Router("/"+PROJECT+"/saledetail/deleteSaledetail",
-	// 	&controllers.SaledetailController{}, POST+":DeleteSaledetail")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteSaledetail",
+		&controllers.SaledetailController{}, POST+":DeleteSaledetail")
 }
 
 func Stock() {
-	// beego.Router("/"+PROJECT+"/stock/getStocks",
-	// 	&controllers.StockController{}, POST+":GetStocks")
+	preRoute := "stock"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getStocks",
+		&controllers.StockController{}, POST+":GetStocks")
 
-	// beego.Router("/"+PROJECT+"/stock/getStockById",
-	// 	&controllers.StockController{}, POST+":GetStockById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getStockById",
+		&controllers.StockController{}, POST+":GetStockById")
 
-	// beego.Router("/"+PROJECT+"/stock/editStockById",
-	// 	&controllers.StockController{}, POST+":EditStockById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editStockById",
+		&controllers.StockController{}, POST+":EditStockById")
 
-	// beego.Router("/"+PROJECT+"/stock/addStock",
-	// 	&controllers.StockController{}, POST+":AddStock")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addStock",
+		&controllers.StockController{}, POST+":AddStock")
 
-	// beego.Router("/"+PROJECT+"/stock/deleteStock",
-	// 	&controllers.StockController{}, POST+":DeleteStock")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteStock",
+		&controllers.StockController{}, POST+":DeleteStock")
 }
 
 func Supplier() {
@@ -378,20 +603,21 @@ func Supplier() {
 }
 
 func Supplyrelation() {
-	// beego.Router("/"+PROJECT+"/supplyrelation/getSupplyrelations",
-	// 	&controllers.SupplyrelationController{}, POST+":GetSupplyrelations")
+	preRoute := "supplyrelation"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getSupplyrelations",
+		&controllers.SupplyrelationController{}, POST+":GetSupplyrelations")
 
-	// beego.Router("/"+PROJECT+"/supplyrelation/getSupplyrelationById",
-	// 	&controllers.SupplyrelationController{}, POST+":GetSupplyrelationById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/getSupplyrelationById",
+		&controllers.SupplyrelationController{}, POST+":GetSupplyrelationById")
 
-	// beego.Router("/"+PROJECT+"/supplyrelation/editSupplyrelationById",
-	// 	&controllers.SupplyrelationController{}, POST+":EditSupplyrelationById")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/editSupplyrelationById",
+		&controllers.SupplyrelationController{}, POST+":EditSupplyrelationById")
 
-	// beego.Router("/"+PROJECT+"/supplyrelation/addSupplyrelation",
-	// 	&controllers.SupplyrelationController{}, POST+":AddSupplyrelation")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addSupplyrelation",
+		&controllers.SupplyrelationController{}, POST+":AddSupplyrelation")
 
-	// beego.Router("/"+PROJECT+"/supplyrelation/deleteSupplyrelation",
-	// 	&controllers.SupplyrelationController{}, POST+":DeleteSupplyrelation")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteSupplyrelation",
+		&controllers.SupplyrelationController{}, POST+":DeleteSupplyrelation")
 }
 
 func Vehicle() {
