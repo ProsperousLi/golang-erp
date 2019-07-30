@@ -32,8 +32,9 @@ func GetRepairitemBypage(pageNum, pageSize int64) []Repairitem {
 	var (
 		params []Repairitem
 	)
-	err := OSQL.Raw("select * from "+util.Repairitem_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Repairitem_TABLE_NAME+" limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -63,7 +64,9 @@ func EditRepairitemById(param Repairitem) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_repairitem(param)
+
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Repairitem_EDIT_FAILED
@@ -71,6 +74,33 @@ func EditRepairitemById(param Repairitem) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_repairitem(param Repairitem) (args []string) {
+	if param.Causeanalysis != "" {
+		args = append(args, "causeanalysis")
+	}
+
+	if param.Fault != "" {
+		args = append(args, "fault")
+	}
+
+	if param.Itemname != "" {
+		args = append(args, "itemname")
+	}
+
+	if param.Measures != "" {
+		args = append(args, "measures")
+	}
+
+	if param.Status != 0 {
+		args = append(args, "status")
+	}
+
+	if param.Vehiclecode != "" {
+		args = append(args, "vehiclecode")
+	}
+	return args
 }
 
 func AddRepairitem(param Repairitem) (errorCode int64) {

@@ -32,8 +32,9 @@ func GetRepaircostBypage(pageNum, pageSize int64) []Repaircost {
 	var (
 		params []Repaircost
 	)
-	err := OSQL.Raw("select * from "+util.Repaircost_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Repaircost_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -63,7 +64,9 @@ func EditRepaircostById(param Repaircost) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_repaircost(param)
+
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Repaircost_EDIT_FAILED
@@ -71,6 +74,33 @@ func EditRepaircostById(param Repaircost) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_repaircost(param Repaircost) (args []string) {
+	if param.Extend != "" {
+		args = append(args, "extend")
+	}
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+
+	if param.Remark != "" {
+		args = append(args, "remark")
+	}
+
+	if param.Type != 0 {
+		args = append(args, "type")
+	}
+
+	if param.Unit != "" {
+		args = append(args, "unit")
+	}
+
+	return args
 }
 
 func AddRepaircost(param Repaircost) (errorCode int64) {

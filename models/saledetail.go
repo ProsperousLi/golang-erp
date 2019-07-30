@@ -26,15 +26,16 @@ func GetSaledetailBypage(pageNum, pageSize int64) []Saledetail {
 	var (
 		saledetails []Saledetail
 	)
-	err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&saledetails)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+" order by id asc limit ?,?",
+		begin, pageSize).QueryRows(&saledetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return saledetails
 }
 
-func GetSaledetailByUserID(contractid string) (saledetail Saledetail, err error) {
+func GetSaledetailById(contractid string) (saledetail Saledetail, err error) {
 	saledetail.Contractid = contractid
 	err = OSQL.Read(&saledetail, "contractid")
 	if err != nil {
@@ -49,6 +50,7 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	)
 	temp.Contractid = saledetail.Contractid
 	errorCode = util.SUCESSFUL
+
 	err := OSQL.Read(&temp, "contractid")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
@@ -56,7 +58,8 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&saledetail)
+	args := edit_saledetail(saledetail)
+	num, err2 := OSQL.Update(&saledetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Saledetail_EDIT_FAILED
@@ -66,6 +69,22 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	logs.FileLogs.Info("num=%v err=%v", num, err2)
 
 	return errorCode
+}
+
+func edit_saledetail(param Saledetail) (args []string) {
+
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+
+	if param.Price != 0 {
+		args = append(args, "price")
+	}
+	return args
 }
 
 func AddSaledetail(saledetail Saledetail) (errorCode int64) {

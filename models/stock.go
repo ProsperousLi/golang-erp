@@ -26,15 +26,16 @@ func GetStockBypage(pageNum, pageSize int64) []Stock {
 	var (
 		stocks []Stock
 	)
-	err := OSQL.Raw("select * from "+util.Stock_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&stocks)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Stock_TABLE_NAME+" limit ?,?",
+		begin, pageSize).QueryRows(&stocks)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return stocks
 }
 
-func GetStockByUserID(warehouseid int64) (stock Stock, err error) {
+func GetStockById(warehouseid int64) (stock Stock, err error) {
 	stock.Warehouseid = warehouseid
 	err = OSQL.Read(&stock, "warehouseid")
 	if err != nil {
@@ -56,7 +57,9 @@ func EditStockById(stock Stock) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&stock)
+	args := edit_stock(stock)
+
+	num, err2 := OSQL.Update(&stock, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Stock_EDIT_FAILED
@@ -66,6 +69,21 @@ func EditStockById(stock Stock) (errorCode int64) {
 	logs.FileLogs.Info("num=%v err=%v", num, err2)
 
 	return errorCode
+}
+
+func edit_stock(param Stock) (args []string) {
+	if param.Averageprice != 0 {
+		args = append(args, "averageprice")
+	}
+
+	if param.Mattercode != "" {
+		args = append(args, "mattercode")
+	}
+
+	if param.Num != 0 {
+		args = append(args, "num")
+	}
+	return args
 }
 
 func AddStock(stock Stock) (errorCode int64) {

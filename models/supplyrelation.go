@@ -16,8 +16,9 @@ func GetSupplyrelationBypage(pageNum, pageSize int64) []Supplyrelation {
 	var (
 		pas []Supplyrelation
 	)
-	err := OSQL.Raw("select * from "+util.SUPPLYRELATION_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&pas)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.SUPPLYRELATION_TABLE_NAME+" order by id asc limit ?,?",
+		begin, pageSize).QueryRows(&pas)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -47,7 +48,8 @@ func EditSupplyrelationById(pa Supplyrelation) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&pa)
+	args := edit_supplyrelation(pa)
+	num, err2 := OSQL.Update(&pa, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.SUPPLYRELATION_EDIT_FAILED
@@ -55,6 +57,16 @@ func EditSupplyrelationById(pa Supplyrelation) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_supplyrelation(param Supplyrelation) (args []string) {
+	if param.Matterid != 0 {
+		args = append(args, "matterid")
+	}
+	if param.Supplierid != 0 {
+		args = append(args, "supplierid")
+	}
+	return args
 }
 
 func AddSupplyrelation(pa Supplyrelation) (errorCode int64) {

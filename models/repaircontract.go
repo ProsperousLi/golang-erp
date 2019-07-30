@@ -53,8 +53,9 @@ func GetRepaircontractBypage(pageNum, pageSize int64) []Repaircontract {
 	var (
 		params []Repaircontract
 	)
-	err := OSQL.Raw("select * from "+util.Repaircontract_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Repaircontract_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -84,7 +85,8 @@ func EditRepaircontractById(param Repaircontract) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_repaircontract(param)
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Repaircontract_EDIT_FAILED
@@ -92,6 +94,73 @@ func EditRepaircontractById(param Repaircontract) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_repaircontract(param Repaircontract) (args []string) {
+	if param.Amount != 0 {
+		args = append(args, "amount")
+	}
+
+	if param.Attachment != "" {
+		args = append(args, "attachment")
+	}
+
+	if param.Contractcode != "" {
+		args = append(args, "contractcode")
+	}
+
+	if param.Createat != "" {
+		args = append(args, "createat")
+	}
+
+	if param.Currentreviewer != 0 {
+		args = append(args, "currentreviewer")
+	}
+
+	if param.Currentreviewindex != 0 {
+		args = append(args, "currentreviewindex")
+	}
+
+	if param.Custcode != "" {
+		args = append(args, "custcode")
+	}
+
+	if param.Deadline != "" {
+		args = append(args, "deadline")
+	}
+
+	if param.Execstatus != "" {
+		args = append(args, "execstatus")
+	}
+
+	if param.Handler != "" {
+		args = append(args, "handler")
+	}
+
+	if param.Relatedcode != "" {
+		args = append(args, "relatedcode")
+	}
+
+	if param.Remark != "" {
+		args = append(args, "remark")
+	}
+
+	if param.Settleamount != 0 {
+		args = append(args, "settleamount")
+	}
+
+	if param.Settlestatus != 0 {
+		args = append(args, "settlestatus")
+	}
+
+	if param.Signdate != "" {
+		args = append(args, "signdate")
+	}
+
+	if param.Vehicles != "" {
+		args = append(args, "vehicles")
+	}
+	return args
 }
 
 func AddRepaircontract(param Repaircontract) (errorCode int64) {

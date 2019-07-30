@@ -15,7 +15,7 @@ import (
 
 //审核流程表
 type Review struct {
-	Id     string `json:"id" orm:"column(id)"`
+	Id     int64  `json:"id" orm:"column(id)"`
 	Type   string `json:"type" orm:"column(type)"`     //类型(1:采购合同审核)
 	Detail int8   `json:"detail" orm:"column(detail)"` //详情([{end:0, cardids:['''']}])
 }
@@ -24,15 +24,16 @@ func GetReviewBypage(pageNum, pageSize int64) []Review {
 	var (
 		params []Review
 	)
-	err := OSQL.Raw("select * from "+util.Review_TABLE_NAME+" order by id desc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Review_TABLE_NAME+" order by id desc limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return params
 }
 
-func GetReviewById(id string) (ret Review, err error) {
+func GetReviewById(id int64) (ret Review, err error) {
 	ret.Id = id
 	err = OSQL.Read(&ret, "id")
 	if err != nil {
@@ -55,7 +56,9 @@ func EditReviewById(param Review) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_review(param)
+
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Review_EDIT_FAILED
@@ -63,6 +66,17 @@ func EditReviewById(param Review) (errorCode int64) {
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
+}
+
+func edit_review(param Review) (args []string) {
+	if param.Detail != 0 {
+		args = append(args, "detail")
+	}
+
+	if param.Type != "" {
+		args = append(args, "type")
+	}
+	return args
 }
 
 func AddReview(param Review) (errorCode int64) {
@@ -88,7 +102,7 @@ func AddReview(param Review) (errorCode int64) {
 	return errorCode
 }
 
-func DeleteReview(id string) (errorCode int64) {
+func DeleteReview(id int64) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	var (
 		temp Review

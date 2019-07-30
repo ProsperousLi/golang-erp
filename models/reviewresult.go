@@ -33,15 +33,16 @@ func GetReviewresultBypage(pageNum, pageSize int64) []Reviewresult {
 	var (
 		params []Reviewresult
 	)
-	err := OSQL.Raw("select * from "+util.Reviewresult_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&params)
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw("select * from "+util.Reviewresult_TABLE_NAME+" order by id asc limit ?,?",
+		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
 	return params
 }
 
-func GetReviewresultByUserID(id int64) (result Reviewresult, err error) {
+func GetReviewresultById(id int64) (result Reviewresult, err error) {
 	result.Id = id
 	err = OSQL.Read(&result, "id")
 	if err != nil {
@@ -63,7 +64,9 @@ func EditReviewresultById(param Reviewresult) (errorCode int64) {
 		return errorCode
 	}
 
-	num, err2 := OSQL.Update(&param)
+	args := edit_reviewresult(param)
+
+	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Reviewresult_EDIT_FAILED
@@ -73,6 +76,33 @@ func EditReviewresultById(param Reviewresult) (errorCode int64) {
 	logs.FileLogs.Info("num=%v err=%v", num, err2)
 
 	return errorCode
+}
+
+func edit_reviewresult(param Reviewresult) (args []string) {
+	if param.Opinion != "" {
+		args = append(args, "opinion")
+	}
+
+	if param.Relatedcode != "" {
+		args = append(args, "relatedcode")
+	}
+
+	if param.Result != 0 {
+		args = append(args, "result")
+	}
+
+	if param.Reviewer != "" {
+		args = append(args, "reviewer")
+	}
+
+	if param.Reviewtime != "" {
+		args = append(args, "reviewtime")
+	}
+
+	if param.Type != 0 {
+		args = append(args, "type")
+	}
+	return args
 }
 
 func AddReviewresult(param Reviewresult) (errorCode int64) {
