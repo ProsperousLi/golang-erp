@@ -13,6 +13,7 @@ const (
 
 func init() {
 	beego.Router("/", &controllers.MainController{}, GET+":Index")
+	Login()
 	Account()
 	Arrivalbill()
 	Arrivaldetail()
@@ -49,13 +50,15 @@ func init() {
 	Warehouse()
 }
 
-func Account() {
+func Login() {
 	beego.Router("/"+PROJECT+"/Login",
-		&controllers.AccountController{}, POST+":Login")
+		&controllers.LoginController{}, POST+":Login")
 
 	beego.Router("/"+PROJECT+"/Loginout",
-		&controllers.AccountController{}, GET+":Loginout")
+		&controllers.LoginController{}, GET+":Loginout")
+}
 
+func Account() {
 	beego.Router("/"+PROJECT+"/account/getAccounts",
 		&controllers.AccountController{}, POST+":GetAccounts")
 
@@ -128,6 +131,9 @@ func Customer() {
 }
 
 func Department() {
+	beego.Router("/"+PROJECT+"/queryDept",
+		&controllers.DepartmentController{}, GET+":QueryDept")
+
 	beego.Router("/"+PROJECT+"/department/getDepartments",
 		&controllers.DepartmentController{}, POST+":GetDepartments")
 

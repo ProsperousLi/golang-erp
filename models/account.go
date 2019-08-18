@@ -1,9 +1,6 @@
 package models
 
 import (
-	"errors"
-	"time"
-
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -18,104 +15,6 @@ type Account struct {
 const (
 	RefreshTime = 1
 )
-
-var (
-	TokenMap = make(map[string]string)      //cardid token
-	AccsMap  = make(map[string]interface{}) //token employee
-	TimeMap  = make(map[string]int64)       //token TimeMap
-)
-
-//TODO Timer delete token
-func New_Time_count() {
-	//frist clear map
-	TokenMap = make(map[string]string)
-	AccsMap = make(map[string]interface{})
-	TimeMap = make(map[string]int64)
-}
-
-// 登录接口
-func Login(cardid string, password string) (error, string) {
-	var (
-		qurey Account
-		uuid  string
-	)
-	qurey.Cardid = cardid
-	//qurey.Password = password
-	err := OSQL.Read(&qurey, "cardid")
-	if err != nil {
-		logs.FileLogs.Error("%s", err)
-		return err, uuid
-	}
-
-	if qurey.Cardid == cardid && qurey.Password == password { //login sucess
-		if qurey.Status == 1 {
-			preToken := TokenMap[cardid]
-			uuid = util.GetToken()
-			TokenMap[cardid] = uuid
-			delete(TimeMap, preToken)
-			TimeMap[uuid] = time.Now().Unix()
-			delete(AccsMap, preToken)
-
-			//qurey employee info
-			emp, code := GetEmployeeByCardid(cardid)
-			if code != util.SUCESSFUL {
-				logs.FileLogs.Error("GetEmployeeByCardid failed")
-				return errors.New("GetEmployeeByCardid failed"), uuid
-			}
-			AccsMap[uuid] = emp
-		} else {
-			logs.FileLogs.Error("status is :%s", qurey.Status)
-			return errors.New("status isn't 1"), uuid
-		}
-	} else {
-		logs.FileLogs.Error("cardid or password is invild")
-		return errors.New("cardid or password is invild"), uuid
-	}
-
-	return nil, uuid
-}
-
-// 单点登录
-func SSOLogin(token string) (err error, code int64) {
-	code = util.SUCESSFUL
-	if _, ok := AccsMap[token]; ok {
-		//pandding time
-		if lastTime, ok := TimeMap[token]; ok {
-			if lastTime+1*60*60 < time.Now().Unix() {
-				//token过期了
-				code = 50014
-				logs.FileLogs.Error("token过期了")
-				return errors.New("token过期了"), code
-			}
-		}
-	} else {
-		code = 50008
-		logs.FileLogs.Error("this token not exist :%s", token)
-
-		return errors.New("token not exist"), code
-	}
-
-	return nil, code
-}
-
-func Loginout(token string) (code int64) {
-	code = util.SUCESSFUL
-	if emp, ok := AccsMap[token]; ok {
-		//delete all map
-		TokenMap = make(map[string]string)     //cardid token
-		AccsMap = make(map[string]interface{}) //token employee
-		TimeMap = make(map[string]int64)       //token TimeMap
-
-		tempEmp := emp.(Employee)
-		delete(TokenMap, tempEmp.Cardid)
-		delete(AccsMap, token)
-		delete(TimeMap, token)
-	} else {
-		code = 50008
-	}
-
-	return code
-}
 
 func GetAccountBypage(pageNum, pageSize int64) []Account {
 	var (

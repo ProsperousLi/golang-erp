@@ -12,6 +12,14 @@ type DepartmentController struct {
 	BaseController
 }
 
+func (c *DepartmentController) QueryDept() {
+	rets := models.QueryDept()
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *DepartmentController) GetDepartments() {
 	var (
 		param = make(map[string]int64)

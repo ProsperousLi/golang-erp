@@ -11,6 +11,18 @@ type Department struct {
 	Name   string `json:"name" orm:"column(name)"`     //部门名称
 }
 
+func QueryDept() []Department {
+	var (
+		departs []Department
+	)
+	_, err := OSQL.Raw("select * from " + util.DEPARTMENT_TABLE_NAME + " order by id asc ").QueryRows(&departs)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+
+	return departs
+}
+
 func GetDepartmentBypage(pageNum, pageSize int64) []Department {
 	var (
 		departs []Department
