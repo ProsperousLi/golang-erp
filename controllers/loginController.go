@@ -28,18 +28,11 @@ type loginParam struct {
 //‘您的账号已锁定，请联系管理员解除锁定’}}
 
 func (c *LoginController) Login() {
-	cardid := c.GetString("cardid")
+	username := c.GetString("username")
 	password := c.GetString("password")
-	err, token := models.Login(cardid, password)
-	if err != nil {
-		util.RetContent.Code = 20001
-		util.RetContent.Message = err.Error()
-		c.Data["json"] = util.RetContent
-		c.ServeJSON()
-		return
-	}
+	errCode, token := models.Login(username, password)
 
-	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Code = errCode //util.SUCESSFUL
 	util.RetContent.Message = token
 	util.RetContent.Data = models.AccsMap[token]
 	c.Data["json"] = util.RetContent

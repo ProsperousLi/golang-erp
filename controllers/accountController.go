@@ -12,6 +12,14 @@ type AccountController struct {
 	BaseController
 }
 
+func (c *AccountController) GetAccountList() {
+	rets := models.GetAccountsNotPwd()
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *AccountController) GetAccounts() {
 	var (
 		param = make(map[string]int64)
@@ -77,6 +85,30 @@ func (c *AccountController) EditAccountById() {
 
 	}
 	code := models.EditAccountById(param)
+	util.RetContent.Code = code
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
+func (c *AccountController) EditAccountStatusById() {
+	//{cardid: “xxx”, status: 1}
+	type params struct {
+		Cardid string
+		Status int8
+	}
+
+	var param params
+
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	code := models.EditAccountStatusById(param.Cardid, param.Status)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()

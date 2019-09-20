@@ -16,6 +16,29 @@ const (
 	RefreshTime = 1
 )
 
+func GetAccountsNotPwd() (RetAccounts []map[string]interface{}) {
+	var (
+		accounts []Account
+	)
+
+	_, err := OSQL.Raw("select * from " + util.ACCOUNT_TABLE_NAME +
+		" order by id asc").QueryRows(&accounts)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+
+		return RetAccounts
+	}
+
+	for _, acc := range accounts {
+		tempMsp := util.StructToMap(acc)
+		delete(tempMsp, "password")
+		delete(tempMsp, "Password")
+		RetAccounts = append(RetAccounts, tempMsp)
+	}
+
+	return RetAccounts
+}
+
 func GetAccountBypage(pageNum, pageSize int64) []Account {
 	var (
 		accounts []Account
@@ -56,6 +79,38 @@ func EditAccountById(account Account) (errorCode int64) {
 	args := editArgs(account)
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&account, args...)
+
+		if err2 != nil {
+			logs.FileLogs.Error("%s", err2)
+			errorCode = util.ACCOUNT_EDIT_FAILED
+			return errorCode
+		}
+
+		logs.FileLogs.Info("num=%v err=%v", num, err2)
+	} else {
+		logs.FileLogs.Info("no data update")
+	}
+	return errorCode
+}
+
+func EditAccountStatusById(cardid string, status int8) (errorCode int64) {
+	var (
+		temp Account
+	)
+	temp.Cardid = cardid
+	errorCode = util.SUCESSFUL
+	err := OSQL.Read(&temp, "cardid")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		errorCode = util.ACCOUNT_EDIT_FAILED
+		return errorCode
+	}
+
+	temp.Status = int(status)
+
+	args := editArgs(temp)
+	if len(args) > 0 {
+		num, err2 := OSQL.Update(&temp, args...)
 
 		if err2 != nil {
 			logs.FileLogs.Error("%s", err2)

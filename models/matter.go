@@ -25,7 +25,7 @@ func QueryMatter(mattercode, name string) []Matter {
 	)
 	if mattercode != "" && name != "" {
 		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like %?% " +
-			"and name like %?% order by id asc"
+			"or name like %?% order by id asc"
 	} else if mattercode != "" && name == "" {
 		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like %?% " +
 			"order by id asc"

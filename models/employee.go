@@ -85,6 +85,30 @@ type Employee struct {
 	Contractenddate   string `json:"contractenddate"`   //合同结束日期
 }
 
+func GetAllEmployees(name, cardid string) []Employee {
+	var (
+		emps []Employee
+		sql  string
+	)
+	if name != "" && cardid != "" {
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like %?% " +
+			"or cardid like %?% order by id asc"
+	} else if name != "" && cardid == "" {
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like %?% " +
+			"order by id asc"
+	} else if name == "" && cardid != "" {
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where cardid like %?% order by id asc"
+	} else {
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " order by id asc"
+	}
+
+	_, err := OSQL.Raw(sql).QueryRows(&emps)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return emps
+}
+
 func GetEmployees(pageNum, pageSize int64) []Employee {
 	var (
 		emps []Employee

@@ -7,7 +7,7 @@ import (
 
 const (
 	sqlUser = "root"
-	sqlPwd  = "123456"
+	sqlPwd  = "lrf64787"
 )
 
 var (

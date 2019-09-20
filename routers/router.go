@@ -59,6 +59,10 @@ func Login() {
 }
 
 func Account() {
+	//api/employee/getAccountList
+	beego.Router("/"+PROJECT+"/account/getAccountList",
+		&controllers.AccountController{}, GET+":GetAccountList")
+
 	beego.Router("/"+PROJECT+"/account/getAccounts",
 		&controllers.AccountController{}, POST+":GetAccounts")
 
@@ -68,7 +72,14 @@ func Account() {
 	beego.Router("/"+PROJECT+"/account/editAccountById",
 		&controllers.AccountController{}, POST+":EditAccountById")
 
-	beego.Router("/"+PROJECT+"/account/addAccount",
+	//16.修改账号
+	//url: api/employee/updateAccountStatus
+	beego.Router("/"+PROJECT+"/account/updateAccountStatus",
+		&controllers.AccountController{}, POST+":EditAccountStatusById")
+
+	//开通ERP账号
+	//api/employee/openAccount
+	beego.Router("/"+PROJECT+"/account/openAccount",
 		&controllers.AccountController{}, POST+":AddAccount")
 
 	beego.Router("/"+PROJECT+"/account/deleteAccount",
@@ -223,6 +234,11 @@ func Inquirydetail() {
 
 //人员信息 employee
 func Employee() {
+	//13.获取员工列表(不分页)
+	//api/employee/getEmployeeList
+	beego.Router("/"+PROJECT+"/employee/getEmployeeList",
+		&controllers.EmployeeController{}, GET+":GetAllEmployees")
+
 	//get persons by page
 	// /erp/employee/getPersons
 	beego.Router("/"+PROJECT+"/employee/getPersons",
@@ -234,13 +250,13 @@ func Employee() {
 		&controllers.EmployeeController{}, POST+":GetEmployeeById")
 
 	//edit person info by id
-	// /erp/employee/editPerson
-	beego.Router("/"+PROJECT+"/employee/editPerson",
+	// /erp/employee/updateEmployee
+	beego.Router("/"+PROJECT+"/employee/updateEmployee",
 		&controllers.EmployeeController{}, POST+":EditEmployeeById")
 
 	//add person by id
-	// /erp/employee/addPerson
-	beego.Router("/"+PROJECT+"/employee/addPerson",
+	// /erp/employee/newEmployee
+	beego.Router("/"+PROJECT+"/employee/newEmployee",
 		&controllers.EmployeeController{}, POST+":AddEmployee")
 
 	beego.Router("/"+PROJECT+"/employee/deletePerson",

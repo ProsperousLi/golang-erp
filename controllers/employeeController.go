@@ -12,6 +12,18 @@ type EmployeeController struct {
 	BaseController
 }
 
+//name=abc&cardid=xxx
+func (c *EmployeeController) GetAllEmployees() {
+	name := c.GetString("name")
+	cardid := c.GetString("cardid")
+	emps := models.GetAllEmployees(name, cardid)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = emps
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+
+}
+
 func (c *EmployeeController) GetEmployees() {
 	var (
 		param = make(map[string]int64)

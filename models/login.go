@@ -25,17 +25,17 @@ func New_Time_count() {
 }
 
 // 登录接口
-func Login(cardid string, password string) (error, string) {
+//{username: ‘test’, password: ‘test’, vckey: ‘ekksdfssl’, verifycode: ‘3qu5’}
+func Login(cardid string, password string) (errorCode int64, uuid string) {
 	var (
 		qurey Account
-		uuid  string
 	)
 	qurey.Cardid = cardid
 	//qurey.Password = password
 	err := OSQL.Read(&qurey, "cardid")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		return err, uuid
+		return 1, uuid
 	}
 
 	if qurey.Cardid == cardid && qurey.Password == password { //login sucess
@@ -51,19 +51,19 @@ func Login(cardid string, password string) (error, string) {
 			emp, code := GetEmployeeByCardid(cardid)
 			if code != util.SUCESSFUL {
 				logs.FileLogs.Error("GetEmployeeByCardid failed")
-				return errors.New("GetEmployeeByCardid failed"), uuid
+				return 1, uuid
 			}
 			AccsMap[uuid] = emp
 		} else {
 			logs.FileLogs.Error("status is :%s", qurey.Status)
-			return errors.New("status isn't 1"), uuid
+			return 1, uuid
 		}
 	} else {
 		logs.FileLogs.Error("cardid or password is invild")
-		return errors.New("cardid or password is invild"), uuid
+		return 1, uuid
 	}
 
-	return nil, uuid
+	return 0, uuid
 }
 
 // 单点登录
@@ -155,7 +155,7 @@ func demoCodeCaptchaCreate() string {
 	// base64stringD := base64Captcha.CaptchaWriteToBase64Encoding(capD)
 
 	//fmt.Println(idKeyA, base64stringA, "\n")
-	fmt.Println(idKeyC, base64stringC, "\n")
+	logs.FileLogs.Info(idKeyC, base64stringC, "\n")
 	//fmt.Println(idKeyD, base64stringD, "\n")
 
 	return base64stringC
