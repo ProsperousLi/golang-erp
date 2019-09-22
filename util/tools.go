@@ -1,8 +1,11 @@
 package util
 
 import (
+	"crypto/md5"
+	"fmt"
 	"reflect"
 	"time"
+	"unicode"
 
 	"erpweb/logs"
 
@@ -50,4 +53,32 @@ func StructToMap(obj interface{}) map[string]interface{} {
 		data[obj1.Field(i).Name] = obj2.Field(i).Interface()
 	}
 	return data
+}
+
+func GETMd5(str string) (md5str string) {
+	data := []byte(str)
+	has := md5.Sum(data)
+	md5str = fmt.Sprintf("%x", has)
+	return
+}
+
+func PanddingPwd(pwd string) bool {
+	var (
+		haveChar = 0
+		haveNum  = 0
+	)
+	for _, value := range pwd {
+		//valueStr := string(value)
+		if unicode.IsLetter(value) {
+			haveChar++
+		} else if unicode.IsDigit(value) {
+			haveNum++
+		}
+	}
+
+	if haveChar > 0 && haveNum > 0 {
+		return true
+	}
+
+	return false
 }

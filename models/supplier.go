@@ -29,7 +29,7 @@ func QuerySupplier(querystr string) []Supplier {
 	if querystr != "" {
 		num, err := OSQL.Raw("select * from "+
 			util.SUPPLIER_TABLE_NAME+
-			" where name like %?% order by id asc", querystr).QueryRows(&custs1)
+			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
 		if err != nil {
 			logs.FileLogs.Error("%s", err)
 			return custs1
@@ -38,7 +38,7 @@ func QuerySupplier(querystr string) []Supplier {
 
 		num, err = OSQL.Raw("select * from "+
 			util.SUPPLIER_TABLE_NAME+
-			" where suppcode like %?% order by id asc", querystr).QueryRows(&custs2)
+			" where suppcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
 		if err != nil {
 			logs.FileLogs.Error("%s", err)
 			return custs1

@@ -55,7 +55,6 @@ type Employee struct {
 	Sex               int8   `json:"sex"`               //性别 0男 1女
 	CompID            int8   `orm:"column(compID)"`     //所属分公司ID  0总部1北京2杭州
 	DeptID            int    `orm:"column(deptID)"`     //部门ID
-	DutyID            int    `orm:"column(dutyID)"`     //岗位ID
 	Health            string `json:"health"`            //身体状况
 	Height            string `json:"height"`            //身高
 	Nativeplace       string `json:"nativeplace"`       //籍贯
@@ -91,13 +90,13 @@ func GetAllEmployees(name, cardid string) []Employee {
 		sql  string
 	)
 	if name != "" && cardid != "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like %?% " +
-			"or cardid like %?% order by id asc"
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%?%' " +
+			"or cardid like '%?%' order by id asc"
 	} else if name != "" && cardid == "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like %?% " +
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%?%' " +
 			"order by id asc"
 	} else if name == "" && cardid != "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where cardid like %?% order by id asc"
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where cardid like '%?%' order by id asc"
 	} else {
 		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " order by id asc"
 	}
@@ -199,10 +198,6 @@ func edit_employee(param Employee) []string {
 
 	if param.DeptID != 0 {
 		args = append(args, "deptID")
-	}
-
-	if param.DutyID != 0 {
-		args = append(args, "dutyID")
 	}
 
 	if param.Health != "" {

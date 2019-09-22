@@ -22,13 +22,49 @@ type Saledetail struct {
 	Price      int64  `json:"price" orm:"column(price)"`              //单价
 }
 
-func GetSaledetailBypage(pageNum, pageSize int64) []Saledetail {
+type AddAndUpdateSaledetailStruct struct {
+	Contractcode string
+	Detail       []Saledetail
+}
+
+func AddOrUpdateSaleDetail(param AddAndUpdateSaledetailStruct) (errorCode int64, msg string) {
+	errorCode = util.SUCESSFUL
+	details := GetSaledetailByContractcode(param.Contractcode)
+	if len(details) > 0 {
+		errorCode = DeleteSaledetail(param.Contractcode)
+	} else {
+		errorCode = util.FAILED
+		msg = "获取数据失败"
+		return
+	}
+
+	if errorCode != util.SUCESSFUL {
+		errorCode = util.FAILED
+		msg = "删除数据失败"
+		return
+	}
+
+	//add
+	if len(param.Detail) > 0 {
+		for _, detail := range param.Detail {
+			errorCode = AddSaledetail(detail)
+			if errorCode != util.SUCESSFUL {
+				msg = "删除数据失败"
+				return
+			}
+		}
+
+	}
+
+	return
+}
+
+func GetSaledetailByContractcode(contractcode string) []Saledetail {
 	var (
 		saledetails []Saledetail
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+" order by id asc limit ?,?",
-		begin, pageSize).QueryRows(&saledetails)
+	_, err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+
+		" where contractcode=? order by id asc", contractcode).QueryRows(&saledetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -54,7 +90,7 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	err := OSQL.Read(&temp, "contractid")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		errorCode = util.Saledetail_EDIT_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
@@ -62,7 +98,7 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	num, err2 := OSQL.Update(&saledetail, args...)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
-		errorCode = util.Saledetail_EDIT_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
@@ -96,14 +132,14 @@ func AddSaledetail(saledetail Saledetail) (errorCode int64) {
 	err := OSQL.Read(&temp, "contractid")
 	if err == nil {
 		logs.FileLogs.Info("saledetail have asixt")
-		errorCode = util.Saledetail_ADD_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&saledetail)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
-		errorCode = util.Saledetail_ADD_FAILED
+		errorCode = util.FAILED
 	}
 
 	logs.FileLogs.Info("num=%v", id)
@@ -120,7 +156,7 @@ func DeleteSaledetail(contractid string) (errorCode int64) {
 	num, err := OSQL.Delete(&saledetail, "contractid")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
-		errorCode = util.Saledetail_DELETE_FAILED
+		errorCode = util.FAILED
 	}
 
 	logs.FileLogs.Info("num=%v", num)

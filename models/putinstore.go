@@ -30,6 +30,17 @@ type Putinstore struct {
 	Purchasehandler string `json:"purchasehandler" orm:"column(purchasehandler)"` //采购处理人(cardid)
 }
 
+func GetAllPutinstore() []Putinstore {
+	var (
+		params []Putinstore
+	)
+	_, err := OSQL.Raw("select * from " + util.Putinstore_TABLE_NAME + " order by id desc").QueryRows(&params)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return params
+}
+
 func GetPutinstoreBypage(pageNum, pageSize int64) []Putinstore {
 	var (
 		params []Putinstore

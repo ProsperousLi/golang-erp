@@ -84,8 +84,9 @@ func (c *AccountController) EditAccountById() {
 		return
 
 	}
-	code := models.EditAccountById(param)
+	code, msg := models.EditAccountById(param)
 	util.RetContent.Code = code
+	util.RetContent.Message = msg
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
@@ -130,6 +131,9 @@ func (c *AccountController) AddAccount() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
+
+	//param.Password =
+
 	code := models.AddAccountment(param)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
@@ -154,6 +158,46 @@ func (c *AccountController) DeleteAccount() {
 	logs.FileLogs.Info("%v ---", userId)
 	code := models.DeleteAccount(userId)
 	util.RetContent.Code = code
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
+//{cardid: “xxx”, oldpwd: “xxx”, newpwd: “xxx”}
+func (c *AccountController) ModifyPwd() {
+
+	var param models.ModifyPwdStruct
+
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	logs.FileLogs.Info("%v ---", param)
+	code, msg := models.ModifyPwd(param)
+	util.RetContent.Code = code
+	util.RetContent.Message = msg
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
+//18.重置密码
+//{cardid: “xxx”}
+func (c *AccountController) ResetAccount(cardid string) {
+	//TODO 需要检验操作人的token
+
+	//对人员管理有写权限
+	//EditAccountStatusById(cardid,3)
+	var account models.Account
+	account.Cardid = cardid
+	account.Status = 3
+	account.Password = util.GETMd5(util.DEFUAL_PWD_PRE + util.DEFUAL_PWD)
+	code, msg := models.EditAccountById(account)
+	util.RetContent.Code = code
+	util.RetContent.Message = msg
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

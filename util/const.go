@@ -3,6 +3,11 @@ package util
 import ()
 
 const (
+	DEFUAL_PWD_PRE = "bcxskyc@"
+	DEFUAL_PWD     = "bxkc!QAZ888"
+)
+
+const (
 	EMPLOYEE_TABLE_NAME         = "employee"
 	ACCOUNT_TABLE_NAME          = "account"
 	DEPARTMENT_TABLE_NAME       = "department"
@@ -42,7 +47,7 @@ const (
 
 	SUCESSFUL = 20000
 	//20000 begin
-	EMPLOYEE_EDIT_FAILED   = 20001
+	FAILED                 = 20001
 	EMPLOYEE_ADD_FAILED    = 20002
 	EMPLOYEE_DELETE_FAILED = 30001
 

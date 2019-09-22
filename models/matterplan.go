@@ -20,6 +20,38 @@ type Matterplan struct {
 	Plannum    int64  `json:"plannum" orm:"column(plannum)"`       //
 }
 
+type WebMatterplanAndMatter struct {
+	Itemid     int64  `json:"itemid"`
+	Mattercode string `json:"mattercode"`
+	Plannum    int64  `json:"plannum"`
+	Name       string `json:"name" orm:"column(name)"`   //物料名称
+	Param      string `json:"param" orm:"column(param)"` //规格参数
+	Unit       string `json:"unit" orm:"column(unit)"`   //单位
+}
+
+func GetMatterplansByItemid(itemid int64) (rets []WebMatterplanAndMatter) {
+	mapls, _ := GetMatterplanById(itemid)
+	if len(mapls) > 0 {
+		for _, mp := range mapls {
+			var temp WebMatterplanAndMatter
+			matter, err := GetMatterByMattercode(mp.Mattercode)
+			if err != nil {
+				continue
+			}
+			temp.Itemid = mp.Itemid
+			temp.Mattercode = mp.Mattercode
+			temp.Plannum = mp.Plannum
+			temp.Name = matter.Name
+			temp.Param = matter.Param
+			temp.Unit = matter.Unit
+
+			rets = append(rets, temp)
+		}
+	}
+
+	return
+}
+
 func GetMatterplanBypage(pageNum, pageSize int64) []Matterplan {
 	var (
 		matterplans []Matterplan
@@ -33,13 +65,14 @@ func GetMatterplanBypage(pageNum, pageSize int64) []Matterplan {
 	return matterplans
 }
 
-func GetMatterplanById(itemid int64) (matterplan Matterplan, err error) {
-	matterplan.Itemid = itemid
-	err = OSQL.Read(&matterplan, "itemid")
+func GetMatterplanById(itemid int64) (matterplans []Matterplan, err error) {
+	_, err = OSQL.Raw("select * from "+util.Matterplan_TABLE_NAME+
+		" where itemid=? order by itemid desc", itemid).QueryRows(&matterplans)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
+		return matterplans, err
 	}
-	return matterplan, nil
+	return matterplans, nil
 }
 
 func EditMatterplanById(matterplan Matterplan) (errorCode int64) {
@@ -89,13 +122,19 @@ func AddMatterplan(matterplan Matterplan) (errorCode int64) {
 	return errorCode
 }
 
-func DeleteMatterplan(itemid int64) (errorCode int64) {
+type DeleteMatterStruct struct {
+	Itemid     int64
+	Mattercode string
+}
+
+func DeleteMatterplan(param DeleteMatterStruct) (errorCode int64) {
 	var (
 		temp Matterplan
 	)
 	errorCode = util.SUCESSFUL
-	temp.Itemid = itemid
-	_, err := OSQL.Delete(&temp, "itemid")
+	temp.Itemid = param.Itemid
+	temp.Mattercode = param.Mattercode
+	_, err := OSQL.Delete(&temp, "itemid", "mattercode")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
 		errorCode = util.Matterplan_DELETE_FAILED

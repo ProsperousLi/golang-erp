@@ -63,7 +63,7 @@ func GetAccountByUserID(cardid string) (account Account, err error) {
 	return account, nil
 }
 
-func EditAccountById(account Account) (errorCode int64) {
+func EditAccountById(account Account) (errorCode int64, msg string) {
 	var (
 		temp Account
 	)
@@ -72,8 +72,9 @@ func EditAccountById(account Account) (errorCode int64) {
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		errorCode = util.ACCOUNT_EDIT_FAILED
-		return errorCode
+		errorCode = 20001
+		msg = "未找到该用户"
+		return
 	}
 
 	args := editArgs(account)
@@ -82,15 +83,18 @@ func EditAccountById(account Account) (errorCode int64) {
 
 		if err2 != nil {
 			logs.FileLogs.Error("%s", err2)
-			errorCode = util.ACCOUNT_EDIT_FAILED
-			return errorCode
+			errorCode = 20001
+			msg = "数据更新失败"
+			return
 		}
 
 		logs.FileLogs.Info("num=%v err=%v", num, err2)
 	} else {
 		logs.FileLogs.Info("no data update")
+		errorCode = 20001
+		msg = "没有数据要更新"
 	}
-	return errorCode
+	return
 }
 
 func EditAccountStatusById(cardid string, status int8) (errorCode int64) {
@@ -155,6 +159,8 @@ func AddAccountment(account Account) (errorCode int64) {
 		return errorCode
 	}
 
+	account.Password = util.GETMd5(util.DEFUAL_PWD + util.DEFUAL_PWD_PRE)
+
 	id, err2 := OSQL.Insert(&account)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
@@ -181,4 +187,74 @@ func DeleteAccount(cardid string) (errorCode int64) {
 	logs.FileLogs.Info("num=%v", num)
 
 	return errorCode
+}
+
+type ModifyPwdStruct struct {
+	Cardid string
+	Oldpwd string
+	Newpwd string
+}
+
+func ModifyPwd(param ModifyPwdStruct) (errorCode int64, errorMessage string) {
+	var (
+		temp Account
+	)
+	temp.Cardid = param.Cardid
+	errorCode = 20001
+	err := OSQL.Read(&temp, "cardid")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		errorMessage = "未找到该用户"
+		return
+	}
+
+	// 	Cardid string
+	// Oldpwd string
+	// Newpwd string
+
+	if param.Oldpwd == "" {
+		errorMessage = "旧密码为空"
+		return
+	}
+
+	if param.Newpwd == "" {
+		errorMessage = "新密码为空"
+		return
+	}
+
+	if len(param.Oldpwd) <= 8 || len(param.Newpwd) <= 8 {
+		errorMessage = "密码至少8位"
+		return
+	}
+
+	if !util.PanddingPwd(param.Oldpwd) || !util.PanddingPwd(param.Newpwd) {
+		errorMessage = "密码必须至少包含字母和数字"
+		return
+	}
+
+	temp.Password = param.Newpwd
+
+	args := editArgs(temp)
+	if len(args) > 0 {
+		num, err2 := OSQL.Update(&temp, args...)
+
+		if err2 != nil {
+			logs.FileLogs.Error("%s", err2)
+			errorMessage = "数据库更新密码失败"
+			//errorCode = util.ACCOUNT_EDIT_FAILED
+			return
+		}
+
+		logs.FileLogs.Info("num=%v err=%v", num, err2)
+	} else {
+		logs.FileLogs.Info("no data update")
+		errorMessage = "没有数据要更新"
+		return
+	}
+
+	//TODO 删除此人token
+
+	errorCode = util.SUCESSFUL
+	return
+
 }

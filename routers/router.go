@@ -6,13 +6,14 @@ import (
 )
 
 const (
-	PROJECT = "api/basedata"
+	PROJECT = "api"
 	GET     = "get"
 	POST    = "post"
 )
 
 func init() {
 	beego.Router("/", &controllers.MainController{}, GET+":Index")
+	Allinterfaces()
 	Login()
 	Account()
 	Arrivalbill()
@@ -50,6 +51,24 @@ func init() {
 	Warehouse()
 }
 
+func Allinterfaces() {
+	//获取单据序号
+	beego.Router("/"+PROJECT+"/ts/queryTimeStamp",
+		&controllers.AllinterfacesController{}, GET+":QueryTimeStamp")
+
+	beego.Router("/"+PROJECT+"/basedata/queryMattersOfSupplier",
+		&controllers.AllinterfacesController{}, GET+":QueryMattersOfSupplier")
+
+	beego.Router("/"+PROJECT+"/basedata/querySuppliersOfMatter",
+		&controllers.AllinterfacesController{}, GET+":QuerySuppliersOfMatter")
+
+	beego.Router("/"+PROJECT+"/basedata/updateMatterListOfSupplier",
+		&controllers.AllinterfacesController{}, POST+":UpdateMatterListOfSupplier")
+
+	beego.Router("/"+PROJECT+"/basedata/updateSupplierListOfMatter",
+		&controllers.AllinterfacesController{}, POST+":UpdateSupplierListOfMatter")
+}
+
 func Login() {
 	beego.Router("/"+PROJECT+"/Login",
 		&controllers.LoginController{}, POST+":Login")
@@ -74,16 +93,28 @@ func Account() {
 
 	//16.修改账号
 	//url: api/employee/updateAccountStatus
-	beego.Router("/"+PROJECT+"/account/updateAccountStatus",
+	beego.Router("/"+PROJECT+"/employee/updateAccountStatus",
 		&controllers.AccountController{}, POST+":EditAccountStatusById")
 
 	//开通ERP账号
 	//api/employee/openAccount
-	beego.Router("/"+PROJECT+"/account/openAccount",
+	beego.Router("/"+PROJECT+"/employee/openAccount",
 		&controllers.AccountController{}, POST+":AddAccount")
 
 	beego.Router("/"+PROJECT+"/account/deleteAccount",
 		&controllers.AccountController{}, POST+":DeleteAccount")
+
+	//17.修改密码
+	//api/employee/modifyPwd
+	//{cardid: “xxx”, oldpwd: “xxx”, newpwd: “xxx”}
+	beego.Router("/"+PROJECT+"/employee/modifyPwd",
+		&controllers.AccountController{}, POST+":ModifyPwd")
+
+	// 	18.重置密码
+	// url: api/employee/resetAccount
+	//{cardid: “xxx”}
+	beego.Router("/"+PROJECT+"/employee/resetAccount",
+		&controllers.AccountController{}, POST+":ResetAccount")
 }
 
 func Arrivalbill() {
@@ -122,7 +153,7 @@ func Arrivaldetail() {
 }
 
 func Customer() {
-	beego.Router("/"+PROJECT+"/queryCustomer",
+	beego.Router("/"+PROJECT+"/basedata/queryCustomer",
 		&controllers.CustomerController{}, GET+":QueryCustomer")
 
 	beego.Router("/"+PROJECT+"/customer/getCustomers",
@@ -131,10 +162,10 @@ func Customer() {
 	beego.Router("/"+PROJECT+"/customer/getCustomerById",
 		&controllers.CustomerController{}, POST+":GetCustomerById")
 
-	beego.Router("/"+PROJECT+"/customer/editCustomerById",
+	beego.Router("/"+PROJECT+"/basedata/updateCustomer",
 		&controllers.CustomerController{}, POST+":EditCustomerById")
 
-	beego.Router("/"+PROJECT+"/customer/addCustomer",
+	beego.Router("/"+PROJECT+"/basedata/newCustomer",
 		&controllers.CustomerController{}, POST+":AddCustomer")
 
 	beego.Router("/"+PROJECT+"/customer/deleteCustomer",
@@ -142,7 +173,7 @@ func Customer() {
 }
 
 func Department() {
-	beego.Router("/"+PROJECT+"/queryDept",
+	beego.Router("/"+PROJECT+"/basedata/queryDept",
 		&controllers.DepartmentController{}, GET+":QueryDept")
 
 	beego.Router("/"+PROJECT+"/department/getDepartments",
@@ -151,10 +182,10 @@ func Department() {
 	beego.Router("/"+PROJECT+"/department/getDepartmentById",
 		&controllers.DepartmentController{}, POST+":GetDepartmentById")
 
-	beego.Router("/"+PROJECT+"/department/editDepartmentById",
+	beego.Router("/"+PROJECT+"/basedata/updateDept",
 		&controllers.DepartmentController{}, POST+":EditDepartmentById")
 
-	beego.Router("/"+PROJECT+"/department/addDepartment",
+	beego.Router("/"+PROJECT+"/basedata/newDept",
 		&controllers.DepartmentController{}, POST+":AddDepartment")
 
 	beego.Router("/"+PROJECT+"/department/deleteDepartment",
@@ -264,6 +295,9 @@ func Employee() {
 }
 
 func Leave() {
+	beego.Router("/"+PROJECT+"/employee/queryAllLeave",
+		&controllers.LeaveController{}, GET+":QueryAllLeave")
+
 	beego.Router("/"+PROJECT+"/leave/getLeaves",
 		&controllers.LeaveController{}, POST+":GetLeaves")
 
@@ -273,7 +307,7 @@ func Leave() {
 	beego.Router("/"+PROJECT+"/leave/editLeaveById",
 		&controllers.LeaveController{}, POST+":EditLeaveById")
 
-	beego.Router("/"+PROJECT+"/leave/addLeave",
+	beego.Router("/"+PROJECT+"/employee/newLeave",
 		&controllers.LeaveController{}, POST+":AddLeave")
 
 	beego.Router("/"+PROJECT+"/leave/deleteLeave",
@@ -281,37 +315,34 @@ func Leave() {
 }
 
 func Marketcontract() {
-	beego.Router("/"+PROJECT+"/marketcontract/getMarketcontracts",
-		&controllers.MarketcontractController{}, POST+":GetMarketcontracts")
+	beego.Router("/"+PROJECT+"/contract/queryMarketContract",
+		&controllers.MarketcontractController{}, GET+":GetMarketcontracts")
 
 	beego.Router("/"+PROJECT+"/marketcontract/getMarketcontractById",
 		&controllers.MarketcontractController{}, POST+":GetMarketcontractById")
 
-	beego.Router("/"+PROJECT+"/marketcontract/editMarketcontractById",
+	beego.Router("/"+PROJECT+"/contract/updateMarketContract",
 		&controllers.MarketcontractController{}, POST+":EditMarketcontractById")
 
-	beego.Router("/"+PROJECT+"/marketcontract/addMarketcontract",
+	beego.Router("/"+PROJECT+"/contract/addMarketContract",
 		&controllers.MarketcontractController{}, POST+":AddMarketcontract")
 
-	beego.Router("/"+PROJECT+"/marketcontract/deleteMarketcontract",
+	beego.Router("/"+PROJECT+"/contract/delMarketContract",
 		&controllers.MarketcontractController{}, POST+":DeleteMarketcontract")
 }
 
 func Matter() {
 
-	beego.Router("/"+PROJECT+"/queryMatter",
+	beego.Router("/"+PROJECT+"/basedata/queryMatter",
 		&controllers.MatterController{}, GET+":QueryMatter")
 
 	beego.Router("/"+PROJECT+"/matter/getMatters",
 		&controllers.MatterController{}, POST+":GetMatters")
 
-	beego.Router("/"+PROJECT+"/matter/getMatterById",
-		&controllers.MatterController{}, POST+":GetMatterById")
-
-	beego.Router("/"+PROJECT+"/matter/editMatterById",
+	beego.Router("/"+PROJECT+"/basedata/updateMatter",
 		&controllers.MatterController{}, POST+":EditMatterById")
 
-	beego.Router("/"+PROJECT+"/matter/addMatter",
+	beego.Router("/"+PROJECT+"/basedata/newMatter",
 		&controllers.MatterController{}, POST+":AddMatter")
 
 	beego.Router("/"+PROJECT+"/matter/deleteMatter",
@@ -319,17 +350,17 @@ func Matter() {
 }
 
 func Matterplan() {
-	preRoute := "matterplan"
-	beego.Router("/"+PROJECT+"/"+preRoute+"/getMatterplans",
+	preRoute := "repair"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/queryMatterPlan",
 		&controllers.MatterplanController{}, POST+":GetMatterplans")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getMatterplanById",
 		&controllers.MatterplanController{}, POST+":GetMatterplanById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/editMatterplanById",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/updateMatterPlan",
 		&controllers.MatterplanController{}, POST+":EditMatterplanById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/addMatterplan",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addMatterPlan",
 		&controllers.MatterplanController{}, POST+":AddMatterplan")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteMatterplan",
@@ -337,7 +368,8 @@ func Matterplan() {
 }
 
 func Menu() {
-	beego.Router("/"+PROJECT+"/queryMenu",
+	//api/permission/allmenu
+	beego.Router("/"+PROJECT+"/permissionallmenu",
 		&controllers.MenuController{}, GET+":GetMenus")
 }
 
@@ -409,6 +441,14 @@ func Permission() {
 
 	beego.Router("/"+PROJECT+"/permission/deletePermission",
 		&controllers.PermissionController{}, POST+":DeletePermission")
+
+	//19.设置账号权限
+	beego.Router("/"+PROJECT+"/permission/setPermission",
+		&controllers.PermissionController{}, POST+":SetPermission")
+
+	//20.获取账号权限
+	beego.Router("/"+PROJECT+"/permission/queryPermission",
+		&controllers.PermissionController{}, GET+":QueryPermission")
 }
 
 func Purchasecontract() {
@@ -516,20 +556,20 @@ func Repaircost() {
 		&controllers.RepaircostController{}, POST+":DeleteRepaircost")
 }
 func Repairitem() {
-	preRoute := "repairitem"
-	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepairitems",
-		&controllers.RepairitemController{}, POST+":GetRepairitems")
+	preRoute := "repair"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/queryRepairItem",
+		&controllers.RepairitemController{}, GET+":GetRepairitems")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepairitemById",
 		&controllers.RepairitemController{}, POST+":GetRepairitemById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/editRepairitemById",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/updateRepairItem",
 		&controllers.RepairitemController{}, POST+":EditRepairitemById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepairitem",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepairItem",
 		&controllers.RepairitemController{}, POST+":AddRepairitem")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteRepairitem",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/delRepairItem",
 		&controllers.RepairitemController{}, POST+":DeleteRepairitem")
 }
 func Review() {
@@ -569,9 +609,9 @@ func Reviewresult() {
 }
 
 func Saledetail() {
-	preRoute := "saledetail"
-	beego.Router("/"+PROJECT+"/"+preRoute+"/getSaledetails",
-		&controllers.SaledetailController{}, POST+":GetSaledetails")
+	preRoute := "contract"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/querySaleDetail",
+		&controllers.SaledetailController{}, GET+":GetSaledetails")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getSaledetailById",
 		&controllers.SaledetailController{}, POST+":GetSaledetailById")
@@ -584,6 +624,10 @@ func Saledetail() {
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteSaledetail",
 		&controllers.SaledetailController{}, POST+":DeleteSaledetail")
+
+	//45.新增或修改销售详情(先删除，再新增)
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addOrUpdateSaleDetail",
+		&controllers.SaledetailController{}, POST+":AddOrUpdateSaleDetail")
 }
 
 func Stock() {
@@ -614,10 +658,10 @@ func Supplier() {
 	beego.Router("/"+PROJECT+"/supplier/getSupplierById",
 		&controllers.SupplierController{}, POST+":GetSupplierById")
 
-	beego.Router("/"+PROJECT+"/supplier/editSupplierById",
+	beego.Router("/"+PROJECT+"/basedata/updateSupplier",
 		&controllers.SupplierController{}, POST+":EditSupplierById")
 
-	beego.Router("/"+PROJECT+"/supplier/addSupplier",
+	beego.Router("/"+PROJECT+"/basedata/newSupplier",
 		&controllers.SupplierController{}, POST+":AddSupplier")
 
 	beego.Router("/"+PROJECT+"/supplier/deleteSupplier",
@@ -643,20 +687,20 @@ func Supplyrelation() {
 }
 
 func Vehicle() {
-	// beego.Router("/"+PROJECT+"/vehicle/getVehicles",
-	// 	&controllers.VehicleController{}, POST+":GetVehicles")
+	beego.Router("/"+PROJECT+"/basedata/queryVehicle",
+		&controllers.VehicleController{}, GET+":QueryVehicle")
 
 	// beego.Router("/"+PROJECT+"/vehicle/getVehicleById",
 	// 	&controllers.VehicleController{}, POST+":GetVehicleById")
 
-	// beego.Router("/"+PROJECT+"/vehicle/editVehicleById",
-	// 	&controllers.VehicleController{}, POST+":EditVehicleById")
+	beego.Router("/"+PROJECT+"/basedata/updateVehicle",
+		&controllers.VehicleController{}, POST+":UpdateVehicle")
 
-	// beego.Router("/"+PROJECT+"/vehicle/addVehicle",
-	// 	&controllers.VehicleController{}, POST+":AddVehicle")
+	beego.Router("/"+PROJECT+"/basedata/newVehicle",
+		&controllers.VehicleController{}, POST+":NewVehicle")
 
-	// beego.Router("/"+PROJECT+"/vehicle/deleteVehicle",
-	// 	&controllers.VehicleController{}, POST+":DeleteVehicle")
+	beego.Router("/"+PROJECT+"/basedata/delVehicle",
+		&controllers.VehicleController{}, POST+":DelVehicle")
 }
 
 func Warehouse() {

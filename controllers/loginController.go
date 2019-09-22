@@ -30,7 +30,10 @@ type loginParam struct {
 func (c *LoginController) Login() {
 	username := c.GetString("username")
 	password := c.GetString("password")
-	errCode, token := models.Login(username, password)
+	//vckey  verifycode
+	vckey := c.GetString("password")
+	verifycode := c.GetString("password")
+	errCode, token := models.Login(username, password, vckey, verifycode)
 
 	util.RetContent.Code = errCode //util.SUCESSFUL
 	util.RetContent.Message = token

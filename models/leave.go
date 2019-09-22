@@ -13,6 +13,18 @@ type Leaves struct {
 	Reason     string `json:"reason" orm:"column(reason)"`   //离职原因
 }
 
+func QueryAllLeave() []Leaves {
+	var (
+		les []Leaves
+	)
+	_, err := OSQL.Raw("select * from " + util.LEAVE_TABLE_NAME +
+		" order by id asc").QueryRows(&les)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return les
+}
+
 func GetLeaveBypage(pageNum, pageSize int64) []Leaves {
 	var (
 		les []Leaves

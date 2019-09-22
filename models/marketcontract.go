@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -41,7 +43,6 @@ type Marketcontract struct {
 	Deadline           string `json:"deadline" orm:"column(deadline)"`                     //结束日期
 	Createat           string `json:"createat" orm:"column(createat)"`                     //制单日期
 	Amount             int64  `json:"amount" orm:"column(amount)"`                         //金额
-	Settlestatus       int8   `json:"settlestatus" orm:"column(settlestatus)"`             //结算状态(1:未结算；2:已结算；3:部分结算)
 	Settleamount       int64  `json:"settleamount" orm:"column(settleamount)"`             //结算金额
 	Attachment         string `json:"attachment" orm:"column(attachment)"`                 //附件
 	Remark             string `json:"remark" orm:"column(remark)"`                         //备注
@@ -51,12 +52,53 @@ type Marketcontract struct {
 	Vehicles           string `json:"vehicles" orm:"column(vehicles)"`                     //车辆列表(车辆编号的json数组)
 }
 
-func GetMarketcontractBypage(pageNum, pageSize int64) []Marketcontract {
+func GetMarketcontractByType(codeType int8) []Marketcontract {
 	var (
 		params []Marketcontract
 	)
+	_, err := OSQL.Raw("select * from "+util.Marketcontract_TABLE_NAME+
+		"where type=? order by id asc", codeType).QueryRows(&params)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return params
+}
+
+func GetMarketcontractBypage(marketType, execstatus,
+	contractcode, custcode, handler string, pageNum, pageSize int64) []Marketcontract {
+	var (
+		params []Marketcontract
+	)
+
+	sql := "select * from " + util.Marketcontract_TABLE_NAME + " where 1=1"
+	if marketType != "" {
+		_, err := strconv.ParseInt(marketType, 10, 64)
+		if err != nil {
+			sql += " and type=" + marketType
+		}
+	}
+
+	if execstatus != "" {
+		_, err := strconv.ParseInt(execstatus, 10, 64)
+		if err != nil {
+			sql += " and execstatus=" + execstatus
+		}
+	}
+
+	if contractcode != "" {
+		sql += " and contractcode like '%" + contractcode + "%'"
+	}
+
+	if custcode != "" {
+		sql += " and custcode='" + custcode + "'"
+	}
+
+	if handler != "" {
+		sql += " and handler='" + handler + "'"
+	}
+
 	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Marketcontract_TABLE_NAME+" order by id asc limit ?,?",
+	_, err := OSQL.Raw(sql+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
@@ -147,9 +189,6 @@ func editArgs_market(param Marketcontract) []string {
 	if param.Settleamount != 0 {
 		args = append(args, "settleamount")
 	}
-	if param.Settlestatus != 0 {
-		args = append(args, "settlestatus")
-	}
 	if param.Signdate != "" {
 		args = append(args, "signdate")
 	}
@@ -164,7 +203,7 @@ func editArgs_market(param Marketcontract) []string {
 	return args
 }
 
-func AddMarketcontract(param Marketcontract) (errorCode int64) {
+func AddMarketcontract(param Marketcontract) (errorCode int64, msg string) {
 	var (
 		temp Marketcontract
 	)
@@ -173,34 +212,54 @@ func AddMarketcontract(param Marketcontract) (errorCode int64) {
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
 		logs.FileLogs.Info("Marketcontract have asixt")
-		errorCode = util.Marketcontract_ADD_FAILED
-		return errorCode
+		errorCode = util.FAILED
+		msg = "查询到已经有该数据"
+		return
 	}
 
 	id, err2 := OSQL.Insert(&param)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
-		errorCode = util.Marketcontract_ADD_FAILED
+		errorCode = util.FAILED
+		msg = "数据更新失败"
+		return
 	}
 
 	logs.FileLogs.Info("num=%v", id)
 
-	return errorCode
+	return
 }
 
-func DeleteMarketcontract(id int64) (errorCode int64) {
+func DeleteMarketcontract(id int64) (errorCode int64, msg string) {
 	var (
 		temp Marketcontract
 	)
 	errorCode = util.SUCESSFUL
 	temp.Id = id
+	err := OSQL.Read(&temp, "id")
+	if err != nil {
+		logs.FileLogs.Info("Marketcontract have asixt")
+		errorCode = util.FAILED
+		msg = "未查询到该数据"
+		return
+	}
+
+	if temp.Execstatus != 1 {
+		logs.FileLogs.Error("不能删除状态不为1的市场合同,status = %s", temp.Execstatus)
+		errorCode = util.FAILED
+		msg = "不能删除状态不为1的市场合同"
+		return
+	}
+
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
-		errorCode = util.Marketcontract_DELETE_FAILED
+		errorCode = util.FAILED
+		msg = "删除失败"
+		return
 	}
 
 	logs.FileLogs.Info("num=%v", num)
 
-	return errorCode
+	return
 }

@@ -60,7 +60,7 @@ func EditDepartmentById(depart Department) (errorCode int64) {
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		errorCode = util.DEPART_EDIT_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
@@ -69,7 +69,7 @@ func EditDepartmentById(depart Department) (errorCode int64) {
 		num, err2 := OSQL.Update(&depart, args...)
 		if err2 != nil {
 			logs.FileLogs.Error("%s", err2)
-			errorCode = util.DEPART_EDIT_FAILED
+			errorCode = util.FAILED
 			return errorCode
 		}
 		logs.FileLogs.Info("num=%v", num)
@@ -105,14 +105,14 @@ func AddDepartment(depart Department) (errorCode int64) {
 	err := OSQL.Read(&temp, "compID")
 	if err == nil {
 		logs.FileLogs.Error("table have this compID=%v", depart.CompID)
-		errorCode = util.DEPART_ADD_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&depart)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
-		errorCode = util.DEPART_ADD_FAILED
+		errorCode = util.FAILED
 	}
 
 	logs.FileLogs.Info("num=%v", id)

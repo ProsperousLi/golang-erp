@@ -12,27 +12,53 @@ type SaledetailController struct {
 	BaseController
 }
 
-func (c *SaledetailController) GetSaledetails() {
+// util.RetContent.Code = util.FAILED
+// util.RetContent.Message = "参数错误"
+// c.Data["json"] = util.RetContent
+// c.ServeJSON()
+// return
+
+func (c *SaledetailController) AddOrUpdateSaleDetail() {
 	var (
-		param = make(map[string]int64)
+		param models.AddAndUpdateSaledetailStruct
 	)
+
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
 		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
-		util.RetContent.Code = util.PARAM_FAILED
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数错误"
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
+
+	if param.Contractcode == "" {
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数错误"
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
 	}
-	if pageSize == 0 {
-		pageSize = 10
+
+	code, msg := models.AddOrUpdateSaleDetail(param)
+
+	util.RetContent.Code = code
+	util.RetContent.Message = msg
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
+func (c *SaledetailController) GetSaledetails() {
+	contractcode := c.GetString("contractcode")
+	if contractcode == "" {
+		util.RetContent.Code = util.SUCESSFUL
+		util.RetContent.Message = ""
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
 	}
-	rets := models.GetSaledetailBypage(pageNum, pageSize)
+	rets := models.GetSaledetailByContractcode(contractcode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
@@ -110,7 +136,7 @@ func (c *SaledetailController) DeleteSaledetail() {
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
 		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
-		util.RetContent.Code = util.PARAM_FAILED
+		util.RetContent.Code = util.FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return

@@ -12,6 +12,70 @@ type Supplyrelation struct {
 	Matterid   int64 `json:"matterid" orm:"column(matterid)"`     //物料主键
 }
 
+func UpdateSupplierListOfMatter(matterid int64, supplierList []int64) (errorCode int64, msg string) {
+	errorCode = util.SUCESSFUL
+	//delete
+	code := DeleteSupplyrelationByMatterId(matterid)
+	if code != util.SUCESSFUL {
+		msg = "删除失败"
+		return code, msg
+	}
+
+	//add
+	for _, supplierid := range supplierList {
+		var tempRelation Supplyrelation
+		tempRelation.Matterid = matterid
+		tempRelation.Supplierid = supplierid
+		AddSupplyrelation(tempRelation)
+	}
+
+	return
+}
+
+func UpdateRelationBySupplierid(supplierid int64, matterList []int64) (errorCode int64, msg string) {
+	errorCode = util.SUCESSFUL
+	//delete
+	code := DeleteSupplyrelationBySupplierid(supplierid)
+	if code != util.SUCESSFUL {
+		msg = "删除失败"
+		return code, msg
+	}
+
+	//add
+	for _, matterId := range matterList {
+		var tempRelation Supplyrelation
+		tempRelation.Matterid = matterId
+		tempRelation.Supplierid = supplierid
+		AddSupplyrelation(tempRelation)
+	}
+
+	return
+}
+
+func GetSupplyrelationByMatterid(matterid int64) (pa []Supplyrelation, err error) {
+	var (
+		pas []Supplyrelation
+	)
+	_, err = OSQL.Raw("select * from " + util.SUPPLYRELATION_TABLE_NAME +
+		" where matterid=? order by id asc").QueryRows(&pas)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return pas, err
+}
+
+func GetSupplyrelationBySupplierid(Supplierid int64) (pa []Supplyrelation, err error) {
+	var (
+		pas []Supplyrelation
+	)
+	_, err = OSQL.Raw("select * from " + util.SUPPLYRELATION_TABLE_NAME +
+		" where supplierid=? order by id asc").QueryRows(&pas)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return pas, err
+}
+
 func GetSupplyrelationBypage(pageNum, pageSize int64) []Supplyrelation {
 	var (
 		pas []Supplyrelation
@@ -102,6 +166,38 @@ func DeleteSupplyrelation(id int64) (errorCode int64) {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		errorCode = util.SUPPLYRELATION_DELETE_FAILED
+		return errorCode
+	}
+	logs.FileLogs.Info("num=%v", num)
+	return errorCode
+}
+
+func DeleteSupplyrelationBySupplierid(supplierid int64) (errorCode int64) {
+	errorCode = util.SUCESSFUL
+	var (
+		temp Supplyrelation
+	)
+	temp.Supplierid = supplierid
+	num, err := OSQL.Delete(&temp, "supplierid")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		errorCode = util.FAILED
+		return errorCode
+	}
+	logs.FileLogs.Info("num=%v", num)
+	return errorCode
+}
+
+func DeleteSupplyrelationByMatterId(matterid int64) (errorCode int64) {
+	errorCode = util.SUCESSFUL
+	var (
+		temp Supplyrelation
+	)
+	temp.Matterid = matterid
+	num, err := OSQL.Delete(&temp, "matterid")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		errorCode = util.FAILED
 		return errorCode
 	}
 	logs.FileLogs.Info("num=%v", num)

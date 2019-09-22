@@ -12,27 +12,18 @@ type RepairitemController struct {
 	BaseController
 }
 
+//contractcode=xxx& vehiclecode=xxx,两个参数必带
 func (c *RepairitemController) GetRepairitems() {
-	var (
-		param = make(map[string]int64)
-	)
-	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
-	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
-		util.RetContent.Code = util.PARAM_FAILED
+	contractcode := c.GetString("contractcode")
+	vehiclecode := c.GetString("vehiclecode")
+	if contractcode == "" || vehiclecode == "" {
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数为空"
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetRepairitemBypage(pageNum, pageSize)
+	rets := models.GetRepairitemBCode(contractcode, vehiclecode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
@@ -90,7 +81,8 @@ func (c *RepairitemController) AddRepairitem() {
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		util.RetContent.Code = util.PARAM_FAILED
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数错误"
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
@@ -105,7 +97,7 @@ func (c *RepairitemController) AddRepairitem() {
 
 func (c *RepairitemController) DeleteRepairitem() {
 	var (
-		param = make(map[string]string)
+		param = make(map[string]int64)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -116,7 +108,7 @@ func (c *RepairitemController) DeleteRepairitem() {
 		return
 	}
 
-	id := param["contractcode"]
+	id := param["id"]
 
 	logs.FileLogs.Info("%v ---", id)
 	code := models.DeleteRepairitem(id)

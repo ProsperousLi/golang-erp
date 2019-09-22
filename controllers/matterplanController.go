@@ -12,6 +12,27 @@ type MatterplanController struct {
 	BaseController
 }
 
+func (c *MatterplanController) GetMatterplansByItemid() {
+	var (
+		param = make(map[string]int64)
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	id := param["itemid"]
+
+	rets := models.GetMatterplansByItemid(id)
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *MatterplanController) GetMatterplans() {
 	var (
 		param = make(map[string]int64)
@@ -52,7 +73,7 @@ func (c *MatterplanController) GetMatterplanById() {
 		return
 	}
 
-	id := param["id"]
+	id := param["itemid"]
 
 	logs.FileLogs.Info("%v ---id = ", id)
 	ret, _ := models.GetMatterplanById(id)
@@ -103,23 +124,28 @@ func (c *MatterplanController) AddMatterplan() {
 	c.ServeJSON()
 }
 
+//{itemid: xxx, mattercode: xxx}
 func (c *MatterplanController) DeleteMatterplan() {
 	var (
-		param = make(map[string]int64)
+		param models.DeleteMatterStruct
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
 		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
-		util.RetContent.Code = util.PARAM_FAILED
+		util.RetContent.Code = util.FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	}
 
-	id := param["id"]
+	if param.Itemid == 0 || param.Mattercode == "" {
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数为空"
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+	}
 
-	logs.FileLogs.Info("%v ---", id)
-	code := models.DeleteMatterplan(id)
+	code := models.DeleteMatterplan(param)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()

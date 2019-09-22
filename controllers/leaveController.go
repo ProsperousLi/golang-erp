@@ -12,6 +12,14 @@ type LeaveController struct {
 	BaseController
 }
 
+func (c *LeaveController) QueryAllLeave() {
+	rets := models.QueryAllLeave()
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *LeaveController) GetLeaves() {
 	var (
 		param = make(map[string]int64)

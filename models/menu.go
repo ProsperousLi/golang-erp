@@ -6,7 +6,7 @@ import (
 )
 
 type Menu struct {
-	Id        int64  `json:"id" orm:"column(id)"`               //菜单id
+	MenuID    int64  `json:"menuID" orm:"column(menuID);pk"`    //菜单id
 	Title     string `json:"title" orm:"column(title)"`         //标题
 	Icon      string `json:"icon" orm:"column(icon)"`           //图标
 	ParentID  int64  `json:"parentID" orm:"column(parentID)"`   //父ID
@@ -14,11 +14,30 @@ type Menu struct {
 	Component string `json:"component" orm:"column(component)"` //组件名
 }
 
+type WebMenu struct {
+	MenuID   int64     `json:"menuID"`
+	Title    string    `json:"title"`
+	Children []WebMenu `json:"children"`
+}
+
+func convert2WebMenu(params []Menu) (ret WebMenu) {
+	// for i, param := range params {
+	// 	if i == 0 {
+	// 		ret.MenuID = param.MenuID
+	// 		ret.Title = param.Title
+	// 	}
+
+	// 	return
+	// }
+
+	return
+}
+
 func GetMenus() []Menu {
 	var (
 		menus []Menu
 	)
-	_, err := OSQL.Raw("select * from " + util.EMPLOYEE_TABLE_NAME).QueryRows(&menus)
+	_, err := OSQL.Raw("select * from " + util.EMPLOYEE_TABLE_NAME + " order by menuID asc").QueryRows(&menus)
 	if err != nil {
 		logs.FileLogs.Error("%s", err) //logs.Error(err)
 	}

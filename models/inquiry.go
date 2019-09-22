@@ -19,7 +19,6 @@ import (
 //   `replydate` date DEFAULT NULL COMMENT '回复日期',
 //   `remark` text CHARACTER SET utf8mb4 COMMENT '备注',
 //   `attachment` text CHARACTER SET utf8mb4 COMMENT '附件',
-//   `validity` int(5) DEFAULT NULL COMMENT '价格有效期(单位：月)',
 //   PRIMARY KEY (`id`),
 //   UNIQUE KEY `inquirycode` (`inquirycode`) USING BTREE
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='询价表';
@@ -38,7 +37,6 @@ type Inquiry struct {
 	Replydate    string `json:"replydate" orm:"column(replydate)"`       //回复日期
 	Remark       string `json:"remark" orm:"column(remark)"`             //备注
 	Attachment   string `json:"attachment" orm:"column(attachment)"`     //附件
-	Validity     int    `json:"validity" orm:"column(validity)"`         //价格有效期(单位：月)
 }
 
 func GetInquiryBypage(pageNum, pageSize int64) []Inquiry {
@@ -131,10 +129,6 @@ func edit_InquiryArgs(param Inquiry) (args []string) {
 
 	if param.Type != 0 {
 		args = append(args, "type")
-	}
-
-	if param.Validity != 0 {
-		args = append(args, "validity")
 	}
 	return args
 }

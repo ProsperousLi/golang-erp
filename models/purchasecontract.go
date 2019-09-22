@@ -22,7 +22,7 @@ import (
 //   `taxsign` tinyint(5) NOT NULL COMMENT '含税标志(1：含税价；2：不含税价)',
 //   `taxrate` tinyint(5) NOT NULL COMMENT '税率',
 //   `ralatedinquirycode` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '关联询价单号',
-//   `settlestatus` tinyint(5) NOT NULL COMMENT '结算状态(1:未结算；2:已结算；3:部分结算)',
+//   `pureamount` bigint(20) NOT NULL COMMENT '不含税金额',
 //   `settleamount` bigint(20) DEFAULT '0' COMMENT '已结算金额',
 //   `amount` bigint(20) NOT NULL COMMENT '金额',
 //   PRIMARY KEY (`id`)
@@ -44,9 +44,9 @@ type Purchasecontract struct {
 	Taxsign            int    `json:"taxsign" orm:"column(taxsign)"`                       //含税标志(1：含税价；2：不含税价)
 	Taxrate            int    `json:"taxrate" orm:"column(taxrate)"`                       //税率
 	Ralatedinquirycode string `json:"ralatedinquirycode" orm:"column(ralatedinquirycode)"` //关联询价单号
-	Settlestatus       int    `json:"settlestatus" orm:"column(settlestatus)"`             //结算状态(1:未结算；2:已结算；3:部分结算)
 	Settleamount       int64  `json:"settleamount" orm:"column(settleamount)"`             //已结算金额
 	Amount             int64  `json:"amount" orm:"column(amount)"`                         //金额
+	Pureamount         int64  `json:"pureamount" orm:"column(pureamount)"`                 //不含税金额
 
 }
 
@@ -143,8 +143,8 @@ func edit_purchasecontract(param Purchasecontract) (args []string) {
 		args = append(args, "settleamount")
 	}
 
-	if param.Settlestatus != 0 {
-		args = append(args, "settlestatus")
+	if param.Pureamount != 0 {
+		args = append(args, "pureamount")
 	}
 
 	if param.Status != 0 {

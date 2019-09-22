@@ -28,7 +28,7 @@ func QueryCustomer(querystr string) []Customer {
 	if querystr != "" {
 		num, err := OSQL.Raw("select * from "+
 			util.CUSTOMER_TABLE_NAME+
-			" where name like %?% order by id asc", querystr).QueryRows(&custs1)
+			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
 		if err != nil {
 			logs.FileLogs.Error("%s", err)
 			return custs1
@@ -37,7 +37,7 @@ func QueryCustomer(querystr string) []Customer {
 
 		num, err = OSQL.Raw("select * from "+
 			util.CUSTOMER_TABLE_NAME+
-			" where custcode like %?% order by id asc", querystr).QueryRows(&custs2)
+			" where custcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
 		if err != nil {
 			logs.FileLogs.Error("%s", err)
 			return custs1

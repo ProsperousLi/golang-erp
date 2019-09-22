@@ -24,13 +24,13 @@ func QueryMatter(mattercode, name string) []Matter {
 		sql string
 	)
 	if mattercode != "" && name != "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like %?% " +
-			"or name like %?% order by id asc"
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%?%' " +
+			"or name like '%?%' order by id asc"
 	} else if mattercode != "" && name == "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like %?% " +
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%?%' " +
 			"order by id asc"
 	} else if mattercode == "" && name != "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where name like %?% order by id asc"
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where name like '%?%' order by id asc"
 	} else {
 		sql = "select * from " + util.MATTER_TABLE_NAME + " order by id asc"
 	}
@@ -53,6 +53,16 @@ func GetMatterBypage(pageNum, pageSize int64) []Matter {
 		logs.FileLogs.Error("%s", err)
 	}
 	return mas
+}
+
+func GetMatterByMattercode(mattercode string) (ma Matter, err error) {
+	ma.Mattercode = mattercode
+	err = OSQL.Read(&ma, "mattercode")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		return ma, err
+	}
+	return ma, nil
 }
 
 func GetMatterById(id int64) (ma Matter, err error) {

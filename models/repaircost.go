@@ -9,6 +9,7 @@ import (
 // CREATE TABLE `repaircost` (
 //   `id` bigint(20) NOT NULL AUTO_INCREMENT,
 //   `type` tinyint(5) NOT NULL COMMENT '费用类型(1：物料;2:人工；3：其他；4：外协)',
+//   `itemid` bigint(20) DEFAULT NULL COMMENT '维修项id',
 //   `extend` text CHARACTER SET utf8mb4 COMMENT '扩展信息(json;如人工的出发和返回时间)',
 //   `unit` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '单位',
 //   `num` bigint(20) NOT NULL COMMENT '数量',
@@ -21,6 +22,7 @@ import (
 type Repaircost struct {
 	Id     int64  `json:"id" orm:"column(id)"`
 	Type   int8   `json:"type" orm:"column(type)"`     //合同编号
+	Itemid int64  `json:"itemid" orm:"column(itemid)"` //维修项id
 	Extend string `json:"extend" orm:"column(extend)"` //费用类型(1：物料;2:人工；3：其他；4：外协)
 	Unit   string `json:"unit" orm:"column(unit)"`     //扩展信息(json;如人工的出发和返回时间)
 	Num    int64  `json:"num" orm:"column(num)"`       //数量
@@ -94,6 +96,10 @@ func edit_repaircost(param Repaircost) (args []string) {
 
 	if param.Type != 0 {
 		args = append(args, "type")
+	}
+
+	if param.Itemid != 0 {
+		args = append(args, "itemid")
 	}
 
 	if param.Unit != "" {

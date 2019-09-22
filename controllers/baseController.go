@@ -14,6 +14,8 @@ type BaseController struct {
 	actionName     string //当前action名称
 }
 
+//TODO 1.检查用户的token是否存在；2.所有的增删改都需要去检查该用户是否有写权限，查询不需要写权限
+//权限表最好加载到内存
 func (c *BaseController) Prepare() {
 	//附值
 	c.controllerName, c.actionName = c.GetControllerAndAction()

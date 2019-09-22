@@ -124,3 +124,37 @@ func (c *PermissionController) DeletePermission() {
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
+
+//{cardid: 1, read:[1,2,3], write:[4,5,6]}
+func (c *PermissionController) SetPermission() {
+	var param models.AddPersionStruct
+
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+	code, msg := models.SetPermission(param)
+	util.RetContent.Code = code
+	util.RetContent.Message = msg
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
+//cardid=’xxx’
+func (c *PermissionController) QueryPermission() {
+	cardid := c.GetString("cardid")
+	ret, err := models.QueryPermission(cardid)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "未查询到该用户"
+	}
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = ret
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}

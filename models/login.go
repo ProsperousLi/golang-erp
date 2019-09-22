@@ -26,7 +26,7 @@ func New_Time_count() {
 
 // 登录接口
 //{username: ‘test’, password: ‘test’, vckey: ‘ekksdfssl’, verifycode: ‘3qu5’}
-func Login(cardid string, password string) (errorCode int64, uuid string) {
+func Login(cardid string, password string, vckey, verifycode string) (errorCode int64, uuid string) {
 	var (
 		qurey Account
 	)
@@ -56,7 +56,7 @@ func Login(cardid string, password string) (errorCode int64, uuid string) {
 			AccsMap[uuid] = emp
 		} else {
 			logs.FileLogs.Error("status is :%s", qurey.Status)
-			return 1, uuid
+			return 3, uuid
 		}
 	} else {
 		logs.FileLogs.Error("cardid or password is invild")

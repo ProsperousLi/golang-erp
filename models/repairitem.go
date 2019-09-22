@@ -7,6 +7,7 @@ import (
 
 // DROP TABLE IF EXISTS `repairitem`;
 // CREATE TABLE `repairitem` (
+//   `id` bigint(20) NOT NULL AUTO_INCREMENT,
 //   `contractcode` varchar(20) CHARACTER SET utf8mb4 NOT NULL COMMENT '合同编号',
 //   `itemname` varchar(100) CHARACTER SET utf8mb4 NOT NULL COMMENT '项目名称',
 //   `status` tinyint(5) NOT NULL COMMENT '状态(3:进行中；4：完工)',
@@ -19,6 +20,7 @@ import (
 
 //维修合同表
 type Repairitem struct {
+	Id            int64  `json:"id" orm:"column(id)"`
 	Contractcode  string `json:"contractcode" orm:"column(contractcode)"`
 	Itemname      string `json:"itemname" orm:"column(itemname)"`           //合同编号
 	Status        int8   `json:"status" orm:"column(status)"`               //项目名称
@@ -28,13 +30,13 @@ type Repairitem struct {
 	Vehiclecode   string `json:"vehiclecode" orm:"column(vehiclecode)"`     //修复措施
 }
 
-func GetRepairitemBypage(pageNum, pageSize int64) []Repairitem {
+func GetRepairitemBCode(contractcode, vehiclecode string) []Repairitem {
 	var (
 		params []Repairitem
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Repairitem_TABLE_NAME+" limit ?,?",
-		begin, pageSize).QueryRows(&params)
+	_, err := OSQL.Raw("select * from "+util.Repairitem_TABLE_NAME+
+		"where contractcode='?' and vehiclecode='?' order by id desc",
+		contractcode, vehiclecode).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -57,7 +59,9 @@ func EditRepairitemById(param Repairitem) (errorCode int64) {
 	)
 	errorCode = util.SUCESSFUL
 	temp.Contractcode = param.Contractcode
-	err := OSQL.Read(&temp, "contractcode")
+	temp.Vehiclecode = param.Vehiclecode
+	temp.Itemname = param.Itemname
+	err := OSQL.Read(&temp, "contractcode", "vehiclecode", "itemname")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		errorCode = util.Repairitem_EDIT_FAILED
@@ -112,27 +116,27 @@ func AddRepairitem(param Repairitem) (errorCode int64) {
 	err := OSQL.Read(&temp, "contractcode")
 	if err == nil {
 		logs.FileLogs.Error("Repairitem have this contractcode=%v", param.Contractcode)
-		errorCode = util.Repairitem_ADD_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
-		errorCode = util.Repairitem_ADD_FAILED
+		errorCode = util.FAILED
 		return errorCode
 	}
 	logs.FileLogs.Info("num=%v", num)
 	return errorCode
 }
 
-func DeleteRepairitem(contractcode string) (errorCode int64) {
+func DeleteRepairitem(id int64) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	var (
 		temp Repairitem
 	)
-	temp.Contractcode = contractcode
-	num, err := OSQL.Delete(&temp, "contractcode")
+	temp.Id = id
+	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		errorCode = util.Repairitem_DELETE_FAILED
