@@ -363,7 +363,7 @@ func Matterplan() {
 	beego.Router("/"+PROJECT+"/"+preRoute+"/addMatterPlan",
 		&controllers.MatterplanController{}, POST+":AddMatterplan")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteMatterplan",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/delMatterPlan",
 		&controllers.MatterplanController{}, POST+":DeleteMatterplan")
 }
 
@@ -540,19 +540,19 @@ func Repaircontract() {
 }
 func Repaircost() {
 	preRoute := "repaircost"
-	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircosts",
-		&controllers.RepaircostController{}, POST+":GetRepaircosts")
+	beego.Router("/"+PROJECT+"/"+preRoute+"/queryRepairCost",
+		&controllers.RepaircostController{}, POST+":QueryRepairCost")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getRepaircostById",
 		&controllers.RepaircostController{}, POST+":GetRepaircostById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/editRepaircostById",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/updateRepairCost",
 		&controllers.RepaircostController{}, POST+":EditRepaircostById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepaircost",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addRepairCost",
 		&controllers.RepaircostController{}, POST+":AddRepaircost")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteRepaircost",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/delRepairCost",
 		&controllers.RepaircostController{}, POST+":DeleteRepaircost")
 }
 func Repairitem() {

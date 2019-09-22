@@ -12,6 +12,28 @@ type RepaircostController struct {
 	BaseController
 }
 
+//itemid=xx&type=1
+func (c *RepaircostController) QueryRepairCost() {
+	var (
+		param models.QueryRepaircostStruct
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	rets := models.QueryRepairCost(param)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+
+}
+
 func (c *RepaircostController) GetRepaircosts() {
 	var (
 		param = make(map[string]int64)

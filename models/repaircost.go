@@ -20,14 +20,32 @@ import (
 
 //维修合同表
 type Repaircost struct {
-	Id     int64  `json:"id" orm:"column(id)"`
-	Type   int8   `json:"type" orm:"column(type)"`     //合同编号
+	Id     int64  `json:"id" orm:"column(id)"`         //合同编号
+	Type   int8   `json:"type" orm:"column(type)"`     //费用类型(1：物料;2:人工；3：其他；4：外协)
 	Itemid int64  `json:"itemid" orm:"column(itemid)"` //维修项id
-	Extend string `json:"extend" orm:"column(extend)"` //费用类型(1：物料;2:人工；3：其他；4：外协)
-	Unit   string `json:"unit" orm:"column(unit)"`     //扩展信息(json;如人工的出发和返回时间)
+	Extend string `json:"extend" orm:"column(extend)"` //扩展信息(json;如人工的出发和返回时间)
+	Unit   string `json:"unit" orm:"column(unit)"`     //单位
 	Num    int64  `json:"num" orm:"column(num)"`       //数量
 	Price  int64  `json:"price" orm:"column(price)"`   //单价
 	Remark string `json:"remark" orm:"column(remark)"` //备注
+}
+
+type QueryRepaircostStruct struct {
+	Itemid int64
+	Type   int8
+}
+
+func QueryRepairCost(param QueryRepaircostStruct) []Repaircost {
+	var (
+		params []Repaircost
+	)
+	_, err := OSQL.Raw("select * from "+util.Repaircost_TABLE_NAME+
+		" where itemid=? and type=? order by id desc",
+		param.Itemid, param.Type).QueryRows(&params)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return params
 }
 
 func GetRepaircostBypage(pageNum, pageSize int64) []Repaircost {
