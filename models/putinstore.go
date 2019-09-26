@@ -30,6 +30,7 @@ type Putinstore struct {
 	Purchasehandler string `json:"purchasehandler" orm:"column(purchasehandler)"` //采购处理人(cardid)
 }
 
+//SELECT LAST_INSERT_ID() last_id
 func GetAllPutinstore() []Putinstore {
 	var (
 		params []Putinstore
