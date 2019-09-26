@@ -12,6 +12,37 @@ type StockController struct {
 	BaseController
 }
 
+//warehouseid=1&mattercode=xxx , warehouseid必填
+func (c *StockController) QueryStock() {
+	var (
+		param models.Stock
+	)
+
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+
+	}
+
+	if param.Warehouseid == 0 {
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数为空"
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	rets := models.QueryStock(param.Warehouseid, param.Mattercode)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *StockController) GetStocks() {
 	var (
 		param = make(map[string]int64)

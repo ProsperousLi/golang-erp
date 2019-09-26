@@ -50,6 +50,27 @@ type Purchasecontract struct {
 
 }
 
+func UpdatePurchasecontractAmount(relatedcode string, account int64) error {
+	var (
+		result Purchasecontract
+	)
+	result.Relatedcode = relatedcode
+	err = OSQL.Read(&result, "relatedcode")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		return err
+	}
+
+	result.Amount = result.Amount + account
+
+	errcode := EditPurchasecontractById(result)
+	if errcode != util.SUCESSFUL {
+		return errors.New("update failed")
+	}
+
+	return nil
+}
+
 func GetPurchasecontractBypage(pageNum, pageSize int64) []Purchasecontract {
 	var (
 		purchasecontracts []Purchasecontract

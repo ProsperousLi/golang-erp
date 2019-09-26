@@ -210,20 +210,23 @@ func Duty() {
 }
 
 func Financeflow() {
-	preRoute := "financeflow"
+	preRoute := "finance"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/queryFinanceFlow",
+		&controllers.FinanceflowController{}, GET+":QueryFinanceFlow")
+
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getFinanceflows",
 		&controllers.FinanceflowController{}, POST+":GetFinanceflows")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getFinanceflowById",
 		&controllers.FinanceflowController{}, POST+":GetFinanceflowById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/editFinanceflowById",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/updateFinanceFlow",
 		&controllers.FinanceflowController{}, POST+":EditFinanceflowById")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/addFinanceflow",
 		&controllers.FinanceflowController{}, POST+":AddFinanceflow")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/deleteFinanceflow",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/delFinanceFlow",
 		&controllers.FinanceflowController{}, POST+":DeleteFinanceflow")
 }
 
@@ -505,7 +508,7 @@ func Putindetail() {
 		&controllers.PutindetailController{}, POST+":DeletePutindetail")
 }
 func Putinstore() {
-	preRoute := "putinstore"
+	preRoute := "store"
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutinstores",
 		&controllers.PutinstoreController{}, POST+":GetPutinstores")
 
@@ -515,7 +518,7 @@ func Putinstore() {
 	beego.Router("/"+PROJECT+"/"+preRoute+"/editPutinstoreById",
 		&controllers.PutinstoreController{}, POST+":EditPutinstoreById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/addPutinstore",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/putinStore",
 		&controllers.PutinstoreController{}, POST+":AddPutinstore")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePutinstore",
@@ -539,7 +542,7 @@ func Repaircontract() {
 		&controllers.RepaircontractController{}, POST+":DeleteRepaircontract")
 }
 func Repaircost() {
-	preRoute := "repaircost"
+	preRoute := "repair"
 	beego.Router("/"+PROJECT+"/"+preRoute+"/queryRepairCost",
 		&controllers.RepaircostController{}, POST+":QueryRepairCost")
 
@@ -632,6 +635,10 @@ func Saledetail() {
 
 func Stock() {
 	preRoute := "stock"
+
+	beego.Router("/"+PROJECT+"/"+preRoute+"/queryStock",
+		&controllers.StockController{}, GET+":QueryStock")
+
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getStocks",
 		&controllers.StockController{}, POST+":GetStocks")
 

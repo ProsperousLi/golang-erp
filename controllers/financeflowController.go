@@ -12,6 +12,33 @@ type FinanceflowController struct {
 	BaseController
 }
 
+//datebegin=xxx&dateend=xxx    dateend可以不带
+func (c *FinanceflowController) QueryFinanceFlow() {
+	var (
+		param = make(map[string]string)
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+	datebegin := param["datebegin"]
+	dateend := param["dateend"]
+
+	if datebegin == "" {
+		util.RetContent.Code = util.FAILED
+		util.RetContent.Message = "参数为空"
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	//rets :=
+}
+
 func (c *FinanceflowController) GetFinanceflows() {
 	var (
 		param = make(map[string]int64)

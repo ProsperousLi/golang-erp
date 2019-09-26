@@ -7,7 +7,7 @@ import (
 
 // DROP TABLE IF EXISTS `saledetail`;
 // CREATE TABLE `saledetail` (
-//   `contractid` varchar(20) CHARACTER SET utf8mb4 NOT NULL COMMENT '合同编号',
+//   `contractcode` varchar(20) CHARACTER SET utf8mb4 NOT NULL COMMENT '合同编号',
 //   `mattercode` varchar(20) CHARACTER SET utf8mb4 NOT NULL COMMENT '物料编码',
 //   `num` bigint(20) NOT NULL,
 //   `price` bigint(20) NOT NULL COMMENT '单价',
@@ -16,10 +16,10 @@ import (
 
 //销售详情表
 type Saledetail struct {
-	Contractid string `json:"contractid" orm:"pk;column(contractid)"` //合同编号
-	Mattercode string `json:"mattercode" orm:"column(mattercode)"`    //物料编码
-	Num        int64  `json:"num" orm:"column(num)"`                  //数量
-	Price      int64  `json:"price" orm:"column(price)"`              //单价
+	Contractcode string `json:"contractcode" orm:"pk;column(contractcode)"` //合同编号
+	Mattercode   string `json:"mattercode" orm:"column(mattercode)"`        //物料编码
+	Num          int64  `json:"num" orm:"column(num)"`                      //数量
+	Price        int64  `json:"price" orm:"column(price)"`                  //单价
 }
 
 type AddAndUpdateSaledetailStruct struct {

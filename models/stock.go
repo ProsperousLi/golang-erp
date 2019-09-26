@@ -22,6 +22,23 @@ type Stock struct {
 	Averageprice int64  `json:"averageprice" orm:"column(averageprice)"`  //均价
 }
 
+func QueryStock(warehouseid int64, mattercode string) []Stock {
+	var (
+		stocks []Stock
+	)
+	sql := "select * from " + util.Stock_TABLE_NAME + " where 1=1"
+	sql += " and warehouseid=" + warehouseid
+	if mattercode != "" {
+		sql += " and mattercode='" + mattercode + "'"
+	}
+	begin := pageSize * pageNum
+	_, err := OSQL.Raw(sql + " order by warehouseid asc").QueryRows(&stocks)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return stocks
+}
+
 func GetStockBypage(pageNum, pageSize int64) []Stock {
 	var (
 		stocks []Stock

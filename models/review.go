@@ -17,7 +17,7 @@ import (
 type Review struct {
 	Id     int64  `json:"id" orm:"column(id)"`
 	Type   string `json:"type" orm:"column(type)"`     //类型(1:采购合同审核)
-	Detail int8   `json:"detail" orm:"column(detail)"` //详情([{end:0, cardids:['''']}])
+	Detail int8   `json:"detail" orm:"column(detail)"` //详情([{end:0, cardids:['''']}],[[],[],[]])
 }
 
 func GetReviewBypage(pageNum, pageSize int64) []Review {

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"strconv"
 
 	"erpweb/logs"
@@ -50,6 +51,27 @@ type Marketcontract struct {
 	Currentreviewindex int8   `json:"currentreviewindex" orm:"column(currentreviewindex)"` //当前审核序号
 	Relatedcode        string `json:"relatedcode" orm:"column(relatedcode)"`               //关联合同编号
 	Vehicles           string `json:"vehicles" orm:"column(vehicles)"`                     //车辆列表(车辆编号的json数组)
+}
+
+func UpdateMarketcontractAmount(relatedcode string, account int64) error {
+	var (
+		result Marketcontract
+	)
+	result.Relatedcode = relatedcode
+	err = OSQL.Read(&result, "relatedcode")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		return err
+	}
+
+	result.Amount = result.Amount + account
+
+	errcode := EditMarketcontractById(result)
+	if errcode != util.SUCESSFUL {
+		return errors.New("update failed")
+	}
+
+	return nil
 }
 
 func GetMarketcontractByType(codeType int8) []Marketcontract {
