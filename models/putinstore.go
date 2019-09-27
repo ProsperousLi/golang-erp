@@ -30,6 +30,31 @@ type Putinstore struct {
 	Purchasehandler string `json:"purchasehandler" orm:"column(purchasehandler)"` //采购处理人(cardid)
 }
 
+func PutinStore() (errorCode, lastId int64) {
+	var (
+		temp Putinstore
+	)
+	errorCode = util.SUCESSFUL
+	temp.Id = param.Id
+	err := OSQL.Read(&temp, "id")
+	if err == nil {
+		logs.FileLogs.Error("putinstore have this id=%v", param.Id)
+		errorCode = util.Putinstore_ADD_FAILED
+		return errorCode, lastId
+	}
+
+	num, err2 := OSQL.Insert(&param)
+	if err2 != nil {
+		logs.FileLogs.Error("%s", err2)
+		errorCode = util.Putinstore_ADD_FAILED
+		return errorCode
+	}
+	logs.FileLogs.Info("num=%v", num)
+
+	lastId = num
+	return errorCode, num
+}
+
 //SELECT LAST_INSERT_ID() last_id
 func GetAllPutinstore() []Putinstore {
 	var (

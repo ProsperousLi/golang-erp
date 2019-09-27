@@ -12,6 +12,27 @@ type PutinstoreController struct {
 	BaseController
 }
 
+func (c *PutinstoreController) PutinStore() {
+	var (
+		param models.Putinstore
+	)
+
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	} else {
+		logs.FileLogs.Info("%v", param)
+	}
+	code := models.AddPutinstore(param)
+	util.RetContent.Code = code
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *PutinstoreController) GetPutinstores() {
 	var (
 		param = make(map[string]int64)

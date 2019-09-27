@@ -509,6 +509,9 @@ func Putindetail() {
 }
 func Putinstore() {
 	preRoute := "store"
+	beego.Router("/"+PROJECT+"/"+preRoute+"/putinStore",
+		&controllers.PutinstoreController{}, POST+":PutinStore")
+
 	beego.Router("/"+PROJECT+"/"+preRoute+"/getPutinstores",
 		&controllers.PutinstoreController{}, POST+":GetPutinstores")
 
@@ -518,7 +521,7 @@ func Putinstore() {
 	beego.Router("/"+PROJECT+"/"+preRoute+"/editPutinstoreById",
 		&controllers.PutinstoreController{}, POST+":EditPutinstoreById")
 
-	beego.Router("/"+PROJECT+"/"+preRoute+"/putinStore",
+	beego.Router("/"+PROJECT+"/"+preRoute+"/addPutinstore",
 		&controllers.PutinstoreController{}, POST+":AddPutinstore")
 
 	beego.Router("/"+PROJECT+"/"+preRoute+"/deletePutinstore",
