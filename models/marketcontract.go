@@ -58,7 +58,7 @@ func UpdateMarketcontractAmount(relatedcode string, account int64) error {
 		result Marketcontract
 	)
 	result.Relatedcode = relatedcode
-	err = OSQL.Read(&result, "relatedcode")
+	err := OSQL.Read(&result, "relatedcode")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		return err

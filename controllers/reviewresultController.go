@@ -14,7 +14,7 @@ type ReviewresultController struct {
 
 func (c *ReviewresultController) GetReviewresults() {
 	var (
-		param = make(map[string]int64)
+		param models.ReviewresultParam
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -24,15 +24,7 @@ func (c *ReviewresultController) GetReviewresults() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetReviewresultBypage(pageNum, pageSize)
+	rets := models.GetReviewresultBypage(param)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent

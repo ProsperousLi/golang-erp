@@ -1,32 +1,36 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
 
 // DROP TABLE IF EXISTS `review`;
 // CREATE TABLE `review` (
-//   `id` bigint(20) NOT NULL AUTO_INCREMENT,
 //   `type` tinyint(5) DEFAULT NULL COMMENT '类型(1:采购合同审核)',
 //   `detail` varchar(1000) CHARACTER SET utf8mb4 NOT NULL COMMENT '详情([{end:0, cardids:['''']}])',
-//   PRIMARY KEY (`id`)
+//   PRIMARY KEY (`type`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='审核流程表';
 
 //审核流程表
 type Review struct {
-	Id     int64  `json:"id" orm:"column(id)"`
-	Type   string `json:"type" orm:"column(type)"`     //类型(1:采购合同审核)
-	Detail int8   `json:"detail" orm:"column(detail)"` //详情([{end:0, cardids:['''']}],[[],[],[]])
+	Type   int64  `json:"type" orm:"column(type)"`     //类型(1:采购合同审核)
+	Detail string `json:"detail" orm:"column(detail)"` //详情([{end:0, cardids:['''']}],[[],[],[]])
 }
 
-func GetReviewBypage(pageNum, pageSize int64) []Review {
+func GetReviewBypage(Type int64) []Review {
 	var (
 		params []Review
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Review_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&params)
+
+	sql := "select * from " + util.Review_TABLE_NAME + " where 1=1 "
+
+	if Type != 0 {
+		sql += " and where type=" + strconv.FormatInt(Type, 10)
+	}
+	_, err := OSQL.Raw(sql).QueryRows(&params)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -34,8 +38,8 @@ func GetReviewBypage(pageNum, pageSize int64) []Review {
 }
 
 func GetReviewById(id int64) (ret Review, err error) {
-	ret.Id = id
-	err = OSQL.Read(&ret, "id")
+	ret.Type = id
+	err = OSQL.Read(&ret, "type")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		return ret, err
@@ -48,12 +52,23 @@ func EditReviewById(param Review) (errorCode int64) {
 		temp Review
 	)
 	errorCode = util.SUCESSFUL
-	temp.Id = param.Id
-	err := OSQL.Read(&temp, "id")
+	temp.Type = param.Type
+	err := OSQL.Read(&temp, "type")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
-		errorCode = util.Review_EDIT_FAILED
-		return errorCode
+		// logs.FileLogs.Error("%s", err)
+		// errorCode = util.Review_EDIT_FAILED
+		// return errorCode
+		code := AddReview(param)
+		if code != util.SUCESSFUL {
+			return code
+		}
+
+		return code
+	}
+
+	code := DeleteReview(temp.Type)
+	if code != util.SUCESSFUL {
+		return code
 	}
 
 	args := edit_review(param)
@@ -69,11 +84,11 @@ func EditReviewById(param Review) (errorCode int64) {
 }
 
 func edit_review(param Review) (args []string) {
-	if param.Detail != 0 {
+	if param.Detail != "" {
 		args = append(args, "detail")
 	}
 
-	if param.Type != "" {
+	if param.Type != 0 {
 		args = append(args, "type")
 	}
 	return args
@@ -84,10 +99,10 @@ func AddReview(param Review) (errorCode int64) {
 		temp Review
 	)
 	errorCode = util.SUCESSFUL
-	temp.Id = param.Id
-	err := OSQL.Read(&temp, "id")
+	temp.Type = param.Type
+	err := OSQL.Read(&temp, "type")
 	if err == nil {
-		logs.FileLogs.Error("Review have this id=%v", param.Id)
+		logs.FileLogs.Error("Review have this id=%v", param.Type)
 		errorCode = util.Review_ADD_FAILED
 		return errorCode
 	}
@@ -107,8 +122,8 @@ func DeleteReview(id int64) (errorCode int64) {
 	var (
 		temp Review
 	)
-	temp.Id = id
-	num, err := OSQL.Delete(&temp, "id")
+	temp.Type = id
+	num, err := OSQL.Delete(&temp, "type")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		errorCode = util.Review_DELETE_FAILED

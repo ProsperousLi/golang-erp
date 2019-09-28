@@ -1,6 +1,9 @@
 package models
 
 import (
+	"errors"
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -25,6 +28,7 @@ import (
 //   `pureamount` bigint(20) NOT NULL COMMENT '不含税金额',
 //   `settleamount` bigint(20) DEFAULT '0' COMMENT '已结算金额',
 //   `amount` bigint(20) NOT NULL COMMENT '金额',
+//   `createat` datetime DEFAULT NULL COMMENT '制单日期',
 //   PRIMARY KEY (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='采购合同表';
 
@@ -47,7 +51,63 @@ type Purchasecontract struct {
 	Settleamount       int64  `json:"settleamount" orm:"column(settleamount)"`             //已结算金额
 	Amount             int64  `json:"amount" orm:"column(amount)"`                         //金额
 	Pureamount         int64  `json:"pureamount" orm:"column(pureamount)"`                 //不含税金额
+	createat           string `json:"createat" orm:"column(createat)"`                     //制单日期
+}
 
+type QueryPurchasecontractStruct struct {
+	Contractcode string `json:"contractcode" orm:"column(contractcode)"` //采购合同编号
+	Handler      string `json:"handler" orm:"column(handler)"`           //采购员
+	Status       int    `json:"outdate" orm:"column(outdate)"`           //状态(1:制单;2:审核；3:执行中；4:执行完；5:已结算)',
+	Suppcode     int    `json:"suppcode" orm:"column(suppcode)"`         //供应商编号
+	Type         string `json:"type" orm:"column(type)"`                 //源类型(1：配件销售合同；2：维修合同；3：消耗品)
+	Datebegin    string
+	Dateend      string
+	Pageno       int64
+	Pagesize     int64
+}
+
+func QueryPurchaseContract(param QueryPurchasecontractStruct) []Purchasecontract {
+	var (
+		rets []Purchasecontract
+	)
+
+	sql := "select * from " + util.Purchasecontract_TABLE_NAME + "where 1=1 "
+
+	if param.Contractcode != "" {
+		sql += " and contractcode='" + param.Contractcode + "' "
+	}
+
+	if param.Handler != "" {
+		sql += " and handler='" + param.Handler + "' "
+	}
+
+	if param.Suppcode != 0 {
+		sql += " and suppcode='" + strconv.FormatInt(int64(param.Suppcode), 10) + "' "
+	}
+
+	if param.Status != 0 {
+		sql += " and status=" + strconv.FormatInt(int64(param.Status), 10)
+	}
+
+	if param.Type != "" {
+		sql += " and type=" + param.Type
+	}
+
+	if param.Datebegin != "" {
+		sql += " and createat>=" + param.Datebegin
+	}
+
+	if param.Dateend != "" {
+		sql += " and createat<=" + param.Dateend
+	}
+
+	begin := param.Pageno * param.Pagesize
+	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
+		begin, param.Pagesize).QueryRows(&rets)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets
 }
 
 func UpdatePurchasecontractAmount(relatedcode string, account int64) error {
@@ -55,7 +115,7 @@ func UpdatePurchasecontractAmount(relatedcode string, account int64) error {
 		result Purchasecontract
 	)
 	result.Relatedcode = relatedcode
-	err = OSQL.Read(&result, "relatedcode")
+	err := OSQL.Read(&result, "relatedcode")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		return err
@@ -191,7 +251,7 @@ func edit_purchasecontract(param Purchasecontract) (args []string) {
 	return args
 }
 
-func AddPurchasecontract(purchasecontract Purchasecontract) (errorCode int64) {
+func AddPurchasecontract(purchasecontract Purchasecontract) (errorCode, id int64) {
 	var (
 		temp Purchasecontract
 	)
@@ -201,17 +261,17 @@ func AddPurchasecontract(purchasecontract Purchasecontract) (errorCode int64) {
 	if err == nil {
 		logs.FileLogs.Error("purchasecontract have this id=%v", purchasecontract.Id)
 		errorCode = util.Purchasecontract_ADD_FAILED
-		return errorCode
+		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&purchasecontract)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Purchasecontract_ADD_FAILED
-		return errorCode
+		return errorCode, num
 	}
 	logs.FileLogs.Info("num=%v", num)
-	return errorCode
+	return errorCode, num
 }
 
 func DeletePurchasecontract(id int64) (errorCode int64) {

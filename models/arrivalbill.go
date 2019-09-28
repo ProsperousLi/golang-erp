@@ -31,13 +31,58 @@ type Arrivalbill struct {
 	Storehandler    string `json:"storehandler" orm:"column(storehandler)"`       //入库操作员
 }
 
-func GetArrivalbillBypage(pageNum, pageSize int64) []Arrivalbill {
+type QueryArrivalBillStruct struct {
+	Arrivalbillcode string
+	Handler         string
+	Contractcode    string
+	Datebegin       string
+	Dateend         string
+	Pageno          int64
+	Pagesize        int64
+}
+
+func QueryArrivalBill(param QueryArrivalBillStruct) []Arrivalbill {
+	var (
+		rets []Arrivalbill
+	)
+
+	sql := "select * from " + util.Arrivalbill_TABLE_NAME + "where 1=1 "
+
+	if param.Arrivalbillcode != "" {
+		sql += " and arrivalbillcode='" + param.Arrivalbillcode + "' "
+	}
+
+	if param.Handler != "" {
+		sql += " and handler='" + param.Handler + "' "
+	}
+
+	if param.Contractcode != "" {
+		sql += " and contractcode='" + param.Contractcode + "' "
+	}
+
+	if param.Datebegin != "" {
+		sql += " and indate>=" + param.Datebegin
+	}
+
+	if param.Dateend != "" {
+		sql += " and indate<=" + param.Dateend
+	}
+
+	begin := param.Pageno * param.Pagesize
+	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
+		begin, param.Pagesize).QueryRows(&rets)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets
+}
+
+func GetArrivalbillBypage(arrivalbillcode string) []Arrivalbill {
 	var (
 		arrivalbills []Arrivalbill
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Arrivalbill_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&arrivalbills)
+	_, err := OSQL.Raw("select * from " + util.Arrivalbill_TABLE_NAME +
+		" and where arrivalbillcode='" + arrivalbillcode + "' order by id desc").QueryRows(&arrivalbills)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -119,7 +164,7 @@ func edit_arrivalbill(param Arrivalbill) []string {
 	return args
 }
 
-func AddArrivalbill(arrivalbill Arrivalbill) (errorCode int64) {
+func AddArrivalbill(arrivalbill Arrivalbill) (errorCode, id int64) {
 	var (
 		temp Arrivalbill
 	)
@@ -129,16 +174,17 @@ func AddArrivalbill(arrivalbill Arrivalbill) (errorCode int64) {
 	if err == nil {
 		logs.FileLogs.Info("arrivalbill have asixt")
 		errorCode = util.Arrivalbill_ADD_FAILED
-		return errorCode
+		return errorCode, id
 	}
 
-	_, err2 := OSQL.Insert(&arrivalbill)
+	num, err2 := OSQL.Insert(&arrivalbill)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
 		errorCode = util.Arrivalbill_ADD_FAILED
+		return errorCode, num
 	}
 
-	return errorCode
+	return errorCode, num
 }
 
 func DeleteArrivalbill(id int64) (errorCode int64) {

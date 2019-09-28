@@ -27,6 +27,54 @@ type Putindetail struct {
 	Value      int64  `json:"value" orm:"column(value)"`           //总价
 }
 
+type PutindetailStruct struct {
+	Id         int64  `json:"id" orm:"column(id)"`
+	Incode     string `json:"incode" orm:"column(incode)"`         //入库单编号(同putinstore的incode字段)
+	Mattercode string `json:"mattercode" orm:"column(mattercode)"` //物料编码
+	Realnum    int64  `json:"realnum" orm:"column(realnum)"`       //采购数量
+	Num        int64  `json:"num" orm:"column(num)"`               //入库数量
+	Price      int64  `json:"price" orm:"column(price)"`           //到货单数量
+	Value      int64  `json:"value" orm:"column(value)"`           //总价
+	Unit       string `json:"unit"`
+	Param      string `json:"param"`
+	Name       string `json:"name"`
+}
+
+func QueryPutinDetail(incode string) (rets []PutindetailStruct) {
+	var (
+		putindetails []Putindetail
+	)
+	_, err := OSQL.Raw("select * from " + util.Putindetail_TABLE_NAME +
+		" where incode ='" + incode + "' order by id desc").QueryRows(&putindetails)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+
+	for _, temp := range putindetails {
+		var tempRet PutindetailStruct
+		tempRet.Id = temp.Id
+		tempRet.Incode = temp.Incode
+		tempRet.Mattercode = temp.Mattercode
+		tempRet.Num = temp.Num
+		tempRet.Price = temp.Price
+		tempRet.Realnum = temp.Realnum
+		tempRet.Value = temp.Value
+
+		mat, err := GetMatterByMattercode(temp.Mattercode)
+		if err != nil {
+			continue
+		}
+
+		tempRet.Unit = mat.Unit
+		tempRet.Param = mat.Param
+		tempRet.Name = mat.Name
+
+		rets = append(rets, tempRet)
+	}
+
+	return rets
+}
+
 func GetPutindetailBypage(pageNum, pageSize int64) []Putindetail {
 	var (
 		putindetails []Putindetail

@@ -14,7 +14,7 @@ type ArrivaldetailController struct {
 
 func (c *ArrivaldetailController) GetArrivaldetails() {
 	var (
-		param = make(map[string]int64)
+		param = make(map[string]string)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -24,15 +24,8 @@ func (c *ArrivaldetailController) GetArrivaldetails() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetArrivaldetailBypage(pageNum, pageSize)
+	arrivalbillcode := param["arrivalbillcode"]
+	rets := models.GetArrivaldetailBypage(arrivalbillcode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
@@ -105,7 +98,7 @@ func (c *ArrivaldetailController) AddArrivaldetail() {
 
 func (c *ArrivaldetailController) DeleteArrivaldetail() {
 	var (
-		param = make(map[string]int64)
+		param = make(map[string]string)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -116,7 +109,7 @@ func (c *ArrivaldetailController) DeleteArrivaldetail() {
 		return
 	}
 
-	id := param["id"]
+	id := param["arrivalbillcode"]
 
 	logs.FileLogs.Info("%v ---", id)
 	code := models.DeleteArrivaldetail(id)

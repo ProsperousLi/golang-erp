@@ -12,6 +12,34 @@ type PurchasecontractController struct {
 	BaseController
 }
 
+func (c *PurchasecontractController) QueryPurchaseContract() {
+	var (
+		param models.QueryPurchasecontractStruct
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	pageNum := param.Pageno
+	pageSize := param.Pagesize
+	if pageNum > 0 {
+		param.Pageno = pageNum - 1
+	}
+	if pageSize == 0 {
+		param.Pagesize = 10
+	}
+	rets := models.QueryPurchaseContract(param)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *PurchasecontractController) GetPurchasecontracts() {
 	var (
 		param = make(map[string]int64)
@@ -97,8 +125,9 @@ func (c *PurchasecontractController) AddPurchasecontract() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
-	code := models.AddPurchasecontract(param)
+	code, num := models.AddPurchasecontract(param)
 	util.RetContent.Code = code
+	util.RetContent.Data = num
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

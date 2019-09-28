@@ -29,17 +29,21 @@ type Reviewresult struct {
 	Reviewtime  string `json:"reviewtime" orm:"column(reviewtime)"`   //审核时间
 }
 
-func GetReviewresultBypage(pageNum, pageSize int64) []Reviewresult {
+type ReviewresultParam struct {
+	Type        int8
+	Relatedcode string
+}
+
+func GetReviewresultBypage(param ReviewresultParam) []Reviewresult {
 	var (
-		params []Reviewresult
+		rets []Reviewresult
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Reviewresult_TABLE_NAME+" order by id asc limit ?,?",
-		begin, pageSize).QueryRows(&params)
+	_, err := OSQL.Raw("select * from "+util.Reviewresult_TABLE_NAME+
+		" where type=? and relatedcode='?' order by id asc", param.Type, param.Relatedcode).QueryRows(&rets)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return params
+	return rets
 }
 
 func GetReviewresultById(id int64) (result Reviewresult, err error) {

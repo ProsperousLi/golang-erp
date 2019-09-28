@@ -71,9 +71,9 @@ func GetSaledetailByContractcode(contractcode string) []Saledetail {
 	return saledetails
 }
 
-func GetSaledetailById(contractid string) (saledetail Saledetail, err error) {
-	saledetail.Contractid = contractid
-	err = OSQL.Read(&saledetail, "contractid")
+func GetSaledetailById(Contractcode string) (saledetail Saledetail, err error) {
+	saledetail.Contractcode = Contractcode
+	err = OSQL.Read(&saledetail, "contractcode")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
@@ -84,10 +84,10 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	var (
 		temp Saledetail
 	)
-	temp.Contractid = saledetail.Contractid
+	temp.Contractcode = saledetail.Contractcode
 	errorCode = util.SUCESSFUL
 
-	err := OSQL.Read(&temp, "contractid")
+	err := OSQL.Read(&temp, "contractcode")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		errorCode = util.FAILED
@@ -127,9 +127,9 @@ func AddSaledetail(saledetail Saledetail) (errorCode int64) {
 	var (
 		temp Saledetail
 	)
-	temp.Contractid = saledetail.Contractid
+	temp.Contractcode = saledetail.Contractcode
 	errorCode = util.SUCESSFUL
-	err := OSQL.Read(&temp, "contractid")
+	err := OSQL.Read(&temp, "contractcode")
 	if err == nil {
 		logs.FileLogs.Info("saledetail have asixt")
 		errorCode = util.FAILED
@@ -147,13 +147,13 @@ func AddSaledetail(saledetail Saledetail) (errorCode int64) {
 	return errorCode
 }
 
-func DeleteSaledetail(contractid string) (errorCode int64) {
+func DeleteSaledetail(contractcode string) (errorCode int64) {
 	var (
 		saledetail Saledetail
 	)
 	errorCode = util.SUCESSFUL
-	saledetail.Contractid = contractid
-	num, err := OSQL.Delete(&saledetail, "contractid")
+	saledetail.Contractcode = contractcode
+	num, err := OSQL.Delete(&saledetail, "contractcode")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
 		errorCode = util.FAILED

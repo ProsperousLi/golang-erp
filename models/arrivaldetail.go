@@ -33,18 +33,16 @@ type Arrivaldetail struct {
 	Price           int64  `json:"price" orm:"column(price)"`                     //单价
 }
 
-func GetArrivaldetailBypage(pageNum, pageSize int64) []Arrivaldetail {
+func GetArrivaldetailBypage(arrivalbillcode string) []Arrivaldetail {
 	var (
-		rets []Arrivaldetail
+		arrivalbills []Arrivaldetail
 	)
-
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Arrivaldetail_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&rets)
+	_, err := OSQL.Raw("select * from " + util.Arrivaldetail_TABLE_NAME +
+		" and where arrivalbillcode='" + arrivalbillcode + "' order by id desc").QueryRows(&arrivalbills)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+	return arrivalbills
 }
 
 func GetArrivaldetailByUserID(id int64) (ret Arrivaldetail, err error) {
@@ -60,12 +58,25 @@ func EditArrivaldetailById(param Arrivaldetail) (errorCode int64) {
 	var (
 		temp Arrivalbill
 	)
-	temp.Id = param.Id
+	temp.Arrivalbillcode = param.Arrivalbillcode
 	errorCode = util.SUCESSFUL
-	err := OSQL.Read(&temp, "id")
+	err := OSQL.Read(&temp, "arrivalbillcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
-		errorCode = util.Arrivaldetail_EDIT_FAILED
+		// logs.FileLogs.Error("%s", err)
+		// errorCode = util.Arrivaldetail_EDIT_FAILED
+		// return errorCode
+		//add
+		code := AddArrivaldetail(param)
+		if code != util.SUCESSFUL {
+			return errorCode
+		}
+
+		return code
+	}
+
+	//delete
+	code := DeleteArrivaldetail(temp.Arrivalbillcode)
+	if code != util.SUCESSFUL {
 		return errorCode
 	}
 
@@ -120,7 +131,7 @@ func AddArrivaldetail(param Arrivaldetail) (errorCode int64) {
 	)
 	temp.Id = param.Id
 	errorCode = util.SUCESSFUL
-	err := OSQL.Read(&temp, "id")
+	err := OSQL.Read(&temp, "arrivalbillcode")
 	if err == nil {
 		logs.FileLogs.Info("Arrivaldetail have asixt")
 		errorCode = util.Arrivaldetail_ADD_FAILED
@@ -136,13 +147,13 @@ func AddArrivaldetail(param Arrivaldetail) (errorCode int64) {
 	return errorCode
 }
 
-func DeleteArrivaldetail(id int64) (errorCode int64) {
+func DeleteArrivaldetail(arrivalbillcode string) (errorCode int64) {
 	var (
 		temp Arrivalbill
 	)
 	errorCode = util.SUCESSFUL
-	temp.Id = id
-	_, err := OSQL.Delete(&temp, "id")
+	temp.Arrivalbillcode = arrivalbillcode
+	_, err := OSQL.Delete(&temp, "arrivalbillcode")
 	if err != nil {
 		logs.FileLogs.Error("%v", err)
 		errorCode = util.Arrivalbill_DELETE_FAILED

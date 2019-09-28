@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -27,11 +29,10 @@ func QueryStock(warehouseid int64, mattercode string) []Stock {
 		stocks []Stock
 	)
 	sql := "select * from " + util.Stock_TABLE_NAME + " where 1=1"
-	sql += " and warehouseid=" + warehouseid
+	sql += " and warehouseid=" + strconv.FormatInt(warehouseid, 10)
 	if mattercode != "" {
 		sql += " and mattercode='" + mattercode + "'"
 	}
-	begin := pageSize * pageNum
 	_, err := OSQL.Raw(sql + " order by warehouseid asc").QueryRows(&stocks)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)

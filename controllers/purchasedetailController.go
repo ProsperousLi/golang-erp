@@ -14,7 +14,7 @@ type PurchasedetailController struct {
 
 func (c *PurchasedetailController) GetPurchasedetails() {
 	var (
-		param = make(map[string]int64)
+		param = make(map[string]string)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -24,15 +24,8 @@ func (c *PurchasedetailController) GetPurchasedetails() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetPurchasedetailBypage(pageNum, pageSize)
+	contractcode := param["contractcode"]
+	rets := models.GetPurchasedetailBypage(contractcode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent

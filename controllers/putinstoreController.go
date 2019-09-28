@@ -27,15 +27,16 @@ func (c *PutinstoreController) PutinStore() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
-	code := models.AddPutinstore(param)
+	code, id := models.AddPutinstore(param)
 	util.RetContent.Code = code
+	util.RetContent.Data = id
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
 
 func (c *PutinstoreController) GetPutinstores() {
 	var (
-		param = make(map[string]int64)
+		param models.QueryPutistoreStruct
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -45,15 +46,26 @@ func (c *PutinstoreController) GetPutinstores() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
+
+	if param.Warehouseid == 0 || param.Pageno == 0 || param.Pagesize == 0 ||
+		(param.Incode == "" && param.Datebegin == "") {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+
+	}
+
+	pageNum := param.Pageno
+	pageSize := param.Pagesize
 	if pageNum > 0 {
-		pageNum = pageNum - 1
+		param.Pageno = pageNum - 1
 	}
 	if pageSize == 0 {
-		pageSize = 10
+		param.Pagesize = 10
 	}
-	rets := models.GetPutinstoreBypage(pageNum, pageSize)
+	rets := models.GetPutinstoreBypage(param)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
@@ -118,8 +130,9 @@ func (c *PutinstoreController) AddPutinstore() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
-	code := models.AddPutinstore(param)
+	code, id := models.AddPutinstore(param)
 	util.RetContent.Code = code
+	util.RetContent.Data = id
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

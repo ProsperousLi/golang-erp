@@ -24,15 +24,8 @@ func (c *ReviewController) GetReviews() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetReviewBypage(pageNum, pageSize)
+	Type := param["type"]
+	rets := models.GetReviewBypage(Type)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent

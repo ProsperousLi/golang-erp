@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -30,7 +32,7 @@ type Putinstore struct {
 	Purchasehandler string `json:"purchasehandler" orm:"column(purchasehandler)"` //采购处理人(cardid)
 }
 
-func PutinStore() (errorCode, lastId int64) {
+func PutinStore(param Putinstore) (errorCode, lastId int64) {
 	var (
 		temp Putinstore
 	)
@@ -47,7 +49,7 @@ func PutinStore() (errorCode, lastId int64) {
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Putinstore_ADD_FAILED
-		return errorCode
+		return errorCode, num
 	}
 	logs.FileLogs.Info("num=%v", num)
 
@@ -67,18 +69,44 @@ func GetAllPutinstore() []Putinstore {
 	return params
 }
 
-func GetPutinstoreBypage(pageNum, pageSize int64) []Putinstore {
+//incode=xxx&warehouseid=xxx&datebegin=xxx&dateend=xxx&pageno=1&pagesize=10
+//参数warehouseid、pageno和pagesize必须传，incode和datebegin至少传一个
+type QueryPutistoreStruct struct {
+	Incode      string
+	Warehouseid int64
+	Datebegin   string
+	Dateend     string
+	Pageno      int64
+	Pagesize    int64
+}
+
+func GetPutinstoreBypage(param QueryPutistoreStruct) []Putinstore {
 	var (
-		params []Putinstore
+		rets []Putinstore
 	)
 
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Putinstore_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&params)
+	sql := "select * from " + util.Putinstore_TABLE_NAME + "where 1=1 "
+
+	if param.Incode != "" {
+		sql += " and incode='" + param.Incode + "' "
+	}
+
+	sql += " and warehouseid=" + strconv.FormatInt(param.Warehouseid, 10)
+	if param.Datebegin != "" {
+		sql += " and indate>=" + param.Datebegin
+	}
+
+	if param.Dateend != "" {
+		sql += " and indate<=" + param.Dateend
+	}
+
+	begin := param.Pageno * param.Pagesize
+	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
+		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return params
+	return rets
 }
 
 func GetPutinstoreById(id int64) (ret Putinstore, err error) {
@@ -147,7 +175,7 @@ func edit_putinstore(param Putinstore) (args []string) {
 	return args
 }
 
-func AddPutinstore(param Putinstore) (errorCode int64) {
+func AddPutinstore(param Putinstore) (errorCode, id int64) {
 	var (
 		temp Putinstore
 	)
@@ -157,17 +185,17 @@ func AddPutinstore(param Putinstore) (errorCode int64) {
 	if err == nil {
 		logs.FileLogs.Error("putinstore have this id=%v", param.Id)
 		errorCode = util.Putinstore_ADD_FAILED
-		return errorCode
+		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Putinstore_ADD_FAILED
-		return errorCode
+		return errorCode, num
 	}
 	logs.FileLogs.Info("num=%v", num)
-	return errorCode
+	return errorCode, num
 }
 
 func DeletePutinstore(id int64) (errorCode int64) {

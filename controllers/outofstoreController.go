@@ -12,6 +12,44 @@ type OutofstoreController struct {
 	BaseController
 }
 
+func (c *OutofstoreController) QueryOutofStore() {
+	var (
+		param models.QueryOutofstoreStruct
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	if param.Warehouseid == 0 || param.Pageno == 0 || param.Pagesize == 0 ||
+		(param.Outcode == "" && param.Datebegin == "") {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+
+	}
+
+	pageNum := param.Pageno
+	pageSize := param.Pagesize
+	if pageNum > 0 {
+		param.Pageno = pageNum - 1
+	}
+	if pageSize == 0 {
+		param.Pagesize = 10
+	}
+	rets := models.QueryOutofStore(param)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *OutofstoreController) GetOutofstores() {
 	var (
 		param = make(map[string]int64)
@@ -97,8 +135,9 @@ func (c *OutofstoreController) AddOutofstore() {
 	} else {
 		logs.FileLogs.Info("%v", param)
 	}
-	code := models.AddOutofstore(param)
+	code, id := models.AddOutofstore(param)
 	util.RetContent.Code = code
+	util.RetContent.Data = id
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

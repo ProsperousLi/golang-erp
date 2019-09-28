@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/logs"
 	"erpweb/util"
 )
@@ -34,6 +36,44 @@ type Outofstore struct {
 	Vehiclecode  string `json:"vehiclecode" orm:"column(vehiclecode)"`   //车辆编号
 	Itemname     string `json:"itemname" orm:"column(itemname)"`         //维修项目名称
 
+}
+
+type QueryOutofstoreStruct struct {
+	Outcode     string
+	Warehouseid int64
+	Datebegin   string
+	Dateend     string
+	Pageno      int64
+	Pagesize    int64
+}
+
+func QueryOutofStore(param QueryOutofstoreStruct) []Outofstore {
+	var (
+		rets []Outofstore
+	)
+
+	sql := "select * from " + util.Outofstore_TABLE_NAME + "where 1=1 "
+
+	if param.Outcode != "" {
+		sql += " and outcode='" + param.Outcode + "' "
+	}
+
+	sql += " and warehouseid=" + strconv.FormatInt(param.Warehouseid, 10)
+	if param.Datebegin != "" {
+		sql += " and outdate>=" + param.Datebegin
+	}
+
+	if param.Dateend != "" {
+		sql += " and outdate<=" + param.Dateend
+	}
+
+	begin := param.Pageno * param.Pagesize
+	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
+		begin, param.Pagesize).QueryRows(&rets)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets
 }
 
 func GetOutofstoreBypage(pageNum, pageSize int64) []Outofstore {
@@ -128,7 +168,7 @@ func edit_outofstore(param Outofstore) (args []string) {
 	return args
 }
 
-func AddOutofstore(outofstore Outofstore) (errorCode int64) {
+func AddOutofstore(outofstore Outofstore) (errorCode, id int64) {
 	var (
 		temp Outofstore
 	)
@@ -138,17 +178,17 @@ func AddOutofstore(outofstore Outofstore) (errorCode int64) {
 	if err == nil {
 		logs.FileLogs.Error("outofstore have this id=%v", outofstore.Id)
 		errorCode = util.Outofstore_ADD_FAILED
-		return errorCode
+		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&outofstore)
 	if err2 != nil {
 		logs.FileLogs.Error("%s", err2)
 		errorCode = util.Outofstore_ADD_FAILED
-		return errorCode
+		return errorCode, num
 	}
 	logs.FileLogs.Info("num=%v", num)
-	return errorCode
+	return errorCode, num
 }
 
 func DeleteOutofstore(id int64) (errorCode int64) {

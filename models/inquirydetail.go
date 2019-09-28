@@ -25,17 +25,48 @@ type Inquirydetail struct {
 
 }
 
-func GetInquirydetailBypage(pageNum, pageSize int64) []Inquirydetail {
+type InquirydetailWeb struct {
+	Inquirycode int64  `json:"inquirycode" orm:"column(inquirycode)"` //询价单号
+	Mattercode  string `json:"mattercode" orm:"column(mattercode)"`   //物料编号
+	Num         int64  `json:"num" orm:"column(num)"`                 //数量
+	Price       int64  `json:"price" orm:"column(price)"`             //价格
+	Validity    int    `json:"validity" orm:"column(validity)"`       //价格有效期(单位：月)
+	Unit        string `json:"unit"`
+	Param       string `json:"param"`
+	Name        string `json:"name"`
+}
+
+func GetInquirydetailBypage(inquirycode string) (rets []InquirydetailWeb) {
 	var (
 		inquirydetails []Inquirydetail
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Inquirydetail_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&inquirydetails)
+	_, err := OSQL.Raw("select * from " + util.Inquirydetail_TABLE_NAME +
+		" where inquirycode='" + inquirycode + "' order by id desc").QueryRows(&inquirydetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return inquirydetails
+
+	for _, temp := range inquirydetails {
+		var tempRet InquirydetailWeb
+		tempRet.Inquirycode = temp.Inquirycode
+		tempRet.Mattercode = temp.Mattercode
+		tempRet.Validity = temp.Validity
+		tempRet.Num = temp.Num
+		tempRet.Price = temp.Price
+
+		mat, err := GetMatterByMattercode(temp.Mattercode)
+		if err != nil {
+			continue
+		}
+
+		tempRet.Unit = mat.Unit
+		tempRet.Param = mat.Param
+		tempRet.Name = mat.Name
+
+		rets = append(rets, tempRet)
+	}
+
+	return rets
 }
 
 func GetInquirydetailId(inquirycode int64) (inquirydetail Inquirydetail, err error) {
@@ -55,8 +86,19 @@ func EditInquirydetailById(inquirydetail Inquirydetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "inquirycode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
-		errorCode = util.Inquirydetail_EDIT_FAILED
+		// logs.FileLogs.Error("%s", err)
+		// errorCode = util.Inquirydetail_EDIT_FAILED
+		// return errorCode
+		code := AddInquirydetail(inquirydetail)
+		if code != util.SUCESSFUL {
+			return errorCode
+		}
+		return code
+	}
+
+	//delete
+	code := DeleteInquirydetail(temp.Inquirycode)
+	if code != util.SUCESSFUL {
 		return errorCode
 	}
 

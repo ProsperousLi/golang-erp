@@ -25,18 +25,50 @@ type Outofdetail struct {
 	Value      int64  `json:"value" orm:"column(value)"`           //总价
 }
 
-func GetOutofdetailBypage(pageNum, pageSize int64) []Outofdetail {
+type OutofdetailWeb struct {
+	Id         int64  `json:"id" orm:"column(id)"`
+	Outcode    string `json:"outcode" orm:"column(outcode)"`       //出库单编号
+	Mattercode string `json:"mattercode" orm:"column(mattercode)"` //物料编码
+	Num        int64  `json:"num" orm:"column(num)"`               //出库数量
+	Price      int64  `json:"price" orm:"column(price)"`           //单价
+	Value      int64  `json:"value" orm:"column(value)"`           //总价
+	Unit       string `json:"unit"`
+	Param      string `json:"param"`
+	Name       string `json:"name"`
+}
+
+func GetOutofdetailBypage(outcode string) (rets []OutofdetailWeb) {
 	var (
 		outofdetails []Outofdetail
 	)
-
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Outofdetail_TABLE_NAME+" order by id desc limit ?,?",
-		begin, pageSize).QueryRows(&outofdetails)
+	_, err := OSQL.Raw("select * from " + util.Outofdetail_TABLE_NAME +
+		" where outcode='" + outcode + "' order by id desc limit").QueryRows(&outofdetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return outofdetails
+
+	for _, temp := range outofdetails {
+		var tempRet OutofdetailWeb
+		tempRet.Id = temp.Id
+		tempRet.Outcode = temp.Outcode
+		tempRet.Mattercode = temp.Mattercode
+		tempRet.Num = temp.Num
+		tempRet.Price = temp.Price
+		tempRet.Value = temp.Value
+
+		mat, err := GetMatterByMattercode(temp.Mattercode)
+		if err != nil {
+			continue
+		}
+
+		tempRet.Unit = mat.Unit
+		tempRet.Param = mat.Param
+		tempRet.Name = mat.Name
+
+		rets = append(rets, tempRet)
+	}
+
+	return rets
 }
 
 func GetOutofdetailById(id int64) (outofdetail Outofdetail, err error) {

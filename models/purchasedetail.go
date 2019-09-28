@@ -33,17 +33,57 @@ type Purchasedetail struct {
 	Deadline     string `json:"deadline" orm:"column(deadline)"`         //要求到货截止日期
 }
 
-func GetPurchasedetailBypage(pageNum, pageSize int64) []Purchasedetail {
+type PurchasedetailWeb struct {
+	Contractcode string `json:"contractcode" orm:"column(contractcode)"` //采购合同编号
+	Mattercode   string `json:"mattercode" orm:"column(mattercode)"`     //物料编码
+	Type         int8   `json:"type" orm:"column(type)"`                 //源类型,1：配件销售合同；2：维修合同；3：消耗品
+	Relatedcode  string `json:"relatedcode" orm:"column(relatedcode)"`   //关联合同号,消耗品时可以为空
+	Num          int64  `json:"num" orm:"column(num)"`                   //采购数量
+	Price        int64  `json:"price" orm:"column(price)"`               //单价
+	Value        int64  `json:"value" orm:"column(value)"`               //总价
+	Pureprice    int64  `json:"pureprice" orm:"column(pureprice)"`       //不含税价
+	Purevalue    int64  `json:"purevalue" orm:"column(purevalue)"`       //不含税额
+	Deadline     string `json:"deadline" orm:"column(deadline)"`         //要求到货截止日期
+	Unit         string `json:"unit"`
+	Param        string `json:"param"`
+	Name         string `json:"name"`
+}
+
+func GetPurchasedetailBypage(contractcode string) (rets []PurchasedetailWeb) {
 	var (
 		purchasedetails []Purchasedetail
 	)
-	begin := pageSize * pageNum
-	_, err := OSQL.Raw("select * from "+util.Purchasedetail_TABLE_NAME+" order by contractcode desc limit ?,?",
-		begin, pageSize).QueryRows(&purchasedetails)
+	_, err := OSQL.Raw("select * from " + util.Purchasedetail_TABLE_NAME +
+		" and contractcode='" + contractcode + "' order by contractcode desc").QueryRows(&purchasedetails)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return purchasedetails
+
+	for _, temp := range purchasedetails {
+		var tempRet PurchasedetailWeb
+		tempRet.Contractcode = temp.Contractcode
+		tempRet.Mattercode = temp.Mattercode
+		tempRet.Type = temp.Type
+		tempRet.Num = temp.Num
+		tempRet.Price = temp.Price
+		tempRet.Value = temp.Value
+		tempRet.Pureprice = temp.Pureprice
+		tempRet.Purevalue = temp.Purevalue
+		tempRet.Deadline = temp.Deadline
+
+		mat, err := GetMatterByMattercode(temp.Mattercode)
+		if err != nil {
+			continue
+		}
+
+		tempRet.Unit = mat.Unit
+		tempRet.Param = mat.Param
+		tempRet.Name = mat.Name
+
+		rets = append(rets, tempRet)
+	}
+
+	return rets
 }
 
 func GetPurchasedetailById(contractcode string) (purchasedetail Purchasedetail, err error) {
@@ -63,9 +103,19 @@ func EditPurchasedetailById(purchasedetail Purchasedetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	temp.Contractcode = purchasedetail.Contractcode
 	err := OSQL.Read(&temp, "contractcode")
-	if err != nil {
-		logs.FileLogs.Error("%s", err)
-		errorCode = util.Purchasedetail_EDIT_FAILED
+	if err != nil { //add
+		// logs.FileLogs.Error("%s", err)
+		// errorCode = util.Purchasedetail_EDIT_FAILED
+		// return errorCode
+		code := AddPurchasedetail(purchasedetail)
+		if code != util.SUCESSFUL {
+			return errorCode
+		}
+	}
+
+	//delete
+	code := DeletePurchasedetail(temp.Contractcode)
+	if code != util.SUCESSFUL {
 		return errorCode
 	}
 

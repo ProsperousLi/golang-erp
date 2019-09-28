@@ -12,6 +12,27 @@ type PutindetailController struct {
 	BaseController
 }
 
+func (c *PutindetailController) QueryPutinDetail() {
+	var (
+		param = make(map[string]string)
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	incode := param["incode"]
+	rets := models.QueryPutinDetail(incode)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *PutindetailController) GetPutindetails() {
 	var (
 		param = make(map[string]int64)

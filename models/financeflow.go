@@ -43,9 +43,6 @@ type Financeflow struct {
 }
 
 func QueryFinanceFlow(datebegin, dateend string) (rets []Financeflow) {
-	var (
-		temps []Financeflow
-	)
 	//select * from test where date_format(create_time,'%Y-%m-%d') between '2018-07-30' and '2018-07-31';
 	sql := "select * from " + util.Financeflow_TABLE_NAME + " where status=6"
 	if datebegin != "" {
@@ -55,7 +52,7 @@ func QueryFinanceFlow(datebegin, dateend string) (rets []Financeflow) {
 	if dateend != "" {
 		sql += " and operdate<='" + dateend + "'"
 	}
-	_, err := OSQL.Raw(sql + " order by id desc").QueryRows(&financeflows)
+	_, err := OSQL.Raw(sql + " order by id desc").QueryRows(&rets)
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}

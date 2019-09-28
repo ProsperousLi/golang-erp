@@ -14,7 +14,7 @@ type OutofdetailController struct {
 
 func (c *OutofdetailController) GetOutofdetails() {
 	var (
-		param = make(map[string]int64)
+		param = make(map[string]string)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -24,15 +24,9 @@ func (c *OutofdetailController) GetOutofdetails() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetOutofdetailBypage(pageNum, pageSize)
+	outcode := param["outcode"]
+
+	rets := models.GetOutofdetailBypage(outcode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent

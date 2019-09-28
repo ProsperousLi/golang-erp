@@ -36,7 +36,11 @@ func (c *FinanceflowController) QueryFinanceFlow() {
 		return
 	}
 
-	//rets :=
+	rets := models.QueryFinanceFlow(datebegin, dateend)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
 }
 
 func (c *FinanceflowController) GetFinanceflows() {

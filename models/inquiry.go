@@ -39,6 +39,52 @@ type Inquiry struct {
 	Attachment   string `json:"attachment" orm:"column(attachment)"`     //附件
 }
 
+type InquiryStruct struct {
+	Inquirycode string
+	Handler     string
+	Custcode    string
+	Datebegin   string
+	Dateend     string
+	Pageno      int64
+	Pagesize    int64
+}
+
+func QueryInquiry(param InquiryStruct) []Inquiry {
+	var (
+		rets []Inquiry
+	)
+
+	sql := "select * from " + util.Inquiry_TABLE_NAME + "where 1=1 "
+
+	if param.Inquirycode != "" {
+		sql += " and inquirycode='" + param.Inquirycode + "' "
+	}
+
+	if param.Handler != "" {
+		sql += " and handler='" + param.Handler + "' "
+	}
+
+	if param.Custcode != "" {
+		sql += " and custcode='" + param.Custcode + "' "
+	}
+
+	if param.Datebegin != "" {
+		sql += " and indate>=" + param.Datebegin
+	}
+
+	if param.Dateend != "" {
+		sql += " and indate<=" + param.Dateend
+	}
+
+	begin := param.Pageno * param.Pagesize
+	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
+		begin, param.Pagesize).QueryRows(&rets)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets
+}
+
 func GetInquiryBypage(pageNum, pageSize int64) []Inquiry {
 	var (
 		inquirys []Inquiry

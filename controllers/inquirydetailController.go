@@ -14,7 +14,7 @@ type InquirydetailController struct {
 
 func (c *InquirydetailController) GetInquirydetails() {
 	var (
-		param = make(map[string]int64)
+		param = make(map[string]string)
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
@@ -24,15 +24,8 @@ func (c *InquirydetailController) GetInquirydetails() {
 		c.ServeJSON()
 		return
 	}
-	pageNum := param["pageNum"]
-	pageSize := param["pageSize"]
-	if pageNum > 0 {
-		pageNum = pageNum - 1
-	}
-	if pageSize == 0 {
-		pageSize = 10
-	}
-	rets := models.GetInquirydetailBypage(pageNum, pageSize)
+	inquirycode := param["inquirycode"]
+	rets := models.GetInquirydetailBypage(inquirycode)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = rets
 	c.Data["json"] = util.RetContent
