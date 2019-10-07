@@ -80,7 +80,7 @@ type QueryPutistoreStruct struct {
 	Pagesize    int64
 }
 
-func GetPutinstoreBypage(param QueryPutistoreStruct) []Putinstore {
+func GetPutinstoreBypage(param QueryPutistoreStruct) ([]Putinstore, int64) {
 	var (
 		rets []Putinstore
 	)
@@ -106,7 +106,12 @@ func GetPutinstoreBypage(param QueryPutistoreStruct) []Putinstore {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+
+	allNums, err := OSQL.QueryTable(util.Putinstore_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets, allNums
 }
 
 func GetPutinstoreById(id int64) (ret Putinstore, err error) {

@@ -66,7 +66,7 @@ type QueryPurchasecontractStruct struct {
 	Pagesize     int64
 }
 
-func QueryPurchaseContract(param QueryPurchasecontractStruct) []Purchasecontract {
+func QueryPurchaseContract(param QueryPurchasecontractStruct) ([]Purchasecontract, int64) {
 	var (
 		rets []Purchasecontract
 	)
@@ -107,7 +107,12 @@ func QueryPurchaseContract(param QueryPurchasecontractStruct) []Purchasecontract
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+
+	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets, allNums
 }
 
 func UpdatePurchasecontractAmount(relatedcode string, account int64) error {

@@ -33,9 +33,11 @@ func (c *ArrivalbillController) QueryArrivalBill() {
 	if pageSize == 0 {
 		param.Pagesize = 10
 	}
-	rets := models.QueryArrivalBill(param)
+	rets, total := models.QueryArrivalBill(param)
 	util.RetContent.Code = util.SUCESSFUL
-	util.RetContent.Data = rets
+	util.PageResults.TotalCount = total
+	util.PageResults.Result = rets
+	util.RetContent.Data = util.PageResults
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

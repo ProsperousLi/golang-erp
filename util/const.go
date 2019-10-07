@@ -197,11 +197,17 @@ const (
 )
 
 var (
-	RetContent Result
+	RetContent  Result
+	PageResults PageResult
 )
 
 type Result struct {
 	Code    int64       `json:"code"`
 	Data    interface{} `json:"data"`
 	Message string      `json:"message"`
+}
+
+type PageResult struct {
+	TotalCount int64       `json:"totalCount"`
+	Result     interface{} `json:"result"`
 }

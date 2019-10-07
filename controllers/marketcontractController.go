@@ -32,10 +32,12 @@ func (c *MarketcontractController) GetMarketcontracts() {
 	if pagesize == 0 {
 		pagesize = 10
 	}
-	rets := models.GetMarketcontractBypage(marketType, execstatus,
+	rets, total := models.GetMarketcontractBypage(marketType, execstatus,
 		contractcode, custcode, handler, pageno, pagesize)
 	util.RetContent.Code = util.SUCESSFUL
-	util.RetContent.Data = rets
+	util.PageResults.TotalCount = total
+	util.PageResults.Result = rets
+	util.RetContent.Data = util.PageResults
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

@@ -47,7 +47,7 @@ type QueryOutofstoreStruct struct {
 	Pagesize    int64
 }
 
-func QueryOutofStore(param QueryOutofstoreStruct) []Outofstore {
+func QueryOutofStore(param QueryOutofstoreStruct) ([]Outofstore, int64) {
 	var (
 		rets []Outofstore
 	)
@@ -73,7 +73,12 @@ func QueryOutofStore(param QueryOutofstoreStruct) []Outofstore {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+
+	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets, allNums
 }
 
 func GetOutofstoreBypage(pageNum, pageSize int64) []Outofstore {

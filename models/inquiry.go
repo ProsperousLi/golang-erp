@@ -49,7 +49,7 @@ type InquiryStruct struct {
 	Pagesize    int64
 }
 
-func QueryInquiry(param InquiryStruct) []Inquiry {
+func QueryInquiry(param InquiryStruct) ([]Inquiry, int64) {
 	var (
 		rets []Inquiry
 	)
@@ -82,7 +82,12 @@ func QueryInquiry(param InquiryStruct) []Inquiry {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+
+	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets, allNums
 }
 
 func GetInquiryBypage(pageNum, pageSize int64) []Inquiry {

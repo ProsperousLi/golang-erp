@@ -27,6 +27,9 @@ func (c *BaseController) Prepare() {
 	var newRes util.Result
 	util.RetContent = newRes
 
+	var newPageRes util.PageResult
+	util.PageResults = newPageRes
+
 	if c.Ctx.Request.Method != "/api/basedata/Login" {
 		message, code := c.checkToken()
 		if code != util.SUCESSFUL {

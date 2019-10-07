@@ -41,7 +41,7 @@ type QueryArrivalBillStruct struct {
 	Pagesize        int64
 }
 
-func QueryArrivalBill(param QueryArrivalBillStruct) []Arrivalbill {
+func QueryArrivalBill(param QueryArrivalBillStruct) ([]Arrivalbill, int64) {
 	var (
 		rets []Arrivalbill
 	)
@@ -74,7 +74,12 @@ func QueryArrivalBill(param QueryArrivalBillStruct) []Arrivalbill {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return rets
+
+	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return rets, allNums
 }
 
 func GetArrivalbillBypage(arrivalbillcode string) []Arrivalbill {

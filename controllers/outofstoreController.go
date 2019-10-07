@@ -43,9 +43,11 @@ func (c *OutofstoreController) QueryOutofStore() {
 	if pageSize == 0 {
 		param.Pagesize = 10
 	}
-	rets := models.QueryOutofStore(param)
+	rets, total := models.QueryOutofStore(param)
 	util.RetContent.Code = util.SUCESSFUL
-	util.RetContent.Data = rets
+	util.PageResults.TotalCount = total
+	util.PageResults.Result = rets
+	util.RetContent.Data = util.PageResults
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }

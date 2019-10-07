@@ -87,7 +87,7 @@ func GetMarketcontractByType(codeType int8) []Marketcontract {
 }
 
 func GetMarketcontractBypage(marketType, execstatus,
-	contractcode, custcode, handler string, pageNum, pageSize int64) []Marketcontract {
+	contractcode, custcode, handler string, pageNum, pageSize int64) ([]Marketcontract, int64) {
 	var (
 		params []Marketcontract
 	)
@@ -125,7 +125,12 @@ func GetMarketcontractBypage(marketType, execstatus,
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return params
+
+	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return params, allNums
 }
 
 func GetMarketcontractById(id int64) (result Marketcontract, err error) {

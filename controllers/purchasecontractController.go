@@ -33,9 +33,11 @@ func (c *PurchasecontractController) QueryPurchaseContract() {
 	if pageSize == 0 {
 		param.Pagesize = 10
 	}
-	rets := models.QueryPurchaseContract(param)
+	rets, total := models.QueryPurchaseContract(param)
 	util.RetContent.Code = util.SUCESSFUL
-	util.RetContent.Data = rets
+	util.PageResults.TotalCount = total
+	util.PageResults.Result = rets
+	util.RetContent.Data = util.PageResults
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 }
