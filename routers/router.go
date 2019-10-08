@@ -70,11 +70,14 @@ func Allinterfaces() {
 }
 
 func Login() {
-	beego.Router("/"+PROJECT+"/Login",
+	beego.Router("/"+PROJECT+"/login/login",
 		&controllers.LoginController{}, POST+":Login")
 
-	beego.Router("/"+PROJECT+"/Loginout",
-		&controllers.LoginController{}, GET+":Loginout")
+	beego.Router("/"+PROJECT+"/login/logout",
+		&controllers.LoginController{}, POST+":Loginout")
+	//api/user/info
+	beego.Router("/"+PROJECT+"/user/info",
+		&controllers.LoginController{}, GET+":UserInfo")
 }
 
 func Account() {

@@ -30,7 +30,7 @@ func (c *BaseController) Prepare() {
 	var newPageRes util.PageResult
 	util.PageResults = newPageRes
 
-	if c.Ctx.Request.Method != "/api/basedata/Login" {
+	if c.Ctx.Request.Method != "/api/login/login" {
 		message, code := c.checkToken()
 		if code != util.SUCESSFUL {
 			util.RetContent.Code = code
@@ -56,14 +56,10 @@ func (c *BaseController) getInfo() {
 	method := c.Ctx.Request.Method
 	header := c.Ctx.Request.URL
 	forms := c.Ctx.Request.Form
-	logs.FileLogs.Info("method=%v", method)
-	logs.FileLogs.Info("url :%v", header.Path)
-	logs.FileLogs.Info("参数 :")
+	logs.FileLogs.Info("method=%v", method, " url :%v", header.Path, " 参数 :\n")
 	for k, v := range forms {
-		//lg.Info("参数 :", k, v)
 		logs.FileLogs.Info("%v=%v", k, v)
 	}
-
 }
 
 func (c *BaseController) checkToken() (string, int64) {

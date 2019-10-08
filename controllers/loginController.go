@@ -27,15 +27,35 @@ type loginParam struct {
 //{code: 20000, data: {detailcode: 3, msg:
 //‘您的账号已锁定，请联系管理员解除锁定’}}
 
+type LoginResult struct {
+	Detailcode int64  `json:"detailcode"`
+	Msg        string `json:"msg"`
+	Vckey      string `json:"vckey"`
+	Verifycode string `json:"verifycode"`
+}
+
 func (c *LoginController) Login() {
 	username := c.GetString("username")
 	password := c.GetString("password")
 	//vckey  verifycode
 	vckey := c.GetString("password")
 	verifycode := c.GetString("password")
-	errCode, token := models.Login(username, password, vckey, verifycode)
+	errCode, token, vckey, verifycode := models.Login(username, password, vckey, verifycode)
 
-	util.RetContent.Code = errCode //util.SUCESSFUL
+	util.RetContent.Code = util.SUCESSFUL
+	var loginRes LoginResult
+	loginRes.Detailcode = errCode
+	if errCode == 1 {
+		loginRes.Msg = "账号密码不正确"
+	} else if errCode == 2 {
+		loginRes.Msg = "验证码错误"
+	} else if errCode == 3 {
+		loginRes.Msg = "您的账号已锁定，请联系管理员解除锁定"
+	}
+
+	loginRes.Vckey = vckey
+	loginRes.Verifycode = verifycode
+
 	util.RetContent.Message = token
 	util.RetContent.Data = models.AccsMap[token]
 	c.Data["json"] = util.RetContent
@@ -47,6 +67,16 @@ func (c *LoginController) Loginout() {
 	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
 	code := models.Loginout(webToken)
 	util.RetContent.Code = code
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+	return
+}
+
+func (c *LoginController) UserInfo() {
+	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+	code, userInfo := models.GetUserInfo(webToken)
+	util.RetContent.Code = code
+	util.RetContent.Data = userInfo
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 	return

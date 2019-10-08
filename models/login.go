@@ -14,6 +14,7 @@ var (
 	TokenMap = make(map[string]string)      //cardid token
 	AccsMap  = make(map[string]interface{}) //token employee
 	TimeMap  = make(map[string]int64)       //token TimeMap
+	LimitMap = make(map[string]int64)       //限制5次登录机会,成功后清除
 )
 
 //TODO Timer delete token
@@ -22,20 +23,54 @@ func New_Time_count() {
 	TokenMap = make(map[string]string)
 	AccsMap = make(map[string]interface{})
 	TimeMap = make(map[string]int64)
+	LimitMap = make(map[string]int64)
 }
 
 // 登录接口
 //{username: ‘test’, password: ‘test’, vckey: ‘ekksdfssl’, verifycode: ‘3qu5’}
-func Login(cardid string, password string, vckey, verifycode string) (errorCode int64, uuid string) {
+
+// url: api/login/login
+// 方法: POST
+// Body：{username: ‘test’, password: ‘test’, vckey: ‘ekksdfssl’, verifycode: ‘3qu5’}
+// 返回：{code: 20000, data: {detailcode: 0, token: ‘’}}
+// 		 或{code: 20000, data: {detailcode: 1, msg: ‘账号密码不正确’, vckey: ‘’, verifycode: ‘dsfwekfsldfklsdfkkkk’}}，其中verifycode是验证码图片的base64编码
+// 		或{code: 20000, data: {detailcode: 2, msg: ‘验证码错误’, vckey: ‘新key’, verifycode: ‘新验证码’}}
+// 		或{code: 20000, data: {detailcode: 3, msg: ‘您的账号已锁定，请联系管理员解除锁定’}}
+// 详细说明：第一次登录不需要验证码，body的vckey和verifycode为空或不带。连续失败5次账号锁定。如果用户名不存在，则一直返回第二种情况。
+func Login(cardid string, password string, vckey, verifycode string) (errorCode int64, uuid, retvckey, retverifycode string) {
 	var (
-		qurey Account
+		qurey      Account
+		loginTimes int64
 	)
 	qurey.Cardid = cardid
 	//qurey.Password = password
 	err := OSQL.Read(&qurey, "cardid")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
-		return 1, uuid
+		return 1, uuid, retvckey, retverifycode
+	}
+
+	defer func() {
+		LimitMap[cardid] = loginTimes
+	}()
+
+	//校验是否需要验证码（是否是第一次登录）
+	if value, ok := LimitMap[cardid]; ok {
+		loginTimes = value + 1
+		if loginTimes > 1 {
+			//检查验证码是否正确
+			if vckey == "" || verifycode == "" {
+				retvckey, retverifycode = CodeCaptchaCreate()
+				return 2, uuid, retvckey, retverifycode
+			}
+
+		} else if value >= 5 {
+			//update status 3
+			EditAccountStatusById(cardid, 3)
+			return 3, uuid, retvckey, retverifycode
+		}
+	} else {
+		loginTimes += 1
 	}
 
 	if qurey.Cardid == cardid && qurey.Password == password { //login sucess
@@ -46,24 +81,32 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 			delete(TimeMap, preToken)
 			TimeMap[uuid] = time.Now().Unix()
 			delete(AccsMap, preToken)
+			delete(LimitMap, cardid)
 
 			//qurey employee info
 			emp, code := GetEmployeeByCardid(cardid)
 			if code != util.SUCESSFUL {
 				logs.FileLogs.Error("GetEmployeeByCardid failed")
-				return 1, uuid
+				return 1, uuid, retvckey, retverifycode
 			}
 			AccsMap[uuid] = emp
 		} else {
 			logs.FileLogs.Error("status is :%s", qurey.Status)
-			return 3, uuid
+			return 3, uuid, retvckey, retverifycode
 		}
 	} else {
 		logs.FileLogs.Error("cardid or password is invild")
-		return 1, uuid
+		if loginTimes == 1 {
+			//new vckey and verifycode
+			retvckey, retverifycode = CodeCaptchaCreate()
+		} else {
+			retvckey = vckey
+			retverifycode = verifycode
+		}
+		return 1, uuid, retvckey, retverifycode
 	}
 
-	return 0, uuid
+	return 0, uuid, retvckey, retverifycode
 }
 
 // 单点登录
@@ -81,9 +124,9 @@ func SSOLogin(token string) (err error, code int64) {
 		}
 	} else {
 		code = 50008
-		logs.FileLogs.Error("this token not exist :%s", token)
+		logs.FileLogs.Error("token不存在 :%s", token)
 
-		return errors.New("token not exist"), code
+		return errors.New("token不存在"), code
 	}
 
 	return nil, code
@@ -109,7 +152,7 @@ func Loginout(token string) (code int64) {
 }
 
 //创建图像验证码
-func demoCodeCaptchaCreate() string {
+func CodeCaptchaCreate() (string, string) {
 	//config struct for digits
 	// //数字验证码配置
 	// var configD = base64Captcha.ConfigDigit{
@@ -158,7 +201,7 @@ func demoCodeCaptchaCreate() string {
 	logs.FileLogs.Info(idKeyC, base64stringC, "\n")
 	//fmt.Println(idKeyD, base64stringD, "\n")
 
-	return base64stringC
+	return idKeyC, base64stringC
 }
 
 //验证图像验证码
@@ -169,4 +212,72 @@ func verfiyCaptcha(idkey, verifyValue string) {
 	} else {
 		//fail
 	}
+}
+
+// 9.获取登录账户的用户信息(根据token)
+// url: api/user/info
+// 方法: GET
+// 参数：无
+// 返回：
+// {
+// 	code: 20000,
+// 	data: {
+// 		userInfo: {
+// 			id: 1,
+// 			name: ‘测试’,
+// 			sex: 0,
+// 			cardid: ‘bxkc - 001’,
+// 			compID: 0,
+// 			deptID: 1
+// 		},
+// 		permission: {
+// 			read: [1, 2, 3],
+// 			write: [4, 5, 6]
+// 		},
+// 		menuList: [{
+// 				menuID: 1,
+// 				title: '销售管理',
+// 				icon: 'el-icon-location',
+// 				children: [{
+// 						menuID: 2,
+// 						title: '维修合同',
+// 						path: '/salerepair',
+// 						component: 'Sale/RepairContract',
+// 						children: []
+// 					]
+// 				}]
+// 		}
+// 	}
+// }
+// 说明：这个接口是登录后通过登录接口返回的token信息来获取账号信息：
+// userInfo的数据来源为人员信息表employee，
+// permission的数据来源为权限信息表permission，
+// menuList的数据来源为菜单表menu，
+// 但是返回时要根据permission处理，
+// permission仅包含了叶子节点（即component不为空的节点的menuID），
+// 返回时仅返回过滤后的节点。
+
+type UserInfoWeb struct {
+	id     int64
+	name   string
+	sex    int8
+	cardid string
+	compID int64
+	deptID int64
+}
+
+type PermissionWeb struct {
+	read  []int64
+	write []int64
+}
+
+type UserInfoStruct struct {
+	userInfo   UserInfoWeb
+	permission PermissionWeb
+	menuList   WebMenu
+}
+
+func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
+
+	return errorCode, userInfo
 }
