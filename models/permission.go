@@ -222,7 +222,7 @@ func SetPermission(param AddPersionStruct) (errorCode int64, msg string) {
 func QueryPermission(cardid string) (ret WebPermission, err error) {
 	var per Permission
 	per.Cardid = cardid
-	err = OSQL.Read(&per, "id")
+	err = OSQL.Read(&per, "cardid")
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 		return ret, err

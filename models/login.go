@@ -11,17 +11,17 @@ import (
 )
 
 var (
-	TokenMap = make(map[string]string)      //cardid token
-	AccsMap  = make(map[string]interface{}) //token employee
-	TimeMap  = make(map[string]int64)       //token TimeMap
-	LimitMap = make(map[string]int64)       //限制5次登录机会,成功后清除
+	TokenMap = make(map[string]string) //cardid token
+	AccsMap  = make(map[string]string) //token employee's cardid
+	TimeMap  = make(map[string]int64)  //token TimeMap
+	LimitMap = make(map[string]int64)  //限制5次登录机会,成功后清除
 )
 
 //TODO Timer delete token
 func New_Time_count() {
 	//frist clear map
 	TokenMap = make(map[string]string)
-	AccsMap = make(map[string]interface{})
+	AccsMap = make(map[string]string)
 	TimeMap = make(map[string]int64)
 	LimitMap = make(map[string]int64)
 }
@@ -89,7 +89,7 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 				logs.FileLogs.Error("GetEmployeeByCardid failed")
 				return 1, uuid, retvckey, retverifycode
 			}
-			AccsMap[uuid] = emp
+			AccsMap[uuid] = emp.Cardid
 		} else {
 			logs.FileLogs.Error("status is :%s", qurey.Status)
 			return 3, uuid, retvckey, retverifycode
@@ -134,14 +134,12 @@ func SSOLogin(token string) (err error, code int64) {
 
 func Loginout(token string) (code int64) {
 	code = util.SUCESSFUL
-	if emp, ok := AccsMap[token]; ok {
+	if cardid, ok := AccsMap[token]; ok {
 		//delete all map
-		TokenMap = make(map[string]string)     //cardid token
-		AccsMap = make(map[string]interface{}) //token employee
-		TimeMap = make(map[string]int64)       //token TimeMap
-
-		tempEmp := emp.(Employee)
-		delete(TokenMap, tempEmp.Cardid)
+		// TokenMap = make(map[string]string) //cardid token
+		// AccsMap = make(map[string]int64)   //token employee
+		// TimeMap = make(map[string]int64)   //token TimeMap
+		delete(TokenMap, cardid)
 		delete(AccsMap, token)
 		delete(TimeMap, token)
 	} else {
@@ -258,26 +256,48 @@ func verfiyCaptcha(idkey, verifyValue string) {
 // 返回时仅返回过滤后的节点。
 
 type UserInfoWeb struct {
-	id     int64
-	name   string
-	sex    int8
-	cardid string
-	compID int64
-	deptID int64
+	Id     int64  `json:"id"`
+	Name   string `json:"name"`
+	Sex    int8   `json:"sex"`
+	Cardid string `json:"cardid"`
+	CompID int8   `json:"compID"`
+	DeptID int    `json:"deptID"`
 }
 
 type PermissionWeb struct {
-	read  []int64
-	write []int64
+	Read  []int64 `json:"read"`
+	Write []int64 `json:"write"`
 }
 
 type UserInfoStruct struct {
-	userInfo   UserInfoWeb
-	permission PermissionWeb
-	menuList   WebMenu
+	UserInfo   UserInfoWeb   `json:"userInfo"`
+	Permission PermissionWeb `json:"permission"`
+	MenuList   WebMenu       `json:"menuList"`
 }
 
 func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
+	if cardId, ok := TokenMap[token]; ok {
+		if cardid, ok2 := AccsMap[cardId]; ok2 {
+			employee, code := GetEmployeeByCardid(cardid)
+			if code != util.SUCESSFUL {
+				return code, userInfo
+			}
 
+			userInfo.UserInfo.Cardid = employee.Cardid
+			userInfo.UserInfo.CompID = employee.CompID
+			userInfo.UserInfo.DeptID = employee.DeptID
+			userInfo.UserInfo.Id = employee.Id
+			userInfo.UserInfo.Name = employee.Name
+			userInfo.UserInfo.Sex = employee.Sex
+
+			permis, err := QueryPermission(cardId)
+			if err != nil {
+				return util.SUCESSFUL, userInfo
+			}
+
+			userInfo.Permission.Read = permis.Read
+			userInfo.Permission.Write = permis.Write
+		}
+	}
 	return errorCode, userInfo
 }

@@ -57,7 +57,7 @@ func (c *LoginController) Login() {
 	loginRes.Verifycode = verifycode
 
 	util.RetContent.Message = token
-	util.RetContent.Data = models.AccsMap[token]
+	util.RetContent.Data = loginRes
 	c.Data["json"] = util.RetContent
 	c.ServeJSON()
 	return

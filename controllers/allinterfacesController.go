@@ -21,6 +21,15 @@ func (c *AllinterfacesController) QueryTimeStamp() {
 	c.ServeJSON()
 }
 
+func (c *AllinterfacesController) QueryTimeStampDays() {
+	queryType := c.GetString("type")
+	rets := models.QueryTimeStampDays(queryType)
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 //supplierid=XXX
 func (c *AllinterfacesController) QueryMattersOfSupplier() {
 	supplierid, err := c.GetInt64("supplierid")

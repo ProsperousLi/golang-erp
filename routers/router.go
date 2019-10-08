@@ -56,6 +56,10 @@ func Allinterfaces() {
 	beego.Router("/"+PROJECT+"/ts/queryTimeStamp",
 		&controllers.AllinterfacesController{}, GET+":QueryTimeStamp")
 
+	//93.查询时间戳
+	beego.Router("/"+PROJECT+"/review/queryTimeStamp",
+		&controllers.AllinterfacesController{}, GET+":QueryTimeStampDays")
+
 	beego.Router("/"+PROJECT+"/basedata/queryMattersOfSupplier",
 		&controllers.AllinterfacesController{}, GET+":QueryMattersOfSupplier")
 

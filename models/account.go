@@ -195,7 +195,8 @@ type ModifyPwdStruct struct {
 	Newpwd string
 }
 
-func ModifyPwd(param ModifyPwdStruct) (errorCode int64, errorMessage string) {
+func ModifyPwd(param ModifyPwdStruct, token string) (errorCode int64, errorMessage string) {
+
 	var (
 		temp Account
 	)
@@ -253,6 +254,12 @@ func ModifyPwd(param ModifyPwdStruct) (errorCode int64, errorMessage string) {
 	}
 
 	//TODO 删除此人token
+	if cardid, ok := AccsMap[token]; ok {
+		delete(LimitMap, cardid)
+		delete(TimeMap, token)
+		delete(AccsMap, token)
+		delete(TokenMap, cardid)
+	}
 
 	errorCode = util.SUCESSFUL
 	return

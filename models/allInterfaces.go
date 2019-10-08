@@ -35,3 +35,26 @@ func QueryTimeStamp(queryType string) interface{} {
 
 	return retCode
 }
+
+func QueryTimeStampDays(queryType string) int64 {
+	var (
+		retTimes int64
+	)
+	if tempTimes, ok := TimeStampMaps[queryType]; ok {
+		if tempTimes >= 10000 || tempTimes+1 >= 10000 {
+			return 10000
+		}
+		TimeStampMaps[queryType] = tempTimes + 1
+		retTimes = tempTimes + 1
+	} else {
+		TimeStampMaps[queryType] = TimeStamp
+		if TimeStamp >= 10000 {
+			return 10000
+		}
+		retTimes = TimeStamp
+	}
+
+	return retTimes
+}
+
+//隔天清零
