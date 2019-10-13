@@ -82,6 +82,10 @@ func Login() {
 	//api/user/info
 	beego.Router("/"+PROJECT+"/user/info",
 		&controllers.LoginController{}, GET+":UserInfo")
+
+	//刷新验证码
+	beego.Router("/"+PROJECT+"/login/refreshVerifyCode",
+		&controllers.LoginController{}, POST+":RefreshVerifyCode")
 }
 
 func Account() {

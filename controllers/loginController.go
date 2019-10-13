@@ -81,3 +81,30 @@ func (c *LoginController) UserInfo() {
 	c.ServeJSON()
 	return
 }
+
+// 返回：{code: 20000, vckey: ‘xxxx’, verifycode: ‘base64’}或者
+// {code: 20001, message:”旧验证码信息不正确”}或{code:20001, message: “刷新过于频繁”}
+//说明：即使之前的验证码已经过期，仍然返回新的，过期的验证码起码保存1天，
+//防止恶意刷验证码,1秒内禁止再次刷新
+func (c *LoginController) RefreshVerifyCode() {
+	util.RetContent.Code = 20000
+	var loginRes LoginResult
+	vckey := c.GetString("vckey")
+	code, vckey, verifycode := models.RefreshVerifyCode(vckey)
+	if code == 1 {
+		code = 20001
+		loginRes.Msg = "旧验证码信息不正确"
+	} else if code == 2 {
+		code = 20001
+		loginRes.Msg = "刷新过于频繁"
+	}
+
+	loginRes.Vckey = vckey
+	loginRes.Verifycode = verifycode
+
+	loginRes.Detailcode = code
+	util.RetContent.Data = loginRes
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+	return
+}

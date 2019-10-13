@@ -2,6 +2,8 @@ package models
 
 import (
 	//"time"
+	"encoding/json"
+	"strconv"
 
 	"erpweb/logs"
 	"erpweb/util"
@@ -53,8 +55,7 @@ type Employee struct {
 	Cardid            string `json:"cardid"`            //工号
 	Name              string `json:"name"`              //姓名
 	Sex               int8   `json:"sex"`               //性别 0男 1女
-	CompID            int8   `orm:"column(compID)"`     //所属分公司ID  0总部1北京2杭州
-	DeptID            int    `orm:"column(deptID)"`     //部门ID
+	DeptID            string `orm:"column(deptID)"`     //部门ID
 	Health            string `json:"health"`            //身体状况
 	Height            string `json:"height"`            //身高
 	Nativeplace       string `json:"nativeplace"`       //籍贯
@@ -84,10 +85,140 @@ type Employee struct {
 	Contractenddate   string `json:"contractenddate"`   //合同结束日期
 }
 
-func GetAllEmployees(name, cardid string) []Employee {
+type WebEmployee struct {
+	Id                int64   `json:"id"`                //人员id
+	Cardid            string  `json:"cardid"`            //工号
+	Name              string  `json:"name"`              //姓名
+	Sex               int8    `json:"sex"`               //性别 0男 1女
+	DeptID            []int64 `orm:"column(deptID)"`     //部门ID
+	Health            string  `json:"health"`            //身体状况
+	Height            string  `json:"height"`            //身高
+	Nativeplace       string  `json:"nativeplace"`       //籍贯
+	Nation            string  `json:"nation"`            //民族
+	Maritalstatus     string  `json:"maritalstatus"`     //婚姻状况
+	Education         string  `json:"education"`         //学历
+	University        string  `json:"university"`        //毕业院校
+	Major             string  `json:"major"`             //专业
+	Qualification     string  `json:"qualification"`     //专业资格
+	Trialsalary       int64   `json:"trialsalary"`       //试用期工资
+	Salary            int64   `json:"salary"`            //转正后工资
+	Idnumber          string  `json:"idnumber"`          //身份证号
+	Address1          string  `json:"address1"`          //户口地址
+	Postcode1         string  `json:"postcode1"`         //邮编
+	Address2          string  `json:"address2"`          //现住地址
+	Postcode2         string  `json:"postcode2"`         //邮编
+	Contactnumber     string  `json:"contactnumber"`     //联系电话
+	Phonenumber       string  `json:"phonenumber"`       //手机
+	Email             string  `json:"email"`             //email
+	Emergencycontact  string  `json:"emergencycontact"`  //紧急情况联系人
+	Contactnumber1    string  `json:"contactnumber1"`    //联系电话
+	Address3          string  `json:"address3"`          //现在何处
+	Trialexpired      string  `json:"trialexpired"`      //试用到期
+	Entrydate         string  `json:"entrydate"`         //入职日期
+	Birthday          string  `json:"birthday"`          //出生日期
+	Contractbegindate string  `json:"contractbegindate"` //合同开始日期
+	Contractenddate   string  `json:"contractenddate"`   //合同结束日期
+}
+
+func covertSql2Web(param Employee) (result WebEmployee) {
+	result.Id = param.Id
+	result.Cardid = param.Cardid
+	result.Name = param.Name
+	result.Sex = param.Sex
+	var tempdepts []string
+	err := json.Unmarshal([]byte(param.DeptID), &tempdepts)
+	if err == nil {
+		for _, value := range tempdepts {
+			deptID, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				result.DeptID = append(result.DeptID, deptID)
+			}
+		}
+	}
+	//result.DeptID =
+	result.Health = param.Health
+	result.Height = param.Height
+	result.Nativeplace = param.Nativeplace
+	result.Nation = param.Nation
+	result.Maritalstatus = param.Maritalstatus
+	result.Education = param.Education
+	result.University = param.University
+	result.Major = param.Major
+	result.Qualification = param.Qualification
+	result.Trialsalary = param.Trialsalary
+	result.Salary = param.Salary
+	result.Idnumber = param.Idnumber
+	result.Address1 = param.Address1
+	result.Postcode1 = param.Postcode1
+	result.Address2 = param.Address2
+	result.Postcode2 = param.Postcode2
+	result.Contactnumber = param.Contactnumber
+	result.Phonenumber = param.Phonenumber
+	result.Email = param.Email
+	result.Emergencycontact = param.Emergencycontact
+	result.Contactnumber1 = param.Contactnumber1
+	result.Address3 = param.Address3
+	result.Trialexpired = param.Trialexpired
+	result.Entrydate = param.Entrydate
+	result.Birthday = param.Birthday
+	result.Contractbegindate = param.Contractbegindate
+	result.Contractenddate = param.Contractenddate
+
+	return
+}
+
+func covertWeb2Sql(param WebEmployee) (result Employee) {
+	result.Id = param.Id
+	result.Cardid = param.Cardid
+	result.Name = param.Name
+	result.Sex = param.Sex
+	var tempdepts []string
+
+	for _, value := range param.DeptID {
+		deptID := strconv.FormatInt(value, 10)
+		tempdepts = append(tempdepts, deptID)
+	}
+
+	bi, err := json.Marshal(tempdepts)
+	if err == nil {
+		result.DeptID = string(bi)
+	}
+	//result.DeptID =
+	result.Health = param.Health
+	result.Height = param.Height
+	result.Nativeplace = param.Nativeplace
+	result.Nation = param.Nation
+	result.Maritalstatus = param.Maritalstatus
+	result.Education = param.Education
+	result.University = param.University
+	result.Major = param.Major
+	result.Qualification = param.Qualification
+	result.Trialsalary = param.Trialsalary
+	result.Salary = param.Salary
+	result.Idnumber = param.Idnumber
+	result.Address1 = param.Address1
+	result.Postcode1 = param.Postcode1
+	result.Address2 = param.Address2
+	result.Postcode2 = param.Postcode2
+	result.Contactnumber = param.Contactnumber
+	result.Phonenumber = param.Phonenumber
+	result.Email = param.Email
+	result.Emergencycontact = param.Emergencycontact
+	result.Contactnumber1 = param.Contactnumber1
+	result.Address3 = param.Address3
+	result.Trialexpired = param.Trialexpired
+	result.Entrydate = param.Entrydate
+	result.Birthday = param.Birthday
+	result.Contractbegindate = param.Contractbegindate
+	result.Contractenddate = param.Contractenddate
+	return
+}
+
+func GetAllEmployees(name, cardid string) []WebEmployee {
 	var (
-		emps []Employee
-		sql  string
+		emps    []Employee
+		retEmps []WebEmployee
+		sql     string
 	)
 	if name != "" && cardid != "" {
 		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%?%' " +
@@ -105,12 +236,20 @@ func GetAllEmployees(name, cardid string) []Employee {
 	if err != nil {
 		logs.FileLogs.Error("%s", err)
 	}
-	return emps
+
+	for _, emp := range emps {
+		var tempWebEmp WebEmployee
+		tempWebEmp = covertSql2Web(emp)
+		retEmps = append(retEmps, tempWebEmp)
+	}
+
+	return retEmps
 }
 
-func GetEmployees(pageNum, pageSize int64) []Employee {
+func GetEmployees(pageNum, pageSize int64) []WebEmployee {
 	var (
-		emps []Employee
+		emps    []Employee
+		retEmps []WebEmployee
 		//err  error
 	)
 	begin := pageSize * pageNum
@@ -121,10 +260,17 @@ func GetEmployees(pageNum, pageSize int64) []Employee {
 		logs.FileLogs.Error("%s", err) //logs.Error(err)
 	}
 
-	return emps
+	for _, emp := range emps {
+		var tempWebEmp WebEmployee
+		tempWebEmp = covertSql2Web(emp)
+		retEmps = append(retEmps, tempWebEmp)
+	}
+
+	return retEmps
 }
 
-func GetEmployeeByCardid(cardid string) (emp Employee, errorCode int64) {
+func GetEmployeeByCardid(cardid string) (retEmp WebEmployee, errorCode int64) {
+	var emp Employee
 	errorCode = util.SUCESSFUL
 	emp.Cardid = cardid
 	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where cardid=?", cardid).QueryRow(&emp)
@@ -132,10 +278,13 @@ func GetEmployeeByCardid(cardid string) (emp Employee, errorCode int64) {
 		logs.FileLogs.Error("%s", err)
 	}
 
-	return emp, errorCode
+	retEmp = covertSql2Web(emp)
+
+	return retEmp, errorCode
 }
 
-func GetEmployeeById(id int64) (emp Employee, errorCode int64) {
+func GetEmployeeById(id int64) (retEmp WebEmployee, errorCode int64) {
+	var emp Employee
 	errorCode = util.SUCESSFUL
 	emp.Id = id
 	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where id=?", emp.Id).QueryRow(&emp)
@@ -143,10 +292,12 @@ func GetEmployeeById(id int64) (emp Employee, errorCode int64) {
 		logs.FileLogs.Error("%s", err)
 	}
 
-	return emp, errorCode
+	retEmp = covertSql2Web(emp)
+
+	return retEmp, errorCode
 }
 
-func EditEmployeeById(emp Employee) (errorCode int64) {
+func EditEmployeeById(emp WebEmployee) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	var (
 		temp Employee
@@ -159,9 +310,12 @@ func EditEmployeeById(emp Employee) (errorCode int64) {
 		errorCode = util.ACCOUNT_EDIT_FAILED
 		return errorCode
 	}
-	args := edit_employee(emp)
+
+	sqlEmp := covertWeb2Sql(emp)
+
+	args := edit_employee(sqlEmp)
 	if len(args) > 0 {
-		num, err2 := OSQL.Update(&emp, args...)
+		num, err2 := OSQL.Update(&sqlEmp, args...)
 		if err2 != nil {
 			logs.FileLogs.Error("%s", err)
 			errorCode = util.ACCOUNT_EDIT_FAILED
@@ -192,11 +346,7 @@ func edit_employee(param Employee) []string {
 		args = append(args, "sex")
 	}
 
-	if param.CompID != 0 {
-		args = append(args, "compID")
-	}
-
-	if param.DeptID != 0 {
+	if param.DeptID != "" {
 		args = append(args, "deptID")
 	}
 
@@ -346,7 +496,7 @@ func edit_employee(param Employee) []string {
 // 	return util.SUCESSFUL
 // }
 
-func AddEmployee(param Employee) (errorCode int64) {
+func AddEmployee(param WebEmployee) (errorCode int64) {
 	var (
 		temp Employee
 	)
@@ -359,7 +509,9 @@ func AddEmployee(param Employee) (errorCode int64) {
 		return errorCode
 	}
 
-	id, err2 := OSQL.Insert(&param)
+	sqlEmp := covertWeb2Sql(param)
+
+	id, err2 := OSQL.Insert(&sqlEmp)
 	if err2 != nil {
 		logs.FileLogs.Error("%v", err2)
 		errorCode = util.EMPLOYEE_ADD_FAILED

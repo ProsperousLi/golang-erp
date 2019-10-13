@@ -189,16 +189,16 @@ func (c *AccountController) ModifyPwd() {
 //{cardid: “xxx”}
 func (c *AccountController) ResetAccount(cardid string) {
 	//TODO 需要检验操作人的token
-	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
-	//check token
-	if adminCardid, ok := models.AccsMap[webToken]; ok {
-		//TODO 对人员管理有写权限 如何知道对人员管理有写权限
-		permis, _ := models.QueryPermission(adminCardid)
-		logs.FileLogs.Info("%v", permis.Write[0])
-	} else {
-		logs.FileLogs.Error("token not have")
-		return
-	}
+	// webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+	// //check token
+	// if adminCardid, ok := models.AccsMap[webToken]; ok {
+	// 	//TODO 对人员管理有写权限 如何知道对人员管理有写权限
+	// 	permis, _ := models.QueryPermission(adminCardid)
+	// 	logs.FileLogs.Info("%v", permis.Write[0])
+	// } else {
+	// 	logs.FileLogs.Error("token not have")
+	// 	return
+	// }
 
 	//EditAccountStatusById(cardid,3)
 	var account models.Account

@@ -256,12 +256,11 @@ func verfiyCaptcha(idkey, verifyValue string) {
 // 返回时仅返回过滤后的节点。
 
 type UserInfoWeb struct {
-	Id     int64  `json:"id"`
-	Name   string `json:"name"`
-	Sex    int8   `json:"sex"`
-	Cardid string `json:"cardid"`
-	CompID int8   `json:"compID"`
-	DeptID int    `json:"deptID"`
+	Id     int64   `json:"id"`
+	Name   string  `json:"name"`
+	Sex    int8    `json:"sex"`
+	Cardid string  `json:"cardid"`
+	DeptID []int64 `json:"deptID"`
 }
 
 type PermissionWeb struct {
@@ -284,7 +283,6 @@ func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
 			}
 
 			userInfo.UserInfo.Cardid = employee.Cardid
-			userInfo.UserInfo.CompID = employee.CompID
 			userInfo.UserInfo.DeptID = employee.DeptID
 			userInfo.UserInfo.Id = employee.Id
 			userInfo.UserInfo.Name = employee.Name
@@ -297,7 +295,17 @@ func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
 
 			userInfo.Permission.Read = permis.Read
 			userInfo.Permission.Write = permis.Write
+
+			// var allPermis []int64
+			// allPermis = append(allPermis, permis.Read...)
+			// allPermis = append(allPermis, permis.Write...)
 		}
 	}
 	return errorCode, userInfo
+}
+
+func RefreshVerifyCode(vckey string) (errorCode int64, retvckey, retverifycode string) {
+	errorCode = util.SUCESSFUL
+	retvckey, retverifycode = CodeCaptchaCreate()
+	return
 }

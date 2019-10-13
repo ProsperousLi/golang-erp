@@ -69,7 +69,7 @@ func (c *EmployeeController) GetEmployeeById() {
 
 func (c *EmployeeController) EditEmployeeById() {
 	var (
-		emp models.Employee
+		emp models.WebEmployee
 	)
 
 	logs.FileLogs.Info("param = ", string(c.Ctx.Input.RequestBody))
@@ -87,7 +87,7 @@ func (c *EmployeeController) EditEmployeeById() {
 //{"cardid":"123","name":"小李","sex":0,"compID":10,"deptID":1,"dutyID":1,"health":"very good","height":"170","nativeplace":"安徽省","nation":"汉","maritalstatus":"未婚","education":"本科","university":"大连东软","major":"计算  机","qualification":"666","trialsalary":2000,"salary":6000,"idnumber":"341182","address1":"1111","postcode1":"www111","address2":"2222","postcode2":"www222","contactnumber":"17615002988","phonenumber":"110","email":"www666","emergencycontact":"1323654222","c  ontactnumber1":"1323654222","address3":"33333","trialexpired":"2019-05-28 15:03:03","entrydate":"2019-05-28   15:03:03","birthday":"2019-05-28 15:03:03","contractbegindate":"2019-05-28 15:03:03","contractenddate":"2019-05-28 15:03:03"}
 func (c *EmployeeController) AddEmployee() {
 	var (
-		emp models.Employee
+		emp models.WebEmployee
 	)
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &emp)
