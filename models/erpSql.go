@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql" // import your used driver
 )
@@ -24,7 +25,9 @@ var (
 func Init() {
 	//log.Info("init sql...")
 	// set default database
-	orm.RegisterDataBase("default", "mysql", sqlUser+":"+sqlPwd+"@/erp?charset=utf8", 30)
+	//beego必须注册一个别名为default的数据库，作为默认使用
+	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("mysqluser")+":"+
+		beego.AppConfig.String("mysqlpass")+"@/erp?charset=utf8", 30)
 	// register model
 	orm.RegisterModel(new(Account), new(Customer), new(Department) /*new(Duty),*/, new(Employee),
 		new(Leaves), new(Matter) /*new(Matterpackage),*/, new(Menu), new(Operlog), /*new(Packagerelation),*/
