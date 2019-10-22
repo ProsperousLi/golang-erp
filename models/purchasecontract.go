@@ -159,6 +159,16 @@ func GetPurchasecontractById(id int64) (purchasecontract Purchasecontract, err e
 	return purchasecontract, nil
 }
 
+func GetPurchasecontractByContractcode(contractcode string) (purchasecontract Purchasecontract, err error) {
+	purchasecontract.Contractcode = contractcode
+	err = OSQL.Read(&purchasecontract, "contractcode")
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+		return purchasecontract, err
+	}
+	return purchasecontract, nil
+}
+
 func EditPurchasecontractById(purchasecontract Purchasecontract) (errorCode int64) {
 	var (
 		temp Purchasecontract

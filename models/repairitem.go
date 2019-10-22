@@ -43,6 +43,16 @@ func GetRepairitemBCode(contractcode, vehiclecode string) []Repairitem {
 	return params
 }
 
+func GetRepairitemByItemname(itemname string) (ret []Repairitem, err error) {
+	_, err = OSQL.Raw("select * from "+util.Repairitem_TABLE_NAME+
+		"where itemname='?' order by id desc",
+		itemname).QueryRows(&ret)
+	if err != nil {
+		logs.FileLogs.Error("%s", err)
+	}
+	return ret, err
+}
+
 func GetRepairitemById(contractcode string) (ret Repairitem, err error) {
 	ret.Contractcode = contractcode
 	err = OSQL.Read(&ret, "contractcode")

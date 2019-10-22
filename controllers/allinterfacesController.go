@@ -12,6 +12,22 @@ type AllinterfacesController struct {
 	BaseController
 }
 
+func (c *AllinterfacesController) QueryNumsOfPurchasecontract() {
+	contractcode := c.GetString("contractcode")
+
+	rets, err := models.QueryNumsOfPurchasecontract(contractcode)
+	if err != nil {
+		util.RetContent.Code = util.FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+	util.RetContent.Code = util.SUCESSFUL
+	util.RetContent.Data = rets
+	c.Data["json"] = util.RetContent
+	c.ServeJSON()
+}
+
 func (c *AllinterfacesController) QueryTimeStamp() {
 	queryType := c.GetString("type")
 	rets := models.QueryTimeStamp(queryType)

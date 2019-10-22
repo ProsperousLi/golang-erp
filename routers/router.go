@@ -71,6 +71,9 @@ func Allinterfaces() {
 
 	beego.Router("/"+PROJECT+"/basedata/updateSupplierListOfMatter",
 		&controllers.AllinterfacesController{}, POST+":UpdateSupplierListOfMatter")
+
+	beego.Router("/"+PROJECT+"/basedata/queryNumsOfPurchasecontract",
+		&controllers.AllinterfacesController{}, POST+":QueryNumsOfPurchasecontract")
 }
 
 func Login() {

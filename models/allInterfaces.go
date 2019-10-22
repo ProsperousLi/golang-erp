@@ -5,6 +5,50 @@ import (
 	//"erpweb/util"
 )
 
+type RetNums struct {
+	Nums    int64
+	Matters []WebMatterplanAndMatter
+}
+
+func QueryNumsOfPurchasecontract(contractcode string) (ret RetNums, err error) {
+	var matters []WebMatterplanAndMatter
+	purch, err1 := GetPurchasecontractByContractcode(contractcode)
+	if err1 != nil {
+		return ret, err1
+	}
+
+	purchDetail, err1 := GetPurchasedetailById(contractcode)
+	if err1 != nil {
+		return ret, err1
+	}
+
+	if purch.Type == "1" { //销售合同
+
+		ret.Nums = purchDetail.Num
+	} else if purch.Type == "2" { //维修合同
+		items, err1 := GetRepairitemByItemname(purchDetail.Relatedcode)
+		if err1 != nil {
+			return ret, err1
+		}
+
+		for _, item := range items {
+			tempMatters := GetMatterplansByItemid(item.Id)
+			if len(tempMatters) > 0 {
+				matters = append(matters, tempMatters...)
+			}
+
+			for _, tempMatter := range tempMatters {
+				ret.Nums += tempMatter.Plannum
+			}
+		}
+
+		ret.Matters = append(ret.Matters, matters...)
+	}
+
+	return ret, nil
+
+}
+
 // 参数: type=1获取员工编号(人员信息表),type=2维修合同编号(采购合同表),
 // type=3销售合同编号(采购合同表),type=4 到货单号(物料入库表)
 func QueryTimeStamp(queryType string) interface{} {
