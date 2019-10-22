@@ -26,8 +26,14 @@ func Init() {
 	//log.Info("init sql...")
 	// set default database
 	//beego必须注册一个别名为default的数据库，作为默认使用
-	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("mysqluser")+":"+
-		beego.AppConfig.String("mysqlpass")+"@/erp?charset=utf8", 30)
+	var dsn = beego.AppConfig.String("mysqluser") + ":" +
+		beego.AppConfig.String("mysqlpass") + "@tcp(" + beego.AppConfig.String("mysqlurls") + ":" +
+		beego.AppConfig.String("dbport") + ")/" +
+		beego.AppConfig.String("mysqldb") + "?charset=utf8"
+	orm.RegisterDataBase("default", "mysql", dsn, 30)
+
+	// orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("mysqluser")+":"+
+	// 	beego.AppConfig.String("mysqlpass")+"@/erp?charset=utf8", 30)
 	// register model
 	orm.RegisterModel(new(Account), new(Customer), new(Department) /*new(Duty),*/, new(Employee),
 		new(Leaves), new(Matter) /*new(Matterpackage),*/, new(Menu), new(Operlog), /*new(Packagerelation),*/
