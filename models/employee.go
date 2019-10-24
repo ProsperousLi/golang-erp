@@ -221,16 +221,18 @@ func GetAllEmployees(name, cardid string) []WebEmployee {
 		sql     string
 	)
 	if name != "" && cardid != "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%?%' " +
-			"or cardid like '%?%' order by id asc"
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%" + name + "%' " +
+			"or cardid like '%" + cardid + "%' order by id asc"
 	} else if name != "" && cardid == "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%?%' " +
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where name like '%" + name + "%' " +
 			"order by id asc"
 	} else if name == "" && cardid != "" {
-		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where cardid like '%?%' order by id asc"
+		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " where cardid like '%" + cardid + "%' order by id asc"
 	} else {
 		sql = "select * from " + util.EMPLOYEE_TABLE_NAME + " order by id asc"
 	}
+
+	beego.Info("sql =", sql)
 
 	_, err := OSQL.Raw(sql).QueryRows(&emps)
 	if err != nil {
@@ -276,6 +278,8 @@ func GetEmployeeByCardid(cardid string) (retEmp WebEmployee, errorCode int64) {
 	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where cardid=?", cardid).QueryRow(&emp)
 	if err != nil {
 		beego.Error(err)
+		errorCode = util.FAILED
+		return retEmp, errorCode
 	}
 
 	retEmp = covertSql2Web(emp)

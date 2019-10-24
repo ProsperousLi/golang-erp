@@ -1,8 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
+
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type LoginController struct {
@@ -35,11 +39,27 @@ type LoginResult struct {
 }
 
 func (c *LoginController) Login() {
-	username := c.GetString("username")
-	password := c.GetString("password")
+
+	var (
+		param = make(map[string]string)
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	username := param["username"]
+	password := param["password"]
 	//vckey  verifycode
-	vckey := c.GetString("password")
-	verifycode := c.GetString("password")
+	vckey := param["vckey"]
+	verifycode := param["verifycode"]
+
+	beego.Info("username=", username, ",password=", password)
+
 	errCode, token, vckey, verifycode := models.Login(username, password, vckey, verifycode)
 
 	util.RetContent.Code = util.SUCESSFUL
@@ -64,7 +84,7 @@ func (c *LoginController) Login() {
 }
 
 func (c *LoginController) Loginout() {
-	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+	webToken := c.Ctx.Input.Header("x-Token")
 	code := models.Loginout(webToken)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
@@ -73,7 +93,7 @@ func (c *LoginController) Loginout() {
 }
 
 func (c *LoginController) UserInfo() {
-	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+	webToken := c.Ctx.Input.Header("x-Token")
 	code, userInfo := models.GetUserInfo(webToken)
 	util.RetContent.Code = code
 	util.RetContent.Data = userInfo

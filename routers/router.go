@@ -296,13 +296,13 @@ func Employee() {
 
 	//get persons by page
 	// /erp/employee/getPersons
-	beego.Router("/"+PROJECT+"/employee/getPersons",
-		&controllers.EmployeeController{}, POST+":GetEmployees")
+	// beego.Router("/"+PROJECT+"/employee/getPersons",
+	// 	&controllers.EmployeeController{}, POST+":GetEmployees")
 
-	//get person by id
-	// /erp/employee/getPerson
-	beego.Router("/"+PROJECT+"/employee/getPerson",
-		&controllers.EmployeeController{}, POST+":GetEmployeeById")
+	// //get person by id
+	// // /erp/employee/getPerson
+	// beego.Router("/"+PROJECT+"/employee/getPerson",
+	// 	&controllers.EmployeeController{}, POST+":GetEmployeeById")
 
 	//edit person info by id
 	// /erp/employee/updateEmployee
@@ -314,8 +314,8 @@ func Employee() {
 	beego.Router("/"+PROJECT+"/employee/newEmployee",
 		&controllers.EmployeeController{}, POST+":AddEmployee")
 
-	beego.Router("/"+PROJECT+"/employee/deletePerson",
-		&controllers.EmployeeController{}, POST+":DeleteEmployee")
+	// beego.Router("/"+PROJECT+"/employee/deletePerson",
+	// 	&controllers.EmployeeController{}, POST+":DeleteEmployee")
 }
 
 func Leave() {

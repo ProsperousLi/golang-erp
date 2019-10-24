@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	TokenMap = make(map[string]string) //cardid token
-	AccsMap  = make(map[string]string) //token employee's cardid
-	TimeMap  = make(map[string]int64)  //token TimeMap
-	LimitMap = make(map[string]int64)  //限制5次登录机会,成功后清除
+	TokenMap   = make(map[string]string) //cardid token
+	AccsMap    = make(map[string]string) //token employee's cardid
+	TimeMap    = make(map[string]int64)  //token TimeMap
+	LimitMap   = make(map[string]int64)  //限制5次登录机会,成功后清除
+	LimitFresh = make(map[string]int64)  //限制1s刷新验证码
 )
 
 //TODO Timer delete token
@@ -39,9 +40,11 @@ func New_Time_count() {
 // 详细说明：第一次登录不需要验证码，body的vckey和verifycode为空或不带。连续失败5次账号锁定。如果用户名不存在，则一直返回第二种情况。
 func Login(cardid string, password string, vckey, verifycode string) (errorCode int64, uuid, retvckey, retverifycode string) {
 	var (
-		qurey      Account
-		loginTimes int64
+		qurey         Account
+		loginTimes    int64
+		isAddLimitMap bool = true
 	)
+
 	qurey.Cardid = cardid
 	//qurey.Password = password
 	err := OSQL.Read(&qurey, "cardid")
@@ -51,20 +54,29 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 	}
 
 	defer func() {
-		LimitMap[cardid] = loginTimes
+		if isAddLimitMap {
+			LimitMap[cardid] = loginTimes
+		}
 	}()
+
+	beego.Info("登录次数 :", LimitMap[cardid])
 
 	//校验是否需要验证码（是否是第一次登录）
 	if value, ok := LimitMap[cardid]; ok {
+		if value == 0 {
+			beego.Info("第一次登录")
+		}
 		loginTimes = value + 1
-		if loginTimes > 1 {
+		if 1 < loginTimes && loginTimes < 5 {
 			//检查验证码是否正确
 			if vckey == "" || verifycode == "" {
-				retvckey, retverifycode = CodeCaptchaCreate()
+				beego.Error("验证码为空 vckey=", vckey, ", verifycode=", verifycode)
+				retvckey, retverifycode = CodeCaptchaCreate(vckey)
 				return 2, uuid, retvckey, retverifycode
 			}
 
-		} else if value >= 5 {
+		} else if loginTimes >= 5 {
+			beego.Error("登录次数超过5次，已锁定")
 			//update status 3
 			EditAccountStatusById(cardid, 3)
 			return 3, uuid, retvckey, retverifycode
@@ -79,12 +91,14 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 
 	if qurey.Cardid == cardid && qurey.Password == password { //login sucess
 		if qurey.Status == 1 {
+			beego.Info("Password is ture")
 			preToken := TokenMap[cardid]
 			uuid = util.GetToken()
 			TokenMap[cardid] = uuid
 			delete(TimeMap, preToken)
 			TimeMap[uuid] = time.Now().Unix()
 			delete(AccsMap, preToken)
+			isAddLimitMap = false
 			delete(LimitMap, cardid)
 
 			//qurey employee info
@@ -102,7 +116,7 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 		beego.Error("cardid or password is invild")
 		if loginTimes == 1 {
 			//new vckey and verifycode
-			retvckey, retverifycode = CodeCaptchaCreate()
+			retvckey, retverifycode = CodeCaptchaCreate(vckey)
 		} else {
 			retvckey = vckey
 			retverifycode = verifycode
@@ -110,13 +124,21 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 		return 1, uuid, retvckey, retverifycode
 	}
 
+	// TokenMap = make(map[string]string) //cardid token
+	// AccsMap = make(map[string]string)  //token employee's cardid
+	// TimeMap = make(map[string]int64)   //token TimeMap
+	// LimitMap = make(map[string]int64)  //限制5次登录机会,成功后清除
+	beego.Info("TokenMap=", TokenMap, " ,AccsMap=", AccsMap, ", TimeMap=", TimeMap, ",LimitMap=", LimitMap)
+
 	return 0, uuid, retvckey, retverifycode
 }
 
 // 单点登录
 func SSOLogin(token string) (err error, code int64) {
+	beego.Info("单点登录token =", token)
 	code = util.SUCESSFUL
 	if _, ok := AccsMap[token]; ok {
+		beego.Info("token存在, 校验过期")
 		//pandding time
 		if lastTime, ok := TimeMap[token]; ok {
 			if lastTime+1*60*60 < time.Now().Unix() {
@@ -147,6 +169,7 @@ func Loginout(token string) (code int64) {
 		delete(AccsMap, token)
 		delete(TimeMap, token)
 	} else {
+		beego.Error("token不存在 :", token)
 		code = 50008
 	}
 
@@ -154,7 +177,7 @@ func Loginout(token string) (code int64) {
 }
 
 //创建图像验证码
-func CodeCaptchaCreate() (string, string) {
+func CodeCaptchaCreate(vckey string) (string, string) {
 	//config struct for digits
 	// //数字验证码配置
 	// var configD = base64Captcha.ConfigDigit{
@@ -191,7 +214,7 @@ func CodeCaptchaCreate() (string, string) {
 	// //以base64编码
 	// base64stringA := base64Captcha.CaptchaWriteToBase64Encoding(capA)
 	//create a characters captcha.
-	idKeyC, capC := base64Captcha.GenerateCaptcha("", configC)
+	idKeyC, capC := base64Captcha.GenerateCaptcha(vckey, configC)
 	//以base64编码
 	base64stringC := base64Captcha.CaptchaWriteToBase64Encoding(capC)
 	// //create a digits captcha.
@@ -200,7 +223,7 @@ func CodeCaptchaCreate() (string, string) {
 	// base64stringD := base64Captcha.CaptchaWriteToBase64Encoding(capD)
 
 	//fmt.Println(idKeyA, base64stringA, "\n")
-	beego.Info(idKeyC, base64stringC, "\n")
+	//beego.Info(idKeyC, base64stringC, "\n")
 	//fmt.Println(idKeyD, base64stringD, "\n")
 
 	return idKeyC, base64stringC
@@ -309,7 +332,17 @@ func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
 }
 
 func RefreshVerifyCode(vckey string) (errorCode int64, retvckey, retverifycode string) {
+	//LimitFresh
+	if value, ok := LimitFresh["LimitFresh"]; ok {
+		if time.Now().Unix()-value <= 0 {
+			errorCode = 2
+			return
+		}
+	}
+
+	LimitFresh["LimitFresh"] = time.Now().Unix()
+
 	errorCode = util.SUCESSFUL
-	retvckey, retverifycode = CodeCaptchaCreate()
+	retvckey, retverifycode = CodeCaptchaCreate(vckey)
 	return
 }

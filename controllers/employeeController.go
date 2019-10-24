@@ -17,6 +17,7 @@ type EmployeeController struct {
 func (c *EmployeeController) GetAllEmployees() {
 	name := c.GetString("name")
 	cardid := c.GetString("cardid")
+	beego.Info("name =", name, ", cardid=", cardid)
 	emps := models.GetAllEmployees(name, cardid)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = emps

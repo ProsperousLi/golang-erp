@@ -68,15 +68,17 @@ func EditAccountById(account Account) (errorCode int64, msg string) {
 	var (
 		temp Account
 	)
-	temp.Id = account.Id
+	temp.Cardid = account.Cardid
 	errorCode = util.SUCESSFUL
-	err := OSQL.Read(&temp, "id")
+	err := OSQL.Read(&temp, "cardid")
 	if err != nil {
 		beego.Error(err)
 		errorCode = 20001
 		msg = "未找到该用户"
 		return
 	}
+
+	account.Id = temp.Id
 
 	args := editArgs(account)
 	if len(args) > 0 {
@@ -115,11 +117,11 @@ func EditAccountStatusById(cardid string, status int8) (errorCode int64) {
 
 	args := editArgs(temp)
 	if len(args) > 0 {
+		var updateTemp Account
+		updateTemp.Cardid = temp.Cardid
+		updateTemp.Status = temp.Status
 
-		if temp.Password != "" {
-			temp.Password = util.GETMd5(util.DEFUAL_PWD_PRE + temp.Password)
-		}
-		num, err2 := OSQL.Update(&temp, args...)
+		num, err2 := OSQL.Update(&updateTemp, args...)
 
 		if err2 != nil {
 			beego.Error(err2)
@@ -232,17 +234,23 @@ func ModifyPwd(param ModifyPwdStruct, token string) (errorCode int64, errorMessa
 		return
 	}
 
-	if len(param.Oldpwd) <= 8 || len(param.Newpwd) <= 8 {
+	if /*len(param.Oldpwd) <= 8 ||*/ len(param.Newpwd) < 8 {
 		errorMessage = "密码至少8位"
 		return
 	}
 
-	if !util.PanddingPwd(param.Oldpwd) || !util.PanddingPwd(param.Newpwd) {
+	if /*!util.PanddingPwd(param.Oldpwd) ||*/ !util.PanddingPwd(param.Newpwd) {
 		errorMessage = "密码必须至少包含字母和数字"
 		return
 	}
+	//util.GETMd5(util.DEFUAL_PWD_PRE + util.DEFUAL_PWD)
 
-	temp.Password = param.Newpwd
+	if temp.Password != util.GETMd5(util.DEFUAL_PWD_PRE+param.Oldpwd) {
+		errorMessage = "旧密码不正确"
+		return
+	}
+
+	temp.Password = util.GETMd5(util.DEFUAL_PWD_PRE + param.Newpwd)
 
 	args := editArgs(temp)
 	if len(args) > 0 {

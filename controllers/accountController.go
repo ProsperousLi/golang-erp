@@ -189,7 +189,7 @@ func (c *AccountController) ModifyPwd() {
 
 //18.重置密码
 //{cardid: “xxx”}
-func (c *AccountController) ResetAccount(cardid string) {
+func (c *AccountController) ResetAccount() {
 	//TODO 需要检验操作人的token
 	// webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
 	// //check token
@@ -203,10 +203,26 @@ func (c *AccountController) ResetAccount(cardid string) {
 	// }
 
 	//EditAccountStatusById(cardid,3)
+
+	var (
+		param = make(map[string]string)
+	)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
+	if err != nil {
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
+		util.RetContent.Code = util.PARAM_FAILED
+		c.Data["json"] = util.RetContent
+		c.ServeJSON()
+		return
+	}
+
+	cardid := param["cardid"]
 	var account models.Account
 	account.Cardid = cardid
 	account.Status = 3
 	account.Password = util.GETMd5(util.DEFUAL_PWD_PRE + util.DEFUAL_PWD)
+
+	beego.Info("Password =", account.Password)
 	code, msg := models.EditAccountById(account)
 	util.RetContent.Code = code
 	util.RetContent.Message = msg

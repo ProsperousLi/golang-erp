@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"io/ioutil"
 	"strings"
 
 	"erpweb/models"
@@ -31,16 +32,22 @@ func (c *BaseController) Prepare() {
 	var newPageRes util.PageResult
 	util.PageResults = newPageRes
 
-	actions := c.Ctx.Request.Method
+	actions := c.Ctx.Request.URL.String()
 
 	beego.Info("action=", actions)
 
+	webToken := c.Ctx.Input.Header("x-Token")
+
+	beego.Info("webToken=", webToken)
+
 	if !strings.HasPrefix(actions, "/api/login/") {
 		beego.Info("校验token")
-		message, code := c.checkToken()
+		err, code := c.checkToken(webToken)
 		if code != util.SUCESSFUL {
 			util.RetContent.Code = code
-			util.RetContent.Message = message
+			if err != nil {
+				util.RetContent.Message = err.Error()
+			}
 			c.Data["json"] = util.RetContent
 			c.ServeJSON()
 			c.StopRun()
@@ -64,14 +71,14 @@ func (c *BaseController) getInfo() {
 	method := c.Ctx.Request.Method
 	header := c.Ctx.Request.URL
 	forms := c.Ctx.Request.Form
-	beego.Info("method=", method, " url :", header.Path, " 参数 :")
+	body, _ := ioutil.ReadAll(c.Ctx.Request.Body)
+	beego.Info("method=", method, " url :", header.Path, " 参数 :", "body :", string(body))
 	for k, v := range forms {
 		beego.Info(k, v)
 	}
 }
 
-func (c *BaseController) checkToken() (string, int64) {
-	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
+func (c *BaseController) checkToken(webToken string) (error, int64) {
 	err, code := models.SSOLogin(webToken)
-	return err.Error(), code
+	return err, code
 }
