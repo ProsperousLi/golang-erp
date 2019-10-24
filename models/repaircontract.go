@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `repaircontract`;
@@ -57,7 +58,7 @@ func GetRepaircontractBypage(pageNum, pageSize int64) []Repaircontract {
 	_, err := OSQL.Raw("select * from "+util.Repaircontract_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params
 }
@@ -66,7 +67,7 @@ func GetRepaircontractById(id int64) (ret Repaircontract, err error) {
 	ret.Id = id
 	err = OSQL.Read(&ret, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 	return ret, nil
@@ -80,7 +81,7 @@ func EditRepaircontractById(param Repaircontract) (errorCode int64) {
 	temp.Id = param.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Repaircontract_EDIT_FAILED
 		return errorCode
 	}
@@ -88,11 +89,11 @@ func EditRepaircontractById(param Repaircontract) (errorCode int64) {
 	args := edit_repaircontract(param)
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Repaircontract_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -171,18 +172,18 @@ func AddRepaircontract(param Repaircontract) (errorCode int64) {
 	temp.Id = param.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("Repaircontract have this id=%v", param.Id)
+		beego.Error("Repaircontract have this id=", param.Id)
 		errorCode = util.Repaircontract_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Repaircontract_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -194,10 +195,10 @@ func DeleteRepaircontract(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Repaircontract_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

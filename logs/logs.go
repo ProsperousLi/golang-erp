@@ -2,8 +2,10 @@ package logs
 
 import (
 	//"strings"
+	"encoding/json"
+	"fmt"
 
-	//"github.com/astaxie/beego"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -15,6 +17,25 @@ var FileLogs *logs.BeeLogger
 
 //运行方式
 var runmode string
+
+func InitLogger() (err error) {
+
+	config := make(map[string]interface{})
+	config["filename"] = beego.AppConfig.String("log_path")
+
+	// map 转 json
+	configStr, err := json.Marshal(config)
+	if err != nil {
+		fmt.Println("initLogger failed, marshal err:", err)
+		return
+	}
+	// log 的配置
+	beego.SetLogger(logs.AdapterFile, string(configStr))
+	// log打印文件名和行数
+	beego.SetLogFuncCall(true)
+	fmt.Println(string(configStr))
+	return
+}
 
 func InitLogs() {
 	// consoleLogs = logs.NewLogger(1)
@@ -47,37 +68,37 @@ func InitLogs() {
 	Info("log start...")
 	//log.Info("log start...")
 }
-func LogEmergency(v interface{}) {
+func LogEmergency(v ...interface{}) {
 	log("emergency", v)
 }
-func LogAlert(v interface{}) {
+func LogAlert(v ...interface{}) {
 	log("alert", v)
 }
-func LogCritical(v interface{}) {
+func LogCritical(v ...interface{}) {
 	log("critical", v)
 }
-func Error(v interface{}) {
+func Error(v ...interface{}) {
 	log("error", v)
 }
-func Warn(v interface{}) {
+func Warn(v ...interface{}) {
 	log("warning", v)
 }
-func LogNotice(v interface{}) {
+func LogNotice(v ...interface{}) {
 	log("notice", v)
 }
-func Info(v interface{}) {
+func Info(v ...interface{}) {
 	log("info", v)
 }
-func LogDebug(v interface{}) {
+func LogDebug(v ...interface{}) {
 	log("debug", v)
 }
 
-func LogTrace(v interface{}) {
+func LogTrace(v ...interface{}) {
 	log("trace", v)
 }
 
 //Log 输出日志
-func log(level, v interface{}) {
+func log(level string, v ...interface{}) {
 	format := "%s"
 	if level == "" {
 		level = "debug"

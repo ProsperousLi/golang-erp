@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type SaledetailController struct {
@@ -25,7 +26,7 @@ func (c *SaledetailController) AddOrUpdateSaleDetail() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.FAILED
 		util.RetContent.Message = "参数错误"
 		c.Data["json"] = util.RetContent
@@ -71,7 +72,7 @@ func (c *SaledetailController) GetSaledetailById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -80,7 +81,7 @@ func (c *SaledetailController) GetSaledetailById() {
 
 	id := param["contractid"]
 
-	logs.FileLogs.Info("%v ---id = ", id)
+	beego.Info("id = ", id)
 	ret, _ := models.GetSaledetailById(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -95,7 +96,7 @@ func (c *SaledetailController) EditSaledetailById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -115,13 +116,13 @@ func (c *SaledetailController) AddSaledetail() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 	code := models.AddSaledetail(param)
 	util.RetContent.Code = code
@@ -135,7 +136,7 @@ func (c *SaledetailController) DeleteSaledetail() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -144,7 +145,7 @@ func (c *SaledetailController) DeleteSaledetail() {
 
 	id := param["contractid"]
 
-	logs.FileLogs.Info("%v ---", id)
+	beego.Info(id)
 	code := models.DeleteSaledetail(id)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent

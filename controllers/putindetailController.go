@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type PutindetailController struct {
@@ -18,7 +19,7 @@ func (c *PutindetailController) QueryPutinDetail() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -39,7 +40,7 @@ func (c *PutindetailController) GetPutindetails() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -66,7 +67,7 @@ func (c *PutindetailController) GetPutindetailById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -75,7 +76,7 @@ func (c *PutindetailController) GetPutindetailById() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---id = ", id)
+	beego.Info("id = ", id)
 	ret, _ := models.GetPutindetailById(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -90,7 +91,7 @@ func (c *PutindetailController) EditPutindetailById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -110,13 +111,13 @@ func (c *PutindetailController) AddPutindetail() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 	code := models.AddPutindetail(param)
 	util.RetContent.Code = code
@@ -130,7 +131,7 @@ func (c *PutindetailController) DeletePutindetail() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -139,7 +140,7 @@ func (c *PutindetailController) DeletePutindetail() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---", id)
+	beego.Info(id)
 	code := models.DeletePutindetail(id)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent

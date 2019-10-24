@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type MatterplanController struct {
@@ -18,7 +19,7 @@ func (c *MatterplanController) GetMatterplansByItemid() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -39,7 +40,7 @@ func (c *MatterplanController) GetMatterplans() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -66,7 +67,7 @@ func (c *MatterplanController) GetMatterplanById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -75,7 +76,7 @@ func (c *MatterplanController) GetMatterplanById() {
 
 	id := param["itemid"]
 
-	logs.FileLogs.Info("%v ---id = ", id)
+	beego.Info("id = ", id)
 	ret, _ := models.GetMatterplanById(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -90,7 +91,7 @@ func (c *MatterplanController) EditMatterplanById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -110,13 +111,13 @@ func (c *MatterplanController) AddMatterplan() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 	code := models.AddMatterplan(param)
 	util.RetContent.Code = code
@@ -131,7 +132,7 @@ func (c *MatterplanController) DeleteMatterplan() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()

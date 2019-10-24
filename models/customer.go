@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //客户信息表
@@ -30,19 +31,19 @@ func QueryCustomer(querystr string) []Customer {
 			util.CUSTOMER_TABLE_NAME+
 			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			return custs1
 		}
-		logs.FileLogs.Info("num1=%v", num)
+		beego.Info("num1=", num)
 
 		num, err = OSQL.Raw("select * from "+
 			util.CUSTOMER_TABLE_NAME+
 			" where custcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			return custs1
 		}
-		logs.FileLogs.Info("num2=%v", num)
+		beego.Info("num2=", num)
 	} else {
 		num, err := OSQL.Raw("select * from " +
 			util.CUSTOMER_TABLE_NAME +
@@ -50,9 +51,9 @@ func QueryCustomer(querystr string) []Customer {
 		).QueryRows(&custs1)
 
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	}
 
 	if len(custs2) > 0 {
@@ -67,13 +68,13 @@ func GetCustomerBypage(pageNum, pageSize int64) []Customer {
 		custs []Customer
 	)
 	begin := pageSize * pageNum
-	logs.FileLogs.Info("begin=%v", begin, ", end =%v", pageSize)
+	beego.Info("begin=", begin, ", end =", pageSize)
 	num, err := OSQL.Raw("select * from "+util.CUSTOMER_TABLE_NAME+" order by id asc limit ?,?",
 		pageNum, pageSize).QueryRows(&custs)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return custs
 }
 
@@ -81,7 +82,7 @@ func GetCustomerById(id int64) (cust Customer, err error) {
 	cust.Id = id
 	err = OSQL.Read(&cust, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return cust, err
 	}
 	return cust, nil
@@ -95,7 +96,7 @@ func EditCustomerById(cust Customer) (errorCode int64) {
 	temp.Id = cust.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.CUSTOMER_EDIT_FAILED
 		return errorCode
 	}
@@ -104,13 +105,13 @@ func EditCustomerById(cust Customer) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&cust, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.CUSTOMER_EDIT_FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 
 	return errorCode
@@ -160,7 +161,7 @@ func editArgs_cu(temp Customer) []string {
 		args = append(args, "remark")
 	}
 
-	logs.FileLogs.Info("args=%v", args)
+	beego.Info("args=", args)
 	return args
 }
 
@@ -172,18 +173,18 @@ func AddCustomer(cust Customer) (errorCode int64) {
 	temp.Id = cust.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", cust.Id)
+		beego.Error("ware have this id=", cust.Id)
 		errorCode = util.CUSTOMER_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&cust)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.CUSTOMER_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -195,10 +196,10 @@ func DeleteCustomer(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.CUSTOMER_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

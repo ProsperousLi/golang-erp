@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //暂时不用实现
@@ -20,7 +21,7 @@ func GetDutyBypage(pageNum, pageSize int64) []Duty {
 	err := OSQL.Raw("select * from "+util.DUTY_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRow(&dutys)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	return dutys
@@ -30,7 +31,7 @@ func GetDutyById(id int64) (duty Duty, err error) {
 	duty.Id = id
 	err = OSQL.Read(&duty, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return duty, err
 	}
 	return duty, nil
@@ -44,7 +45,7 @@ func EditDutyById(duty Duty) (errorCode int64) {
 	temp.Id = duty.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.DUTY_EDIT_FAILED
 		return errorCode
 	}
@@ -52,13 +53,13 @@ func EditDutyById(duty Duty) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&temp, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			errorCode = util.DUTY_EDIT_FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 	return errorCode
 }
@@ -86,17 +87,17 @@ func AddDuty(duty Duty) (errorCode int64) {
 	temp.Id = duty.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("duty have this id=%v", temp.Id)
+		beego.Error("duty have this id=", temp.Id)
 		errorCode = util.DUTY_ADD_FAILED
 		return errorCode
 	}
 	num, err2 := OSQL.Insert(&temp)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.DUTY_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -108,10 +109,10 @@ func DeleteDuty(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.DUTY_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

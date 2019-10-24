@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type PermissionController struct {
@@ -18,7 +19,7 @@ func (c *PermissionController) GetPermissions() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -45,7 +46,7 @@ func (c *PermissionController) GetPermissionById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -54,7 +55,7 @@ func (c *PermissionController) GetPermissionById() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---id = ", id)
+	beego.Info("id = ", id)
 	ret, _ := models.GetPermissionByID(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -69,7 +70,7 @@ func (c *PermissionController) EditPermissionById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -89,13 +90,13 @@ func (c *PermissionController) AddPermission() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 	code := models.AddPermission(param)
 	util.RetContent.Code = code
@@ -109,7 +110,7 @@ func (c *PermissionController) DeletePermission() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -118,7 +119,7 @@ func (c *PermissionController) DeletePermission() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---", id)
+	beego.Info(id)
 	code := models.DeletePermission(id)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
@@ -131,7 +132,7 @@ func (c *PermissionController) SetPermission() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -149,7 +150,7 @@ func (c *PermissionController) QueryPermission() {
 	cardid := c.GetString("cardid")
 	ret, err := models.QueryPermission(cardid)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error("%s", err)
 		util.RetContent.Code = util.FAILED
 		util.RetContent.Message = "未查询到该用户"
 	}

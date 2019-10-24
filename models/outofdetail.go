@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `outofdetail`;
@@ -44,7 +45,7 @@ func GetOutofdetailBypage(outcode string) (rets []OutofdetailWeb) {
 	_, err := OSQL.Raw("select * from " + util.Outofdetail_TABLE_NAME +
 		" where outcode='" + outcode + "' order by id desc limit").QueryRows(&outofdetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, temp := range outofdetails {
@@ -75,7 +76,7 @@ func GetOutofdetailById(id int64) (outofdetail Outofdetail, err error) {
 	outofdetail.Id = id
 	err = OSQL.Read(&outofdetail, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return outofdetail, err
 	}
 	return outofdetail, nil
@@ -89,7 +90,7 @@ func EditOutofdetailById(outofdetail Outofdetail) (errorCode int64) {
 	temp.Id = outofdetail.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Outofdetail_EDIT_FAILED
 		return errorCode
 	}
@@ -98,11 +99,11 @@ func EditOutofdetailById(outofdetail Outofdetail) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&outofdetail, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Outofdetail_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -137,18 +138,18 @@ func AddOutofdetail(outofdetail Outofdetail) (errorCode int64) {
 	temp.Id = outofdetail.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("outofdetail have this id=%v", outofdetail.Id)
+		beego.Error("outofdetail have this id=", outofdetail.Id)
 		errorCode = util.Outofdetail_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&outofdetail)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Outofdetail_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -160,10 +161,10 @@ func DeleteOutofdetail(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Outofdetail_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // -- ----------------------------
@@ -40,7 +41,7 @@ func GetArrivaldetailBypage(arrivalbillcode string) []Arrivaldetail {
 	_, err := OSQL.Raw("select * from " + util.Arrivaldetail_TABLE_NAME +
 		" and where arrivalbillcode='" + arrivalbillcode + "' order by id desc").QueryRows(&arrivalbills)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return arrivalbills
 }
@@ -49,7 +50,7 @@ func GetArrivaldetailByUserID(id int64) (ret Arrivaldetail, err error) {
 	ret.Id = id
 	err = OSQL.Read(&ret, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return ret, nil
 }
@@ -62,7 +63,7 @@ func EditArrivaldetailById(param Arrivaldetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "arrivalbillcode")
 	if err != nil {
-		// logs.FileLogs.Error("%s", err)
+		// beego.Error("%s", err)
 		// errorCode = util.Arrivaldetail_EDIT_FAILED
 		// return errorCode
 		//add
@@ -83,12 +84,12 @@ func EditArrivaldetailById(param Arrivaldetail) (errorCode int64) {
 	args := edit_Arrivaldetail(param)
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Arrivaldetail_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -133,14 +134,14 @@ func AddArrivaldetail(param Arrivaldetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "arrivalbillcode")
 	if err == nil {
-		logs.FileLogs.Info("Arrivaldetail have asixt")
+		beego.Info("Arrivaldetail have asixt")
 		errorCode = util.Arrivaldetail_ADD_FAILED
 		return errorCode
 	}
 
 	_, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Arrivaldetail_ADD_FAILED
 	}
 
@@ -155,7 +156,7 @@ func DeleteArrivaldetail(arrivalbillcode string) (errorCode int64) {
 	temp.Arrivalbillcode = arrivalbillcode
 	_, err := OSQL.Delete(&temp, "arrivalbillcode")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Arrivalbill_DELETE_FAILED
 	}
 

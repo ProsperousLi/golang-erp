@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //供货关系表
@@ -59,7 +60,7 @@ func GetSupplyrelationByMatterid(matterid int64) (pa []Supplyrelation, err error
 	_, err = OSQL.Raw("select * from " + util.SUPPLYRELATION_TABLE_NAME +
 		" where matterid=? order by id asc").QueryRows(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas, err
 }
@@ -71,7 +72,7 @@ func GetSupplyrelationBySupplierid(Supplierid int64) (pa []Supplyrelation, err e
 	_, err = OSQL.Raw("select * from " + util.SUPPLYRELATION_TABLE_NAME +
 		" where supplierid=? order by id asc").QueryRows(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas, err
 }
@@ -84,7 +85,7 @@ func GetSupplyrelationBypage(pageNum, pageSize int64) []Supplyrelation {
 	_, err := OSQL.Raw("select * from "+util.SUPPLYRELATION_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas
 }
@@ -93,7 +94,7 @@ func GetSupplyrelationById(id int64) (pa Supplyrelation, err error) {
 	pa.Id = id
 	err = OSQL.Read(&pa, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return pa, err
 	}
 	return pa, nil
@@ -107,7 +108,7 @@ func EditSupplyrelationById(pa Supplyrelation) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.SUPPLYRELATION_EDIT_FAILED
 		return errorCode
 	}
@@ -115,11 +116,11 @@ func EditSupplyrelationById(pa Supplyrelation) (errorCode int64) {
 	args := edit_supplyrelation(pa)
 	num, err2 := OSQL.Update(&pa, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.SUPPLYRELATION_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -141,18 +142,18 @@ func AddSupplyrelation(pa Supplyrelation) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", pa.Id)
+		beego.Error("ware have this id=", pa.Id)
 		errorCode = util.SUPPLYRELATION_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.SUPPLYRELATION_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -164,11 +165,11 @@ func DeleteSupplyrelation(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.SUPPLYRELATION_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -180,11 +181,11 @@ func DeleteSupplyrelationBySupplierid(supplierid int64) (errorCode int64) {
 	temp.Supplierid = supplierid
 	num, err := OSQL.Delete(&temp, "supplierid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -196,10 +197,10 @@ func DeleteSupplyrelationByMatterId(matterid int64) (errorCode int64) {
 	temp.Matterid = matterid
 	num, err := OSQL.Delete(&temp, "matterid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

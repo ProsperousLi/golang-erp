@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `putindetail`;
@@ -47,7 +48,7 @@ func QueryPutinDetail(incode string) (rets []PutindetailStruct) {
 	_, err := OSQL.Raw("select * from " + util.Putindetail_TABLE_NAME +
 		" where incode ='" + incode + "' order by id desc").QueryRows(&putindetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, temp := range putindetails {
@@ -83,7 +84,7 @@ func GetPutindetailBypage(pageNum, pageSize int64) []Putindetail {
 	_, err := OSQL.Raw("select * from "+util.Putindetail_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&putindetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return putindetails
 }
@@ -92,7 +93,7 @@ func GetPutindetailById(id int64) (putindetail Putindetail, err error) {
 	putindetail.Id = id
 	err = OSQL.Read(&putindetail, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return putindetail, err
 	}
 	return putindetail, nil
@@ -106,7 +107,7 @@ func EditPutindetailById(putindetail Putindetail) (errorCode int64) {
 	temp.Id = putindetail.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Putindetail_EDIT_FAILED
 		return errorCode
 	}
@@ -115,11 +116,11 @@ func EditPutindetailById(putindetail Putindetail) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&putindetail, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Putindetail_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -159,18 +160,18 @@ func AddPutindetail(putindetail Putindetail) (errorCode int64) {
 	temp.Id = putindetail.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("putindetail have this id=%v", putindetail.Id)
+		beego.Error("putindetail have this id=", putindetail.Id)
 		errorCode = util.Putindetail_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&putindetail)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Putindetail_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -182,10 +183,10 @@ func DeletePutindetail(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Putindetail_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

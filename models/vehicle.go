@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `vehicle`;
@@ -38,7 +39,7 @@ func GetVehicleByCustcode(custcode string) []Vehicle {
 	)
 	err := OSQL.Raw("select * from "+util.VEHICLE_TABLE_NAME+" where custcode=? order by id asc", custcode).QueryRow(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas
 }
@@ -50,7 +51,7 @@ func GetVehicleBypage(pageNum, pageSize int64) []Vehicle {
 	err := OSQL.Raw("select * from "+util.VEHICLE_TABLE_NAME+" order by id asc limit ?,?",
 		pageNum, pageSize).QueryRow(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas
 }
@@ -59,7 +60,7 @@ func GetVehicleById(id int64) (pa Vehicle, err error) {
 	pa.Id = id
 	err = OSQL.Read(&pa, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return pa, err
 	}
 	return pa, nil
@@ -73,18 +74,18 @@ func EditVehicleById(pa Vehicle) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.VEHICLE_EDIT_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Update(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.VEHICLE_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -131,18 +132,18 @@ func AddVehicle(pa Vehicle) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("Vehicle have this id=%v", pa.Id)
+		beego.Error("Vehicle have this id=", pa.Id)
 		errorCode = util.VEHICLE_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.VEHICLE_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -154,10 +155,10 @@ func DeleteVehicle(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.VEHICLE_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //操作日志表
@@ -21,7 +22,7 @@ func GetOperlogBypage(pageNum, pageSize int64) []Operlog {
 	_, err := OSQL.Raw("select * from "+util.OPERLOG_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&operlogs)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	return operlogs
@@ -31,7 +32,7 @@ func GetOperlogByOperator(operator int64) (operlog Operlog, err error) {
 	operlog.Operator = operator
 	err = OSQL.Read(&operator, "operator")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return operlog, err
 	}
 	return operlog, nil
@@ -45,7 +46,7 @@ func EditOperlogById(operlog Operlog) (errorCode int64) {
 	temp.Operator = operlog.Operator
 	err := OSQL.Read(&temp, "operator")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.OPERLOG_EDIT_FAILED
 		return errorCode
 	}
@@ -54,11 +55,11 @@ func EditOperlogById(operlog Operlog) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&operlog, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.OPERLOG_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
@@ -87,18 +88,18 @@ func AddOperlog(operlog Operlog) (errorCode int64) {
 	temp.Operator = operlog.Operator
 	err := OSQL.Read(&temp, "operator")
 	if err == nil {
-		logs.FileLogs.Error("operlog have this operator=%v", operlog.Operator)
+		beego.Error("operlog have this operator=", operlog.Operator)
 		errorCode = util.OPERLOG_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&operlog)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.OPERLOG_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
@@ -111,10 +112,10 @@ func DeleteOperlog(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.OPERLOG_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

@@ -1,7 +1,8 @@
 package controllers
 
 import (
-	"erpweb/logs"
+	"strings"
+
 	"erpweb/models"
 	"erpweb/util"
 
@@ -30,7 +31,12 @@ func (c *BaseController) Prepare() {
 	var newPageRes util.PageResult
 	util.PageResults = newPageRes
 
-	if c.Ctx.Request.Method != "/api/login/login" {
+	actions := c.Ctx.Request.Method
+
+	beego.Info("action=", actions)
+
+	if !strings.HasPrefix(actions, "/api/login/") {
+		beego.Info("校验token")
 		message, code := c.checkToken()
 		if code != util.SUCESSFUL {
 			util.RetContent.Code = code
@@ -39,6 +45,8 @@ func (c *BaseController) Prepare() {
 			c.ServeJSON()
 			c.StopRun()
 		}
+	} else {
+		beego.Info("login的登录相关接口，不需要校验token")
 	}
 
 }
@@ -56,9 +64,9 @@ func (c *BaseController) getInfo() {
 	method := c.Ctx.Request.Method
 	header := c.Ctx.Request.URL
 	forms := c.Ctx.Request.Form
-	logs.FileLogs.Info("method=%v", method, " url :%v", header.Path, " 参数 :\n")
+	beego.Info("method=", method, " url :", header.Path, " 参数 :")
 	for k, v := range forms {
-		logs.FileLogs.Info("%v=%v", k, v)
+		beego.Info(k, v)
 	}
 }
 

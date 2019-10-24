@@ -4,7 +4,7 @@ import ()
 
 const (
 	DEFUAL_PWD_PRE = "bcxskyc@"
-	DEFUAL_PWD     = "bxkc!QAZ888"
+	DEFUAL_PWD     = "bxkc!QAZ888" //默认密码
 )
 
 const (

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type Account struct {
@@ -24,7 +25,7 @@ func GetAccountsNotPwd() (RetAccounts []map[string]interface{}) {
 	_, err := OSQL.Raw("select * from " + util.ACCOUNT_TABLE_NAME +
 		" order by id asc").QueryRows(&accounts)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 
 		return RetAccounts
 	}
@@ -45,11 +46,11 @@ func GetAccountBypage(pageNum, pageSize int64) []Account {
 	)
 
 	begin := pageSize * pageNum
-	logs.FileLogs.Info("begin=%v", begin, ", end =%v", pageSize)
+	beego.Info("begin=", begin, ", end =", pageSize)
 	_, err := OSQL.Raw("select * from "+util.ACCOUNT_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&accounts)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return accounts
 }
@@ -58,7 +59,7 @@ func GetAccountByUserID(cardid string) (account Account, err error) {
 	account.Cardid = cardid
 	err = OSQL.Read(&account, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return account, nil
 }
@@ -71,7 +72,7 @@ func EditAccountById(account Account) (errorCode int64, msg string) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = 20001
 		msg = "未找到该用户"
 		return
@@ -82,15 +83,15 @@ func EditAccountById(account Account) (errorCode int64, msg string) {
 		num, err2 := OSQL.Update(&account, args...)
 
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = 20001
 			msg = "数据更新失败"
 			return
 		}
 
-		logs.FileLogs.Info("num=%v err=%v", num, err2)
+		beego.Info("num= err=", num, err2)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 		errorCode = 20001
 		msg = "没有数据要更新"
 	}
@@ -105,7 +106,7 @@ func EditAccountStatusById(cardid string, status int8) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.ACCOUNT_EDIT_FAILED
 		return errorCode
 	}
@@ -114,17 +115,21 @@ func EditAccountStatusById(cardid string, status int8) (errorCode int64) {
 
 	args := editArgs(temp)
 	if len(args) > 0 {
+
+		if temp.Password != "" {
+			temp.Password = util.GETMd5(util.DEFUAL_PWD_PRE + temp.Password)
+		}
 		num, err2 := OSQL.Update(&temp, args...)
 
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.ACCOUNT_EDIT_FAILED
 			return errorCode
 		}
 
-		logs.FileLogs.Info("num=%v err=%v", num, err2)
+		beego.Info("num= err=", num, err2)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 	return errorCode
 }
@@ -142,7 +147,7 @@ func editArgs(temp Account) []string {
 	if temp.Password != "" {
 		args = append(args, "password")
 	}
-	logs.FileLogs.Info("args=%v", args)
+	beego.Info("args=", args)
 	return args
 }
 
@@ -154,20 +159,24 @@ func AddAccountment(account Account) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "Cardid")
 	if err == nil {
-		logs.FileLogs.Info("account have asixt")
+		beego.Info("account have asixt")
 		errorCode = util.ACCOUNT_ADD_FAILED
 		return errorCode
 	}
 
-	account.Password = util.GETMd5(util.DEFUAL_PWD + util.DEFUAL_PWD_PRE)
+	if account.Password == "" {
+		account.Password = util.GETMd5(util.DEFUAL_PWD_PRE + util.DEFUAL_PWD)
+	} else {
+		account.Password = util.GETMd5(util.DEFUAL_PWD_PRE + account.Password)
+	}
 
 	id, err2 := OSQL.Insert(&account)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.ACCOUNT_ADD_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 
 	return errorCode
 }
@@ -180,11 +189,11 @@ func DeleteAccount(cardid string) (errorCode int64) {
 	account.Cardid = cardid
 	num, err := OSQL.Delete(&account, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.ACCOUNT_DELETE_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
@@ -204,7 +213,7 @@ func ModifyPwd(param ModifyPwdStruct, token string) (errorCode int64, errorMessa
 	errorCode = 20001
 	err := OSQL.Read(&temp, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorMessage = "未找到该用户"
 		return
 	}
@@ -240,15 +249,15 @@ func ModifyPwd(param ModifyPwdStruct, token string) (errorCode int64, errorMessa
 		num, err2 := OSQL.Update(&temp, args...)
 
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorMessage = "数据库更新密码失败"
 			//errorCode = util.ACCOUNT_EDIT_FAILED
 			return
 		}
 
-		logs.FileLogs.Info("num=%v err=%v", num, err2)
+		beego.Info("num= err=", num, err2)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 		errorMessage = "没有数据要更新"
 		return
 	}

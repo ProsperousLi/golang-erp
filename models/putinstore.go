@@ -3,8 +3,9 @@ package models
 import (
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `putinstore`;
@@ -40,18 +41,18 @@ func PutinStore(param Putinstore) (errorCode, lastId int64) {
 	temp.Id = param.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("putinstore have this id=%v", param.Id)
+		beego.Error("putinstore have this id=", param.Id)
 		errorCode = util.Putinstore_ADD_FAILED
 		return errorCode, lastId
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Putinstore_ADD_FAILED
 		return errorCode, num
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	lastId = num
 	return errorCode, num
@@ -64,7 +65,7 @@ func GetAllPutinstore() []Putinstore {
 	)
 	_, err := OSQL.Raw("select * from " + util.Putinstore_TABLE_NAME + " order by id desc").QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params
 }
@@ -104,12 +105,12 @@ func GetPutinstoreBypage(param QueryPutistoreStruct) ([]Putinstore, int64) {
 	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
 		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Putinstore_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets, allNums
 }
@@ -118,7 +119,7 @@ func GetPutinstoreById(id int64) (ret Putinstore, err error) {
 	ret.Id = id
 	err = OSQL.Read(&ret, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 	return ret, nil
@@ -132,7 +133,7 @@ func EditPutinstoreById(param Putinstore) (errorCode int64) {
 	temp.Id = param.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Putinstore_EDIT_FAILED
 		return errorCode
 	}
@@ -141,11 +142,11 @@ func EditPutinstoreById(param Putinstore) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Putinstore_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -188,18 +189,18 @@ func AddPutinstore(param Putinstore) (errorCode, id int64) {
 	temp.Id = param.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("putinstore have this id=%v", param.Id)
+		beego.Error("putinstore have this id=", param.Id)
 		errorCode = util.Putinstore_ADD_FAILED
 		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Putinstore_ADD_FAILED
 		return errorCode, num
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode, num
 }
 
@@ -211,10 +212,10 @@ func DeletePutinstore(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Putinstore_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

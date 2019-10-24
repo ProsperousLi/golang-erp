@@ -3,9 +3,11 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
+	//"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type AccountController struct {
@@ -26,7 +28,7 @@ func (c *AccountController) GetAccounts() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -53,7 +55,7 @@ func (c *AccountController) GetAccountById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -62,7 +64,7 @@ func (c *AccountController) GetAccountById() {
 
 	userId := param["cardid"]
 
-	logs.FileLogs.Info("%v ---", userId)
+	beego.Info(userId)
 	ret, _ := models.GetAccountByUserID(userId)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -77,7 +79,7 @@ func (c *AccountController) EditAccountById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -102,7 +104,7 @@ func (c *AccountController) EditAccountStatusById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -123,13 +125,13 @@ func (c *AccountController) AddAccount() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 
 	//param.Password =
@@ -146,7 +148,7 @@ func (c *AccountController) DeleteAccount() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -155,7 +157,7 @@ func (c *AccountController) DeleteAccount() {
 
 	userId := param["cardid"]
 
-	logs.FileLogs.Info("%v ---", userId)
+	beego.Info(userId)
 	code := models.DeleteAccount(userId)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent
@@ -169,14 +171,14 @@ func (c *AccountController) ModifyPwd() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	}
 
-	logs.FileLogs.Info("%v ---", param)
+	beego.Info(param)
 	webToken := c.Ctx.ResponseWriter.Header().Get("x-Token")
 	code, msg := models.ModifyPwd(param, webToken)
 	util.RetContent.Code = code
@@ -194,9 +196,9 @@ func (c *AccountController) ResetAccount(cardid string) {
 	// if adminCardid, ok := models.AccsMap[webToken]; ok {
 	// 	//TODO 对人员管理有写权限 如何知道对人员管理有写权限
 	// 	permis, _ := models.QueryPermission(adminCardid)
-	// 	logs.FileLogs.Info("%v", permis.Write[0])
+	// 	beego.Info("%v", permis.Write[0])
 	// } else {
-	// 	logs.FileLogs.Error("token not have")
+	// 	beego.Error("token not have")
 	// 	return
 	// }
 

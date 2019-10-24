@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `inquiry`;
@@ -80,12 +81,12 @@ func QueryInquiry(param InquiryStruct) ([]Inquiry, int64) {
 	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
 		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets, allNums
 }
@@ -98,7 +99,7 @@ func GetInquiryBypage(pageNum, pageSize int64) []Inquiry {
 	_, err := OSQL.Raw("select * from "+util.Inquiry_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&inquirys)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return inquirys
 }
@@ -107,7 +108,7 @@ func GetInquiryByUserID(id int64) (inquiry Inquiry, err error) {
 	inquiry.Id = id
 	err = OSQL.Read(&inquiry, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return inquiry, nil
 }
@@ -120,7 +121,7 @@ func EditInquiryById(inquiry Inquiry) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Inquiry_EDIT_FAILED
 		return errorCode
 	}
@@ -128,12 +129,12 @@ func EditInquiryById(inquiry Inquiry) (errorCode int64) {
 	args := edit_InquiryArgs(inquiry)
 	num, err2 := OSQL.Update(&inquiry, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Inquiry_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -192,14 +193,14 @@ func AddInquiry(inquiry Inquiry) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Info("inquiry have asixt")
+		beego.Info("inquiry have asixt")
 		errorCode = util.Inquiry_ADD_FAILED
 		return errorCode
 	}
 
 	_, err2 := OSQL.Insert(&inquiry)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Inquiry_ADD_FAILED
 	}
 
@@ -214,7 +215,7 @@ func DeleteInquiry(id int64) (errorCode int64) {
 	inquiry.Id = id
 	_, err := OSQL.Delete(&inquiry, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Inquiry_DELETE_FAILED
 	}
 

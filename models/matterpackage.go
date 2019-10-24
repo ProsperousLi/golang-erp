@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //暂时不用实现
@@ -20,7 +21,7 @@ func GetMatterpackageBypage(pageNum, pageSize int64) []Matterpackage {
 	_, err := OSQL.Raw("select * from "+util.MATTERPACKAGE_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&mas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return mas
 }
@@ -29,7 +30,7 @@ func GetMatterpackageById(id int64) (ma Matterpackage, err error) {
 	ma.Id = id
 	err = OSQL.Read(&ma, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ma, err
 	}
 	return ma, nil
@@ -43,7 +44,7 @@ func EditMatterpackageById(ma Matterpackage) (errorCode int64) {
 	temp.Id = ma.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.MATTERPACKAGE_EDIT_FAILED
 		return errorCode
 	}
@@ -52,11 +53,11 @@ func EditMatterpackageById(ma Matterpackage) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&ma, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.MATTERPACKAGE_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -75,18 +76,18 @@ func AddMatterpackage(ma Matterpackage) (errorCode int64) {
 	temp.Id = ma.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("matterpackage have this id=%v", ma.Id)
+		beego.Error("matterpackage have this id=%v", ma.Id)
 		errorCode = util.MATTERPACKAGE_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&ma)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.MATTERPACKAGE_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -98,10 +99,10 @@ func DeleteMatterpackage(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.MATTERPACKAGE_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

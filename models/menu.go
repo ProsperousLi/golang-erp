@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type Menu struct {
@@ -30,7 +31,7 @@ func GetMenus() []*WebMenu {
 	)
 	_, err := OSQL.Raw("select * from " + util.EMPLOYEE_TABLE_NAME + " order by menuID asc").QueryRows(&menus)
 	if err != nil {
-		logs.FileLogs.Error("%s", err) //logs.Error(err)
+		beego.Error(err) //logs.Error(err)
 	}
 
 	retMenus := groupMenus(menus)

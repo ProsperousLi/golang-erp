@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `arrivalbill`;
@@ -72,12 +73,12 @@ func QueryArrivalBill(param QueryArrivalBillStruct) ([]Arrivalbill, int64) {
 	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
 		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets, allNums
 }
@@ -89,7 +90,7 @@ func GetArrivalbillBypage(arrivalbillcode string) []Arrivalbill {
 	_, err := OSQL.Raw("select * from " + util.Arrivalbill_TABLE_NAME +
 		" and where arrivalbillcode='" + arrivalbillcode + "' order by id desc").QueryRows(&arrivalbills)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return arrivalbills
 }
@@ -98,7 +99,7 @@ func GetArrivalbillByUserID(id int64) (arrivalbill Arrivalbill, err error) {
 	arrivalbill.Id = id
 	err = OSQL.Read(&arrivalbill, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return arrivalbill, nil
 }
@@ -111,7 +112,7 @@ func EditArrivalbillById(arrivalbill Arrivalbill) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Arrivalbill_EDIT_FAILED
 		return errorCode
 	}
@@ -119,12 +120,12 @@ func EditArrivalbillById(arrivalbill Arrivalbill) (errorCode int64) {
 	args := edit_arrivalbill(arrivalbill)
 	num, err2 := OSQL.Update(&arrivalbill, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Arrivalbill_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -177,14 +178,14 @@ func AddArrivalbill(arrivalbill Arrivalbill) (errorCode, id int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Info("arrivalbill have asixt")
+		beego.Info("arrivalbill have asixt")
 		errorCode = util.Arrivalbill_ADD_FAILED
 		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&arrivalbill)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Arrivalbill_ADD_FAILED
 		return errorCode, num
 	}
@@ -200,7 +201,7 @@ func DeleteArrivalbill(id int64) (errorCode int64) {
 	arrivalbill.Id = id
 	_, err := OSQL.Delete(&arrivalbill, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Arrivalbill_DELETE_FAILED
 	}
 

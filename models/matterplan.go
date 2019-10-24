@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `matterplan`;
@@ -60,7 +61,7 @@ func GetMatterplanBypage(pageNum, pageSize int64) []Matterplan {
 	_, err := OSQL.Raw("select * from "+util.Matterplan_TABLE_NAME+" order by itemid desc limit ?,?",
 		begin, pageSize).QueryRows(&matterplans)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return matterplans
 }
@@ -69,7 +70,7 @@ func GetMatterplanById(itemid int64) (matterplans []Matterplan, err error) {
 	_, err = OSQL.Raw("select * from "+util.Matterplan_TABLE_NAME+
 		" where itemid=? order by itemid desc", itemid).QueryRows(&matterplans)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return matterplans, err
 	}
 	return matterplans, nil
@@ -83,19 +84,19 @@ func EditMatterplanById(matterplan Matterplan) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "itemid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Matterplan_EDIT_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Update(&matterplan)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Matterplan_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -108,14 +109,14 @@ func AddMatterplan(matterplan Matterplan) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "itemid")
 	if err == nil {
-		logs.FileLogs.Info("matterplan have asixt")
+		beego.Info("matterplan have asixt")
 		errorCode = util.Matterplan_ADD_FAILED
 		return errorCode
 	}
 
 	_, err2 := OSQL.Insert(&matterplan)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Matterplan_ADD_FAILED
 	}
 
@@ -136,7 +137,7 @@ func DeleteMatterplan(param DeleteMatterStruct) (errorCode int64) {
 	temp.Mattercode = param.Mattercode
 	_, err := OSQL.Delete(&temp, "itemid", "mattercode")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Matterplan_DELETE_FAILED
 	}
 

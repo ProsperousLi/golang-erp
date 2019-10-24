@@ -3,8 +3,9 @@ package models
 import (
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `outofstore`;
@@ -71,12 +72,12 @@ func QueryOutofStore(param QueryOutofstoreStruct) ([]Outofstore, int64) {
 	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
 		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets, allNums
 }
@@ -89,7 +90,7 @@ func GetOutofstoreBypage(pageNum, pageSize int64) []Outofstore {
 	_, err := OSQL.Raw("select * from "+util.Outofstore_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&outofstores)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return outofstores
 }
@@ -98,7 +99,7 @@ func GetOutofstoreById(id int64) (outofstore Outofstore, err error) {
 	outofstore.Id = id
 	err = OSQL.Read(&outofstore, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return outofstore, err
 	}
 	return outofstore, nil
@@ -112,7 +113,7 @@ func EditOutofstoreById(outofstore Outofstore) (errorCode int64) {
 	temp.Id = outofstore.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Outofstore_EDIT_FAILED
 		return errorCode
 	}
@@ -121,11 +122,11 @@ func EditOutofstoreById(outofstore Outofstore) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&outofstore, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Outofstore_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -181,18 +182,18 @@ func AddOutofstore(outofstore Outofstore) (errorCode, id int64) {
 	temp.Id = outofstore.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("outofstore have this id=%v", outofstore.Id)
+		beego.Error("outofstore have this id=", outofstore.Id)
 		errorCode = util.Outofstore_ADD_FAILED
 		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&outofstore)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Outofstore_ADD_FAILED
 		return errorCode, num
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode, num
 }
 
@@ -204,10 +205,10 @@ func DeleteOutofstore(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Outofstore_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

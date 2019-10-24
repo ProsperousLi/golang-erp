@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //客户信息表
@@ -20,7 +21,7 @@ func QueryAllLeave() []Leaves {
 	_, err := OSQL.Raw("select * from " + util.LEAVE_TABLE_NAME +
 		" order by id asc").QueryRows(&les)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return les
 }
@@ -33,7 +34,7 @@ func GetLeaveBypage(pageNum, pageSize int64) []Leaves {
 	_, err := OSQL.Raw("select * from "+util.LEAVE_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&les)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return les
 }
@@ -42,7 +43,7 @@ func GetLeaveById(id int64) (le Leaves, err error) {
 	le.Id = id
 	err = OSQL.Read(&le, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return le, err
 	}
 	return le, nil
@@ -56,7 +57,7 @@ func EditLeaveById(le Leaves) (errorCode int64) {
 	temp.Id = le.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.LEAVE_EDIT_FAILED
 		return errorCode
 	}
@@ -64,13 +65,13 @@ func EditLeaveById(le Leaves) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&le, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.LEAVE_EDIT_FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 	return errorCode
 }
@@ -88,7 +89,7 @@ func editArgs_leave(le Leaves) []string {
 	if le.Reason != "" {
 		args = append(args, "reason")
 	}
-	logs.FileLogs.Info("args=%v", args)
+	beego.Info("args=", args)
 	return args
 }
 
@@ -100,18 +101,18 @@ func AddLeave(le Leaves) (errorCode int64) {
 	temp.Id = le.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("leave have this id=%v", le.Id)
+		beego.Error("leave have this id=", le.Id)
 		errorCode = util.LEAVE_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&le)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.LEAVE_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -123,10 +124,10 @@ func DeleteLeave(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.LEAVE_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

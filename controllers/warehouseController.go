@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 
-	"erpweb/logs"
 	"erpweb/models"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type WarehouseController struct {
@@ -26,7 +27,7 @@ func (c *WarehouseController) GetWarehouses() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -53,7 +54,7 @@ func (c *WarehouseController) GetWarehouseById() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -62,7 +63,7 @@ func (c *WarehouseController) GetWarehouseById() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---id = ", id)
+	beego.Info("id = ", id)
 	ret, _ := models.GetWarehouseById(id)
 	util.RetContent.Code = util.SUCESSFUL
 	util.RetContent.Data = ret
@@ -77,7 +78,7 @@ func (c *WarehouseController) EditWarehouseById() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -98,13 +99,13 @@ func (c *WarehouseController) AddWarehouse() {
 
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return
 	} else {
-		logs.FileLogs.Info("%v", param)
+		beego.Info(param)
 	}
 	code := models.AddWarehouse(param)
 	util.RetContent.Code = code
@@ -118,7 +119,7 @@ func (c *WarehouseController) DeleteWarehouse() {
 	)
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &param)
 	if err != nil {
-		logs.FileLogs.Error("param is err", string(c.Ctx.Input.RequestBody))
+		beego.Error("param is err", string(c.Ctx.Input.RequestBody))
 		util.RetContent.Code = util.PARAM_FAILED
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
@@ -127,7 +128,7 @@ func (c *WarehouseController) DeleteWarehouse() {
 
 	id := param["id"]
 
-	logs.FileLogs.Info("%v ---", id)
+	beego.Info(id)
 	code := models.DeleteWarehouse(id)
 	util.RetContent.Code = code
 	c.Data["json"] = util.RetContent

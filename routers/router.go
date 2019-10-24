@@ -93,17 +93,17 @@ func Login() {
 
 func Account() {
 	//api/employee/getAccountList
-	beego.Router("/"+PROJECT+"/account/getAccountList",
+	beego.Router("/"+PROJECT+"/employee/getAccountList",
 		&controllers.AccountController{}, GET+":GetAccountList")
 
-	beego.Router("/"+PROJECT+"/account/getAccounts",
-		&controllers.AccountController{}, POST+":GetAccounts")
+	// beego.Router("/"+PROJECT+"/account/getAccounts",
+	// 	&controllers.AccountController{}, POST+":GetAccounts")
 
-	beego.Router("/"+PROJECT+"/account/getAccountById",
-		&controllers.AccountController{}, POST+":GetAccountById")
+	// beego.Router("/"+PROJECT+"/account/getAccountById",
+	// 	&controllers.AccountController{}, POST+":GetAccountById")
 
-	beego.Router("/"+PROJECT+"/account/editAccountById",
-		&controllers.AccountController{}, POST+":EditAccountById")
+	// beego.Router("/"+PROJECT+"/account/editAccountById",
+	// 	&controllers.AccountController{}, POST+":EditAccountById")
 
 	//16.修改账号
 	//url: api/employee/updateAccountStatus
@@ -115,8 +115,8 @@ func Account() {
 	beego.Router("/"+PROJECT+"/employee/openAccount",
 		&controllers.AccountController{}, POST+":AddAccount")
 
-	beego.Router("/"+PROJECT+"/account/deleteAccount",
-		&controllers.AccountController{}, POST+":DeleteAccount")
+	// beego.Router("/"+PROJECT+"/account/deleteAccount",
+	// 	&controllers.AccountController{}, POST+":DeleteAccount")
 
 	//17.修改密码
 	//api/employee/modifyPwd

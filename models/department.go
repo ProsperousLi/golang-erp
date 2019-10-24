@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type Department struct {
@@ -17,7 +18,7 @@ func QueryDept() []Department {
 	)
 	_, err := OSQL.Raw("select * from " + util.DEPARTMENT_TABLE_NAME + " order by id asc ").QueryRows(&departs)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	return departs
@@ -28,11 +29,11 @@ func GetDepartmentBypage(pageNum, pageSize int64) []Department {
 		departs []Department
 	)
 	begin := pageSize * pageNum
-	logs.FileLogs.Info("begin=%v", begin, ", end =%v", pageSize)
+	beego.Info("begin=", begin, ", end =", pageSize)
 	_, err := OSQL.Raw("select * from "+util.DEPARTMENT_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&departs)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	return departs
@@ -44,7 +45,7 @@ func GetDepartmentById(id int64) (depart Department, err error) {
 
 	err = OSQL.Read(&depart, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return depart, err
 	}
 
@@ -59,7 +60,7 @@ func EditDepartmentById(depart Department) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 		return errorCode
 	}
@@ -68,13 +69,13 @@ func EditDepartmentById(depart Department) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&depart, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 
 	return errorCode
@@ -92,7 +93,7 @@ func editArgs_depart(depart Department) []string {
 	if depart.Name != "" {
 		args = append(args, "name")
 	}
-	logs.FileLogs.Info("args=%v", args)
+	beego.Info("args=", args)
 	return args
 }
 
@@ -104,18 +105,18 @@ func AddDepartment(depart Department) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "compID")
 	if err == nil {
-		logs.FileLogs.Error("table have this compID=%v", depart.CompID)
+		beego.Error("table have this compID=", depart.CompID)
 		errorCode = util.FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&depart)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 	return errorCode
 }
 
@@ -127,9 +128,9 @@ func DeleteDepartment(id int64) (errorCode int64) {
 	depart.Id = id
 	num, err := OSQL.Delete(&depart, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.DEPART_DELETE_FAILED
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

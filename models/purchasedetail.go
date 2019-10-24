@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `purchasedetail`;
@@ -56,7 +57,7 @@ func GetPurchasedetailBypage(contractcode string) (rets []PurchasedetailWeb) {
 	_, err := OSQL.Raw("select * from " + util.Purchasedetail_TABLE_NAME +
 		" and contractcode='" + contractcode + "' order by contractcode desc").QueryRows(&purchasedetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, temp := range purchasedetails {
@@ -90,7 +91,7 @@ func GetPurchasedetailById(contractcode string) (purchasedetail Purchasedetail, 
 	purchasedetail.Contractcode = contractcode
 	err = OSQL.Read(&purchasedetail, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return purchasedetail, err
 	}
 	return purchasedetail, nil
@@ -104,7 +105,7 @@ func EditPurchasedetailById(purchasedetail Purchasedetail) (errorCode int64) {
 	temp.Contractcode = purchasedetail.Contractcode
 	err := OSQL.Read(&temp, "contractcode")
 	if err != nil { //add
-		// logs.FileLogs.Error("%s", err)
+		// beego.Error("%s", err)
 		// errorCode = util.Purchasedetail_EDIT_FAILED
 		// return errorCode
 		code := AddPurchasedetail(purchasedetail)
@@ -123,11 +124,11 @@ func EditPurchasedetailById(purchasedetail Purchasedetail) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&purchasedetail, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Purchasedetail_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -178,18 +179,18 @@ func AddPurchasedetail(purchasedetail Purchasedetail) (errorCode int64) {
 	temp.Contractcode = purchasedetail.Contractcode
 	err := OSQL.Read(&temp, "contractcode")
 	if err == nil {
-		logs.FileLogs.Error("purchasedetail have this id=%v", purchasedetail.Contractcode)
+		beego.Error("purchasedetail have this id=", purchasedetail.Contractcode)
 		errorCode = util.Purchasedetail_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&purchasedetail)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Purchasedetail_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -201,10 +202,10 @@ func DeletePurchasedetail(contractcode string) (errorCode int64) {
 	temp.Contractcode = contractcode
 	num, err := OSQL.Delete(&temp, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Purchasedetail_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

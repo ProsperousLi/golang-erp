@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //供应商信息表
@@ -31,19 +32,19 @@ func QuerySupplier(querystr string) []Supplier {
 			util.SUPPLIER_TABLE_NAME+
 			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			return custs1
 		}
-		logs.FileLogs.Info("num1=%v", num)
+		beego.Info("num1=", num)
 
 		num, err = OSQL.Raw("select * from "+
 			util.SUPPLIER_TABLE_NAME+
 			" where suppcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			return custs1
 		}
-		logs.FileLogs.Info("num2=%v", num)
+		beego.Info("num2=", num)
 	} else {
 		num, err := OSQL.Raw("select * from " +
 			util.SUPPLIER_TABLE_NAME +
@@ -51,9 +52,9 @@ func QuerySupplier(querystr string) []Supplier {
 		).QueryRows(&custs1)
 
 		if err != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	}
 
 	if len(custs2) > 0 {
@@ -71,7 +72,7 @@ func GetSupplierBypage(pageNum, pageSize int64) []Supplier {
 	_, err := OSQL.Raw("select * from "+util.SUPPLIER_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas
 }
@@ -80,7 +81,7 @@ func GetSupplierById(id int64) (pa Supplier, err error) {
 	pa.Id = id
 	err = OSQL.Read(&pa, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return pa, err
 	}
 	return pa, nil
@@ -94,7 +95,7 @@ func EditSupplierById(pa Supplier) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.SUPPLIER_EDIT_FAILED
 		return errorCode
 	}
@@ -103,11 +104,11 @@ func EditSupplierById(pa Supplier) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&pa, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.SUPPLIER_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -171,18 +172,18 @@ func AddSupplier(pa Supplier) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", pa.Id)
+		beego.Error("ware have this id=", pa.Id)
 		errorCode = util.SUPPLIER_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.SUPPLIER_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -194,10 +195,10 @@ func DeleteSupplier(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.SUPPLIER_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

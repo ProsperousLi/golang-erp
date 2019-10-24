@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"erpweb/logs"
 	"erpweb/util"
 
+	"github.com/astaxie/beego"
 	"github.com/mojocn/base64Captcha"
 )
 
@@ -46,7 +46,7 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 	//qurey.Password = password
 	err := OSQL.Read(&qurey, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return 1, uuid, retvckey, retverifycode
 	}
 
@@ -73,6 +73,10 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 		loginTimes += 1
 	}
 
+	password = util.GETMd5(util.DEFUAL_PWD_PRE + password)
+
+	beego.Info("after md5 pwd :", password)
+
 	if qurey.Cardid == cardid && qurey.Password == password { //login sucess
 		if qurey.Status == 1 {
 			preToken := TokenMap[cardid]
@@ -86,16 +90,16 @@ func Login(cardid string, password string, vckey, verifycode string) (errorCode 
 			//qurey employee info
 			emp, code := GetEmployeeByCardid(cardid)
 			if code != util.SUCESSFUL {
-				logs.FileLogs.Error("GetEmployeeByCardid failed")
+				beego.Error("GetEmployeeByCardid failed")
 				return 1, uuid, retvckey, retverifycode
 			}
 			AccsMap[uuid] = emp.Cardid
 		} else {
-			logs.FileLogs.Error("status is :%s", qurey.Status)
+			beego.Error("status is :", qurey.Status)
 			return 3, uuid, retvckey, retverifycode
 		}
 	} else {
-		logs.FileLogs.Error("cardid or password is invild")
+		beego.Error("cardid or password is invild")
 		if loginTimes == 1 {
 			//new vckey and verifycode
 			retvckey, retverifycode = CodeCaptchaCreate()
@@ -118,13 +122,13 @@ func SSOLogin(token string) (err error, code int64) {
 			if lastTime+1*60*60 < time.Now().Unix() {
 				//token过期了
 				code = 50014
-				logs.FileLogs.Error("token过期了")
+				beego.Error("token过期了")
 				return errors.New("token过期了"), code
 			}
 		}
 	} else {
 		code = 50008
-		logs.FileLogs.Error("token不存在 :%s", token)
+		beego.Error("token不存在 :", token)
 
 		return errors.New("token不存在"), code
 	}
@@ -196,7 +200,7 @@ func CodeCaptchaCreate() (string, string) {
 	// base64stringD := base64Captcha.CaptchaWriteToBase64Encoding(capD)
 
 	//fmt.Println(idKeyA, base64stringA, "\n")
-	logs.FileLogs.Info(idKeyC, base64stringC, "\n")
+	beego.Info(idKeyC, base64stringC, "\n")
 	//fmt.Println(idKeyD, base64stringD, "\n")
 
 	return idKeyC, base64stringC

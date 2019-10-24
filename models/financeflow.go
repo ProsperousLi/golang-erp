@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `financeflow`;
@@ -54,7 +55,7 @@ func QueryFinanceFlow(datebegin, dateend string) (rets []Financeflow) {
 	}
 	_, err := OSQL.Raw(sql + " order by id desc").QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	return rets
@@ -68,7 +69,7 @@ func GetFinanceflowBypage(pageNum, pageSize int64) []Financeflow {
 	_, err := OSQL.Raw("select * from "+util.Financeflow_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&financeflows)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return financeflows
 }
@@ -77,7 +78,7 @@ func GetFinanceflowByUserID(id int64) (financeflow Financeflow, err error) {
 	financeflow.Id = id
 	err = OSQL.Read(&financeflow, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return financeflow, nil
 }
@@ -90,7 +91,7 @@ func EditFinanceflowById(financeflow Financeflow) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Financeflow_EDIT_FAILED
 		return errorCode
 	}
@@ -98,12 +99,12 @@ func EditFinanceflowById(financeflow Financeflow) (errorCode int64) {
 	args := edit_Financeflow(financeflow)
 	num, err2 := OSQL.Update(&financeflow, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Financeflow_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	if financeflow.Status == 6 {
 		if financeflow.Type == 1 || financeflow.Type == 2 {
@@ -168,14 +169,14 @@ func AddFinanceflow(financeflow Financeflow) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Info("financeflow have asixt")
+		beego.Info("financeflow have asixt")
 		errorCode = util.Financeflow_ADD_FAILED
 		return errorCode
 	}
 
 	_, err2 := OSQL.Insert(&financeflow)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Financeflow_ADD_FAILED
 	}
 
@@ -204,7 +205,7 @@ func DeleteFinanceflow(id int64) (errorCode int64) {
 	financeflow.Id = id
 	_, err := OSQL.Delete(&financeflow, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Financeflow_DELETE_FAILED
 	}
 

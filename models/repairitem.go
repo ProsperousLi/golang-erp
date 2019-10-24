@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `repairitem`;
@@ -38,7 +39,7 @@ func GetRepairitemBCode(contractcode, vehiclecode string) []Repairitem {
 		"where contractcode='?' and vehiclecode='?' order by id desc",
 		contractcode, vehiclecode).QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params
 }
@@ -48,7 +49,7 @@ func GetRepairitemByItemname(itemname string) (ret []Repairitem, err error) {
 		"where itemname='?' order by id desc",
 		itemname).QueryRows(&ret)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return ret, err
 }
@@ -57,7 +58,7 @@ func GetRepairitemById(contractcode string) (ret Repairitem, err error) {
 	ret.Contractcode = contractcode
 	err = OSQL.Read(&ret, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 	return ret, nil
@@ -73,7 +74,7 @@ func EditRepairitemById(param Repairitem) (errorCode int64) {
 	temp.Itemname = param.Itemname
 	err := OSQL.Read(&temp, "contractcode", "vehiclecode", "itemname")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Repairitem_EDIT_FAILED
 		return errorCode
 	}
@@ -82,11 +83,11 @@ func EditRepairitemById(param Repairitem) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Repairitem_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -125,18 +126,18 @@ func AddRepairitem(param Repairitem) (errorCode int64) {
 	temp.Contractcode = param.Contractcode
 	err := OSQL.Read(&temp, "contractcode")
 	if err == nil {
-		logs.FileLogs.Error("Repairitem have this contractcode=%v", param.Contractcode)
+		beego.Error("Repairitem have this contractcode=", param.Contractcode)
 		errorCode = util.FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -148,10 +149,10 @@ func DeleteRepairitem(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Repairitem_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

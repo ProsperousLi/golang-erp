@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type Permission struct {
@@ -54,7 +55,7 @@ func GetPermissionBypage(pageNum, pageSize int64) []WebPermission {
 	_, err := OSQL.Raw("select * from "+util.PERMISSION_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&pers)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, v := range pers {
@@ -69,7 +70,7 @@ func GetPermissionByID(id int64) (ret WebPermission, err error) {
 	per.Id = id
 	err = OSQL.Read(&per, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 
@@ -86,7 +87,7 @@ func EditPermissionById(per Permission) (errorCode int64) {
 	temp.Id = per.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.PERMISSION_EDIT_FAILED
 		return errorCode
 	}
@@ -94,11 +95,11 @@ func EditPermissionById(per Permission) (errorCode int64) {
 	args := edit_permission(per)
 	num, err2 := OSQL.Update(&per, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.PERMISSION_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
@@ -129,18 +130,18 @@ func AddPermission(per Permission) (errorCode int64) {
 	temp.Cardid = per.Cardid
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("permission have this id=%v", per.Cardid)
+		beego.Error("permission have this id=%v", per.Cardid)
 		errorCode = util.PERMISSION_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&per)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.PERMISSION_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
@@ -153,11 +154,11 @@ func DeletePermission(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.PERMISSION_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -198,22 +199,22 @@ func SetPermission(param AddPersionStruct) (errorCode int64, msg string) {
 		args := edit_permission(updatePer)
 		num, err2 := OSQL.Update(&updatePer, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.FAILED
 			msg = "更新失败"
 			return
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else { //add
 
 		num, err2 := OSQL.Insert(&updatePer)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.FAILED
 			msg = "添加失败"
 			return
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	}
 
 	return
@@ -224,7 +225,7 @@ func QueryPermission(cardid string) (ret WebPermission, err error) {
 	per.Cardid = cardid
 	err = OSQL.Read(&per, "cardid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 

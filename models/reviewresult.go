@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `reviewresult`;
@@ -41,7 +42,7 @@ func GetReviewresultBypage(param ReviewresultParam) []Reviewresult {
 	_, err := OSQL.Raw("select * from "+util.Reviewresult_TABLE_NAME+
 		" where type=? and relatedcode='?' order by id asc", param.Type, param.Relatedcode).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets
 }
@@ -50,7 +51,7 @@ func GetReviewresultById(id int64) (result Reviewresult, err error) {
 	result.Id = id
 	err = OSQL.Read(&result, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return result, nil
 }
@@ -63,7 +64,7 @@ func EditReviewresultById(param Reviewresult) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Reviewresult_EDIT_FAILED
 		return errorCode
 	}
@@ -72,12 +73,12 @@ func EditReviewresultById(param Reviewresult) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Reviewresult_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -117,18 +118,18 @@ func AddReviewresult(param Reviewresult) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Info("Reviewresult have asixt")
+		beego.Info("Reviewresult have asixt")
 		errorCode = util.Reviewresult_ADD_FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Reviewresult_ADD_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 
 	return errorCode
 }
@@ -141,11 +142,11 @@ func DeleteReviewresult(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Reviewresult_DELETE_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }

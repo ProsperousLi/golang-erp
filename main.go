@@ -26,9 +26,11 @@ import (
 // }
 
 func main() {
+	logs.InitLogger()
+
 	logs.InitLogs()
 
-	logs.Info("hahah")
+	beego.Info("hahah")
 
 	//init sql
 	models.Init()

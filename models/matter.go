@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //客户信息表
@@ -37,7 +38,7 @@ func QueryMatter(mattercode, name string) []Matter {
 
 	_, err := OSQL.Raw(sql).QueryRows(&mas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return mas
 }
@@ -50,7 +51,7 @@ func GetMatterBypage(pageNum, pageSize int64) []Matter {
 	_, err := OSQL.Raw("select * from "+util.MATTER_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&mas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return mas
 }
@@ -59,7 +60,7 @@ func GetMatterByMattercode(mattercode string) (ma Matter, err error) {
 	ma.Mattercode = mattercode
 	err = OSQL.Read(&ma, "mattercode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ma, err
 	}
 	return ma, nil
@@ -69,7 +70,7 @@ func GetMatterById(id int64) (ma Matter, err error) {
 	ma.Id = id
 	err = OSQL.Read(&ma, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ma, err
 	}
 	return ma, nil
@@ -83,7 +84,7 @@ func EditMatterById(ma Matter) (errorCode int64) {
 	temp.Id = ma.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.MATTER_EDIT_FAILED
 		return errorCode
 	}
@@ -92,13 +93,13 @@ func EditMatterById(ma Matter) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&ma, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.MATTER_EDIT_FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 
 	return errorCode
@@ -108,7 +109,7 @@ func edit_matter(ma Matter) []string {
 	var (
 		args []string
 	)
-	logs.FileLogs.Info("%v", ma)
+	beego.Info(ma)
 	if ma.Brand != "" {
 		args = append(args, "brand")
 	}
@@ -134,7 +135,7 @@ func edit_matter(ma Matter) []string {
 		args = append(args, "unit")
 	}
 
-	logs.FileLogs.Info("%v", args)
+	beego.Info(args)
 
 	return args
 }
@@ -147,18 +148,18 @@ func AddMatter(ma Matter) (errorCode int64) {
 	temp.Id = ma.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", ma.Id)
+		beego.Error("ware have this id=", ma.Id)
 		errorCode = util.MATTER_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&ma)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.MATTER_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -170,10 +171,10 @@ func DeleteMatter(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.MATTER_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

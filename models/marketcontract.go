@@ -4,8 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `marketcontract`;
@@ -60,7 +61,7 @@ func UpdateMarketcontractAmount(relatedcode string, account int64) error {
 	result.Relatedcode = relatedcode
 	err := OSQL.Read(&result, "relatedcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return err
 	}
 
@@ -81,7 +82,7 @@ func GetMarketcontractByType(codeType int8) []Marketcontract {
 	_, err := OSQL.Raw("select * from "+util.Marketcontract_TABLE_NAME+
 		"where type=? order by id asc", codeType).QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params
 }
@@ -123,12 +124,12 @@ func GetMarketcontractBypage(marketType, execstatus,
 	_, err := OSQL.Raw(sql+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params, allNums
 }
@@ -137,7 +138,7 @@ func GetMarketcontractById(id int64) (result Marketcontract, err error) {
 	result.Id = id
 	err = OSQL.Read(&result, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return result, nil
 }
@@ -150,7 +151,7 @@ func EditMarketcontractById(param Marketcontract) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Marketcontract_EDIT_FAILED
 		return errorCode
 	}
@@ -158,14 +159,14 @@ func EditMarketcontractById(param Marketcontract) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&param, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err2)
+			beego.Error(err2)
 			errorCode = util.Marketcontract_EDIT_FAILED
 			return errorCode
 		}
 
-		logs.FileLogs.Info("num=%v err=%v", num, err2)
+		beego.Info("num= err=", num, err2)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 
 	return errorCode
@@ -238,7 +239,7 @@ func AddMarketcontract(param Marketcontract) (errorCode int64, msg string) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Info("Marketcontract have asixt")
+		beego.Info("Marketcontract have asixt")
 		errorCode = util.FAILED
 		msg = "查询到已经有该数据"
 		return
@@ -246,13 +247,13 @@ func AddMarketcontract(param Marketcontract) (errorCode int64, msg string) {
 
 	id, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.FAILED
 		msg = "数据更新失败"
 		return
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 
 	return
 }
@@ -265,14 +266,14 @@ func DeleteMarketcontract(id int64) (errorCode int64, msg string) {
 	temp.Id = id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Info("Marketcontract have asixt")
+		beego.Info("Marketcontract have asixt")
 		errorCode = util.FAILED
 		msg = "未查询到该数据"
 		return
 	}
 
 	if temp.Execstatus != 1 {
-		logs.FileLogs.Error("不能删除状态不为1的市场合同,status = %s", temp.Execstatus)
+		beego.Error("不能删除状态不为1的市场合同,status = %s", temp.Execstatus)
 		errorCode = util.FAILED
 		msg = "不能删除状态不为1的市场合同"
 		return
@@ -280,13 +281,13 @@ func DeleteMarketcontract(id int64) (errorCode int64, msg string) {
 
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 		msg = "删除失败"
 		return
 	}
 
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return
 }

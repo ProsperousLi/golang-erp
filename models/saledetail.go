@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `saledetail`;
@@ -66,7 +67,7 @@ func GetSaledetailByContractcode(contractcode string) []Saledetail {
 	_, err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+
 		" where contractcode=? order by id asc", contractcode).QueryRows(&saledetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return saledetails
 }
@@ -75,7 +76,7 @@ func GetSaledetailById(Contractcode string) (saledetail Saledetail, err error) {
 	saledetail.Contractcode = Contractcode
 	err = OSQL.Read(&saledetail, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return saledetail, nil
 }
@@ -89,7 +90,7 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 
 	err := OSQL.Read(&temp, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 		return errorCode
 	}
@@ -97,12 +98,12 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	args := edit_saledetail(saledetail)
 	num, err2 := OSQL.Update(&saledetail, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -131,18 +132,18 @@ func AddSaledetail(saledetail Saledetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "contractcode")
 	if err == nil {
-		logs.FileLogs.Info("saledetail have asixt")
+		beego.Info("saledetail have asixt")
 		errorCode = util.FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&saledetail)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 
 	return errorCode
 }
@@ -155,11 +156,11 @@ func DeleteSaledetail(contractcode string) (errorCode int64) {
 	saledetail.Contractcode = contractcode
 	num, err := OSQL.Delete(&saledetail, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 //暂时不用实现
@@ -21,7 +22,7 @@ func GetPackagerelationBypage(pageNum, pageSize int64) []Packagerelation {
 	err := OSQL.Raw("select * from "+util.PACKAGERALATION_TABLE_NAME+" order by id asc limit ?,?",
 		pageNum, pageSize).QueryRow(&pas)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return pas
 }
@@ -30,7 +31,7 @@ func GetPackagerelationById(id int64) (pa Packagerelation, err error) {
 	pa.Id = id
 	err = OSQL.Read(&pa, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return pa, err
 	}
 	return pa, nil
@@ -44,18 +45,18 @@ func EditPackagerelationById(pa Packagerelation) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.LEAVE_EDIT_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Update(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.LEAVE_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -67,18 +68,18 @@ func AddPackagerelation(pa Packagerelation) (errorCode int64) {
 	temp.Id = pa.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("ware have this id=%v", pa.Id)
+		beego.Error("ware have this id=", pa.Id)
 		errorCode = util.LEAVE_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&pa)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.LEAVE_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -90,10 +91,10 @@ func DeletePackagerelation(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.LEAVE_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

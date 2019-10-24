@@ -3,8 +3,9 @@ package models
 import (
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `review`;
@@ -32,7 +33,7 @@ func GetReviewBypage(Type int64) []Review {
 	}
 	_, err := OSQL.Raw(sql).QueryRows(&params)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return params
 }
@@ -41,7 +42,7 @@ func GetReviewById(id int64) (ret Review, err error) {
 	ret.Type = id
 	err = OSQL.Read(&ret, "type")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return ret, err
 	}
 	return ret, nil
@@ -55,7 +56,7 @@ func EditReviewById(param Review) (errorCode int64) {
 	temp.Type = param.Type
 	err := OSQL.Read(&temp, "type")
 	if err != nil {
-		// logs.FileLogs.Error("%s", err)
+		// beego.Error("%s", err)
 		// errorCode = util.Review_EDIT_FAILED
 		// return errorCode
 		code := AddReview(param)
@@ -75,11 +76,11 @@ func EditReviewById(param Review) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&param, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Review_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -102,18 +103,18 @@ func AddReview(param Review) (errorCode int64) {
 	temp.Type = param.Type
 	err := OSQL.Read(&temp, "type")
 	if err == nil {
-		logs.FileLogs.Error("Review have this id=%v", param.Type)
+		beego.Error("Review have this id=", param.Type)
 		errorCode = util.Review_ADD_FAILED
 		return errorCode
 	}
 
 	num, err2 := OSQL.Insert(&param)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Review_ADD_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -125,10 +126,10 @@ func DeleteReview(id int64) (errorCode int64) {
 	temp.Type = id
 	num, err := OSQL.Delete(&temp, "type")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Review_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

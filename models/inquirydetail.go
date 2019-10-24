@@ -1,8 +1,9 @@
 package models
 
 import (
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `inquirydetail`;
@@ -43,7 +44,7 @@ func GetInquirydetailBypage(inquirycode string) (rets []InquirydetailWeb) {
 	_, err := OSQL.Raw("select * from " + util.Inquirydetail_TABLE_NAME +
 		" where inquirycode='" + inquirycode + "' order by id desc").QueryRows(&inquirydetails)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, temp := range inquirydetails {
@@ -73,7 +74,7 @@ func GetInquirydetailId(inquirycode int64) (inquirydetail Inquirydetail, err err
 	inquirydetail.Inquirycode = inquirycode
 	err = OSQL.Read(&inquirydetail, "inquirycode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return inquirydetail, nil
 }
@@ -86,7 +87,7 @@ func EditInquirydetailById(inquirydetail Inquirydetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "inquirycode")
 	if err != nil {
-		// logs.FileLogs.Error("%s", err)
+		// beego.Error("%s", err)
 		// errorCode = util.Inquirydetail_EDIT_FAILED
 		// return errorCode
 		code := AddInquirydetail(inquirydetail)
@@ -106,12 +107,12 @@ func EditInquirydetailById(inquirydetail Inquirydetail) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&inquirydetail, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Inquirydetail_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -140,14 +141,14 @@ func AddInquirydetail(inquirydetail Inquirydetail) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "inquirycode")
 	if err == nil {
-		logs.FileLogs.Info("inquirydetail have asixt")
+		beego.Info("inquirydetail have asixt")
 		errorCode = util.Inquirydetail_ADD_FAILED
 		return errorCode
 	}
 
 	_, err2 := OSQL.Insert(&inquirydetail)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Inquirydetail_ADD_FAILED
 	}
 
@@ -162,7 +163,7 @@ func DeleteInquirydetail(inquirycode int64) (errorCode int64) {
 	inquirydetail.Inquirycode = inquirycode
 	_, err := OSQL.Delete(&inquirydetail, "inquirycode")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Inquirydetail_DELETE_FAILED
 	}
 

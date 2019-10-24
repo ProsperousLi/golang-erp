@@ -1,8 +1,10 @@
 package models
 
 import (
-	"erpweb/logs"
+	//"erpweb/logs"
 	//"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 type RetNums struct {
@@ -74,7 +76,7 @@ func QueryTimeStamp(queryType string) interface{} {
 			retCode = append(retCode, put.Incode)
 		}
 	} else {
-		logs.FileLogs.Error("unkonw this type=", queryType)
+		beego.Error("unkonw this type=", queryType)
 	}
 
 	return retCode

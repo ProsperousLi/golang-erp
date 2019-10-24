@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
 	//"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `employee`;
@@ -234,7 +234,7 @@ func GetAllEmployees(name, cardid string) []WebEmployee {
 
 	_, err := OSQL.Raw(sql).QueryRows(&emps)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	for _, emp := range emps {
@@ -253,11 +253,11 @@ func GetEmployees(pageNum, pageSize int64) []WebEmployee {
 		//err  error
 	)
 	begin := pageSize * pageNum
-	logs.FileLogs.Info("begin=%v", begin, ", end =%v", pageSize)
+	beego.Info("begin=", begin, ", end =", pageSize)
 	_, err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&emps)
 	if err != nil {
-		logs.FileLogs.Error("%s", err) //logs.Error(err)
+		beego.Error(err) //logs.Error(err)
 	}
 
 	for _, emp := range emps {
@@ -275,7 +275,7 @@ func GetEmployeeByCardid(cardid string) (retEmp WebEmployee, errorCode int64) {
 	emp.Cardid = cardid
 	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where cardid=?", cardid).QueryRow(&emp)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	retEmp = covertSql2Web(emp)
@@ -289,7 +289,7 @@ func GetEmployeeById(id int64) (retEmp WebEmployee, errorCode int64) {
 	emp.Id = id
 	err := OSQL.Raw("select * from "+util.EMPLOYEE_TABLE_NAME+" where id=?", emp.Id).QueryRow(&emp)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	retEmp = covertSql2Web(emp)
@@ -306,7 +306,7 @@ func EditEmployeeById(emp WebEmployee) (errorCode int64) {
 	temp.Id = emp.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.ACCOUNT_EDIT_FAILED
 		return errorCode
 	}
@@ -317,13 +317,13 @@ func EditEmployeeById(emp WebEmployee) (errorCode int64) {
 	if len(args) > 0 {
 		num, err2 := OSQL.Update(&sqlEmp, args...)
 		if err2 != nil {
-			logs.FileLogs.Error("%s", err)
+			beego.Error(err)
 			errorCode = util.ACCOUNT_EDIT_FAILED
 			return errorCode
 		}
-		logs.FileLogs.Info("num=%v", num)
+		beego.Info("num=", num)
 	} else {
-		logs.FileLogs.Info("no data update")
+		beego.Info("no data update")
 	}
 
 	return errorCode
@@ -447,7 +447,7 @@ func edit_employee(param Employee) []string {
 		args = append(args, "contractenddate")
 	}
 
-	logs.FileLogs.Info("args=%v", args)
+	beego.Info("args=", args)
 
 	return args
 }
@@ -463,7 +463,7 @@ func edit_employee(param Employee) []string {
 // 	contractenddate = util.Str2Time(emp.Contractenddate)
 // 	if emp.Cardid == "" || emp.Name == "" || emp.DeptID == 0 ||
 // 		emp.Idnumber == "" {
-// 		logs.FileLogs.Error("must need params have null %v", emp)
+// 		beego.Error("must need params have null %v", emp)
 // 		return util.PARAM_FAILED
 // 	}
 
@@ -486,12 +486,12 @@ func edit_employee(param Employee) []string {
 // 		emp.Contactnumber1, emp.Address3, trialexpired, entrydate, birthday, contractbegindate,
 // 		contractenddate).Exec()
 // 	if err != nil {
-// 		logs.FileLogs.Error("%s", err)
+// 		beego.Error("%s", err)
 // 		return util.PARAM_FAILED
 // 	}
 // 	affect, _ := ret.RowsAffected()
 
-// 	logs.FileLogs.Info("%v", affect)
+// 	beego.Info("%v", affect)
 
 // 	return util.SUCESSFUL
 // }
@@ -504,7 +504,7 @@ func AddEmployee(param WebEmployee) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("table have this id=%v", param.Id)
+		beego.Error("table have this id=", param.Id)
 		errorCode = util.EMPLOYEE_ADD_FAILED
 		return errorCode
 	}
@@ -513,11 +513,11 @@ func AddEmployee(param WebEmployee) (errorCode int64) {
 
 	id, err2 := OSQL.Insert(&sqlEmp)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.EMPLOYEE_ADD_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 	return errorCode
 }
 
@@ -529,9 +529,9 @@ func DeleteEmployee(id int64) (errorCode int64) {
 	param.Id = id
 	num, err := OSQL.Delete(&param, "id")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.EMPLOYEE_DELETE_FAILED
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

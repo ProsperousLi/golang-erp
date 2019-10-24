@@ -4,8 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `purchasecontract`;
@@ -105,12 +106,12 @@ func QueryPurchaseContract(param QueryPurchasecontractStruct) ([]Purchasecontrac
 	_, err := OSQL.Raw(sql+" order by id desc limit ?,?",
 		begin, param.Pagesize).QueryRows(&rets)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 
 	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return rets, allNums
 }
@@ -122,7 +123,7 @@ func UpdatePurchasecontractAmount(relatedcode string, account int64) error {
 	result.Relatedcode = relatedcode
 	err := OSQL.Read(&result, "relatedcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return err
 	}
 
@@ -144,7 +145,7 @@ func GetPurchasecontractBypage(pageNum, pageSize int64) []Purchasecontract {
 	_, err := OSQL.Raw("select * from "+util.Purchasecontract_TABLE_NAME+" order by id desc limit ?,?",
 		begin, pageSize).QueryRows(&purchasecontracts)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return purchasecontracts
 }
@@ -153,7 +154,7 @@ func GetPurchasecontractById(id int64) (purchasecontract Purchasecontract, err e
 	purchasecontract.Id = id
 	err = OSQL.Read(&purchasecontract, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return purchasecontract, err
 	}
 	return purchasecontract, nil
@@ -163,7 +164,7 @@ func GetPurchasecontractByContractcode(contractcode string) (purchasecontract Pu
 	purchasecontract.Contractcode = contractcode
 	err = OSQL.Read(&purchasecontract, "contractcode")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		return purchasecontract, err
 	}
 	return purchasecontract, nil
@@ -177,7 +178,7 @@ func EditPurchasecontractById(purchasecontract Purchasecontract) (errorCode int6
 	temp.Id = purchasecontract.Id
 	err := OSQL.Read(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Purchasecontract_EDIT_FAILED
 		return errorCode
 	}
@@ -186,11 +187,11 @@ func EditPurchasecontractById(purchasecontract Purchasecontract) (errorCode int6
 
 	num, err2 := OSQL.Update(&purchasecontract, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Purchasecontract_EDIT_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }
 
@@ -274,18 +275,18 @@ func AddPurchasecontract(purchasecontract Purchasecontract) (errorCode, id int64
 	temp.Id = purchasecontract.Id
 	err := OSQL.Read(&temp, "id")
 	if err == nil {
-		logs.FileLogs.Error("purchasecontract have this id=%v", purchasecontract.Id)
+		beego.Error("purchasecontract have this id=", purchasecontract.Id)
 		errorCode = util.Purchasecontract_ADD_FAILED
 		return errorCode, id
 	}
 
 	num, err2 := OSQL.Insert(&purchasecontract)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Purchasecontract_ADD_FAILED
 		return errorCode, num
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode, num
 }
 
@@ -297,10 +298,10 @@ func DeletePurchasecontract(id int64) (errorCode int64) {
 	temp.Id = id
 	num, err := OSQL.Delete(&temp, "id")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Purchasecontract_DELETE_FAILED
 		return errorCode
 	}
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 	return errorCode
 }

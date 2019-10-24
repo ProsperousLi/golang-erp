@@ -3,8 +3,9 @@ package models
 import (
 	"strconv"
 
-	"erpweb/logs"
 	"erpweb/util"
+
+	"github.com/astaxie/beego"
 )
 
 // DROP TABLE IF EXISTS `stock`;
@@ -35,7 +36,7 @@ func QueryStock(warehouseid int64, mattercode string) []Stock {
 	}
 	_, err := OSQL.Raw(sql + " order by warehouseid asc").QueryRows(&stocks)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return stocks
 }
@@ -48,7 +49,7 @@ func GetStockBypage(pageNum, pageSize int64) []Stock {
 	_, err := OSQL.Raw("select * from "+util.Stock_TABLE_NAME+" limit ?,?",
 		begin, pageSize).QueryRows(&stocks)
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return stocks
 }
@@ -57,7 +58,7 @@ func GetStockById(warehouseid int64) (stock Stock, err error) {
 	stock.Warehouseid = warehouseid
 	err = OSQL.Read(&stock, "warehouseid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 	}
 	return stock, nil
 }
@@ -70,7 +71,7 @@ func EditStockById(stock Stock) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "warehouseid")
 	if err != nil {
-		logs.FileLogs.Error("%s", err)
+		beego.Error(err)
 		errorCode = util.Stock_EDIT_FAILED
 		return errorCode
 	}
@@ -79,12 +80,12 @@ func EditStockById(stock Stock) (errorCode int64) {
 
 	num, err2 := OSQL.Update(&stock, args...)
 	if err2 != nil {
-		logs.FileLogs.Error("%s", err2)
+		beego.Error(err2)
 		errorCode = util.Stock_EDIT_FAILED
 		return errorCode
 	}
 
-	logs.FileLogs.Info("num=%v err=%v", num, err2)
+	beego.Info("num= err=", num, err2)
 
 	return errorCode
 }
@@ -112,18 +113,18 @@ func AddStock(stock Stock) (errorCode int64) {
 	errorCode = util.SUCESSFUL
 	err := OSQL.Read(&temp, "warehouseid")
 	if err == nil {
-		logs.FileLogs.Info("stock have asixt")
+		beego.Info("stock have asixt")
 		errorCode = util.Stock_ADD_FAILED
 		return errorCode
 	}
 
 	id, err2 := OSQL.Insert(&stock)
 	if err2 != nil {
-		logs.FileLogs.Error("%v", err2)
+		beego.Error(err2)
 		errorCode = util.Stock_ADD_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", id)
+	beego.Info("num=", id)
 
 	return errorCode
 }
@@ -136,11 +137,11 @@ func DeleteStock(warehouseid int64) (errorCode int64) {
 	stock.Warehouseid = warehouseid
 	num, err := OSQL.Delete(&stock, "warehouseid")
 	if err != nil {
-		logs.FileLogs.Error("%v", err)
+		beego.Error(err)
 		errorCode = util.Stock_DELETE_FAILED
 	}
 
-	logs.FileLogs.Info("num=%v", num)
+	beego.Info("num=", num)
 
 	return errorCode
 }
