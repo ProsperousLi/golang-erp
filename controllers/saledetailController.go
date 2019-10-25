@@ -54,7 +54,7 @@ func (c *SaledetailController) GetSaledetails() {
 	contractcode := c.GetString("contractcode")
 	if contractcode == "" {
 		util.RetContent.Code = util.SUCESSFUL
-		util.RetContent.Message = ""
+		util.RetContent.Message = "contractcode is null"
 		c.Data["json"] = util.RetContent
 		c.ServeJSON()
 		return

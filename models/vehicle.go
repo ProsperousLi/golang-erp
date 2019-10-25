@@ -36,8 +36,18 @@ type Vehicle struct {
 func GetVehicleByCustcode(custcode string) []Vehicle {
 	var (
 		pas []Vehicle
+		sql string
 	)
-	err := OSQL.Raw("select * from "+util.VEHICLE_TABLE_NAME+" where custcode=? order by id asc", custcode).QueryRow(&pas)
+
+	beego.Info("custcode =", custcode)
+
+	if custcode != "" {
+		sql = "select * from " + util.VEHICLE_TABLE_NAME + " where custcode=" + custcode + " order by id asc"
+	} else {
+		sql = "select * from " + util.VEHICLE_TABLE_NAME + " order by id asc"
+	}
+
+	_, err := OSQL.Raw(sql).QueryRows(&pas)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -48,8 +58,8 @@ func GetVehicleBypage(pageNum, pageSize int64) []Vehicle {
 	var (
 		pas []Vehicle
 	)
-	err := OSQL.Raw("select * from "+util.VEHICLE_TABLE_NAME+" order by id asc limit ?,?",
-		pageNum, pageSize).QueryRow(&pas)
+	_, err := OSQL.Raw("select * from "+util.VEHICLE_TABLE_NAME+" order by id asc limit ?,?",
+		pageNum, pageSize).QueryRows(&pas)
 	if err != nil {
 		beego.Error(err)
 	}

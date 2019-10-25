@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"erpweb/util"
 
 	"github.com/astaxie/beego"
@@ -30,29 +32,40 @@ type AddAndUpdateSaledetailStruct struct {
 
 func AddOrUpdateSaleDetail(param AddAndUpdateSaledetailStruct) (errorCode int64, msg string) {
 	errorCode = util.SUCESSFUL
-	details := GetSaledetailByContractcode(param.Contractcode)
-	if len(details) > 0 {
+
+	if len(param.Detail) <= 0 {
+		beego.Info("delete")
 		errorCode = DeleteSaledetail(param.Contractcode)
-	} else {
-		errorCode = util.FAILED
-		msg = "获取数据失败"
+		if errorCode != util.SUCESSFUL {
+			errorCode = util.FAILED
+			msg = "删除数据失败"
+			return
+		}
+
 		return
 	}
 
-	if errorCode != util.SUCESSFUL {
-		errorCode = util.FAILED
-		msg = "删除数据失败"
-		return
-	}
-
-	//add
 	if len(param.Detail) > 0 {
+		beego.Info("add or update")
 		for _, detail := range param.Detail {
-			errorCode = AddSaledetail(detail)
-			if errorCode != util.SUCESSFUL {
-				msg = "删除数据失败"
-				return
+			detail.Contractcode = param.Contractcode
+			detailByMattercode := GetSaledetailByMattercode(param.Contractcode, detail.Mattercode)
+			if detailByMattercode.Contractcode == param.Contractcode {
+				beego.Info("update")
+				errorCode = EditSaledetailById(detail)
+				if errorCode != util.SUCESSFUL {
+					beego.Error("更新数据失败")
+					continue
+				}
+			} else {
+				beego.Info("add")
+				errorCode = AddSaledetail(detail)
+				if errorCode != util.SUCESSFUL {
+					beego.Error("添加数据失败")
+					continue
+				}
 			}
+
 		}
 
 	}
@@ -60,12 +73,24 @@ func AddOrUpdateSaleDetail(param AddAndUpdateSaledetailStruct) (errorCode int64,
 	return
 }
 
+func GetSaledetailByMattercode(contractcode, mattercode string) Saledetail {
+	var (
+		saledetails Saledetail
+	)
+	err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+
+		" where mattercode=? and contractcode=?", mattercode, contractcode).QueryRow(&saledetails)
+	if err != nil {
+		beego.Error(err)
+	}
+	return saledetails
+}
+
 func GetSaledetailByContractcode(contractcode string) []Saledetail {
 	var (
 		saledetails []Saledetail
 	)
 	_, err := OSQL.Raw("select * from "+util.Saledetail_TABLE_NAME+
-		" where contractcode=? order by id asc", contractcode).QueryRows(&saledetails)
+		" where contractcode=?", contractcode).QueryRows(&saledetails)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -85,34 +110,47 @@ func EditSaledetailById(saledetail Saledetail) (errorCode int64) {
 	var (
 		temp Saledetail
 	)
+
+	beego.Info("saledetail=", saledetail)
 	temp.Contractcode = saledetail.Contractcode
+	temp.Mattercode = saledetail.Mattercode
 	errorCode = util.SUCESSFUL
 
-	err := OSQL.Read(&temp, "contractcode")
+	err := OSQL.Read(&temp, "contractcode", "mattercode")
 	if err != nil {
 		beego.Error(err)
 		errorCode = util.FAILED
 		return errorCode
 	}
 
-	args := edit_saledetail(saledetail)
-	num, err2 := OSQL.Update(&saledetail, args...)
+	sql := "update " + util.Saledetail_TABLE_NAME +
+		" set num=" + strconv.FormatInt(saledetail.Num, 10) +
+		",price=" + strconv.FormatInt(saledetail.Price, 10) + " where " +
+		" contractcode='" + saledetail.Contractcode + "' and mattercode='" + saledetail.Mattercode + "'"
+
+	beego.Info("sql =", sql)
+	//args := edit_saledetail(saledetail)
+	_, err2 := OSQL.Raw(sql).Exec()
 	if err2 != nil {
 		beego.Error(err2)
 		errorCode = util.FAILED
 		return errorCode
 	}
 
-	beego.Info("num= err=", num, err2)
+	beego.Info("err=", err2)
 
 	return errorCode
 }
 
 func edit_saledetail(param Saledetail) (args []string) {
 
-	if param.Mattercode != "" {
-		args = append(args, "mattercode")
-	}
+	// if param.Contractcode != "" {
+	// 	args = append(args, "contractcode")
+	// }
+
+	// if param.Mattercode != "" {
+	// 	args = append(args, "mattercode")
+	// }
 
 	if param.Num != 0 {
 		args = append(args, "num")
@@ -130,12 +168,6 @@ func AddSaledetail(saledetail Saledetail) (errorCode int64) {
 	)
 	temp.Contractcode = saledetail.Contractcode
 	errorCode = util.SUCESSFUL
-	err := OSQL.Read(&temp, "contractcode")
-	if err == nil {
-		beego.Info("saledetail have asixt")
-		errorCode = util.FAILED
-		return errorCode
-	}
 
 	id, err2 := OSQL.Insert(&saledetail)
 	if err2 != nil {

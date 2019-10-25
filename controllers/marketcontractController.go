@@ -20,7 +20,7 @@ func (c *MarketcontractController) GetMarketcontracts() {
 		pageno, pagesize                                        int64
 	)
 
-	marketType = c.GetString("marketType")
+	marketType = c.GetString("type")
 	execstatus = c.GetString("execstatus")
 	contractcode = c.GetString("contractcode")
 	custcode = c.GetString("custcode")

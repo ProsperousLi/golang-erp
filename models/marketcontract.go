@@ -90,14 +90,19 @@ func GetMarketcontractByType(codeType int8) []Marketcontract {
 func GetMarketcontractBypage(marketType, execstatus,
 	contractcode, custcode, handler string, pageNum, pageSize int64) ([]Marketcontract, int64) {
 	var (
-		params []Marketcontract
+		params, temps []Marketcontract
+		allNums       int64
 	)
+
+	beego.Info("marketType=", marketType)
 
 	sql := "select * from " + util.Marketcontract_TABLE_NAME + " where 1=1"
 	if marketType != "" {
 		_, err := strconv.ParseInt(marketType, 10, 64)
-		if err != nil {
+		if err == nil {
 			sql += " and type=" + marketType
+		} else {
+			beego.Error(err)
 		}
 	}
 
@@ -120,6 +125,8 @@ func GetMarketcontractBypage(marketType, execstatus,
 		sql += " and handler='" + handler + "'"
 	}
 
+	beego.Info("sql =", sql)
+
 	begin := pageSize * pageNum
 	_, err := OSQL.Raw(sql+" order by id asc limit ?,?",
 		begin, pageSize).QueryRows(&params)
@@ -127,10 +134,12 @@ func GetMarketcontractBypage(marketType, execstatus,
 		beego.Error(err)
 	}
 
-	allNums, err := OSQL.QueryTable(util.Marketcontract_TABLE_NAME).Count()
+	_, err = OSQL.Raw(sql + " order by id asc").QueryRows(&temps)
 	if err != nil {
 		beego.Error(err)
 	}
+
+	allNums = int64(len(temps))
 	return params, allNums
 }
 
