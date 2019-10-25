@@ -25,13 +25,13 @@ func QueryMatter(mattercode, name string) []Matter {
 		sql string
 	)
 	if mattercode != "" && name != "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%?%' " +
-			"or name like '%?%' order by id asc"
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%" + mattercode + "%' " +
+			"or name like '%" + name + "%' order by id asc"
 	} else if mattercode != "" && name == "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%?%' " +
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where mattercode like '%" + mattercode + "%' " +
 			"order by id asc"
 	} else if mattercode == "" && name != "" {
-		sql = "select * from " + util.MATTER_TABLE_NAME + " where name like '%?%' order by id asc"
+		sql = "select * from " + util.MATTER_TABLE_NAME + " where name like '%" + name + "%' order by id asc"
 	} else {
 		sql = "select * from " + util.MATTER_TABLE_NAME + " order by id asc"
 	}
@@ -81,13 +81,15 @@ func EditMatterById(ma Matter) (errorCode int64) {
 		temp Matter
 	)
 	errorCode = util.SUCESSFUL
-	temp.Id = ma.Id
-	err := OSQL.Read(&temp, "id")
+	temp.Mattercode = ma.Mattercode
+	err := OSQL.Read(&temp, "mattercode")
 	if err != nil {
 		beego.Error(err)
 		errorCode = util.MATTER_EDIT_FAILED
 		return errorCode
 	}
+
+	ma.Id = temp.Id
 
 	args := edit_matter(ma)
 	if len(args) > 0 {

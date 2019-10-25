@@ -119,6 +119,8 @@ func edit_permission(per Permission) []string {
 		args = append(args, "write")
 	}
 
+	beego.Info("args=", args)
+
 	return args
 }
 
@@ -164,7 +166,7 @@ func DeletePermission(id int64) (errorCode int64) {
 
 //{cardid: 1, read:[1,2,3], write:[4,5,6]}
 type AddPersionStruct struct {
-	Cardid int64
+	Cardid string
 	Read   []int64
 	Write  []int64
 }
@@ -176,7 +178,7 @@ func SetPermission(param AddPersionStruct) (errorCode int64, msg string) {
 		temp, updatePer Permission
 	)
 	errorCode = util.SUCESSFUL
-	temp.Cardid = strconv.FormatInt(param.Cardid, 10)
+	temp.Cardid = param.Cardid
 	updatePer.Cardid = temp.Cardid
 
 	for i, re := range param.Read {
@@ -194,8 +196,12 @@ func SetPermission(param AddPersionStruct) (errorCode int64, msg string) {
 			updatePer.Write += "," + strconv.FormatInt(wr, 10)
 		}
 	}
+
+	beego.Info("updatePer =", updatePer)
+
 	err := OSQL.Read(&temp, "cardid")
 	if err == nil { //find update
+		updatePer.Id = temp.Id
 		args := edit_permission(updatePer)
 		num, err2 := OSQL.Update(&updatePer, args...)
 		if err2 != nil {

@@ -24,27 +24,20 @@ type Supplier struct {
 
 func QuerySupplier(querystr string) []Supplier {
 	var (
-		custs1, custs2 []Supplier
+		custs1 []Supplier
 	)
 
+	beego.Info("querystr=", querystr)
+
 	if querystr != "" {
-		num, err := OSQL.Raw("select * from "+
-			util.SUPPLIER_TABLE_NAME+
-			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
+		num, err := OSQL.Raw("select * from " +
+			util.SUPPLIER_TABLE_NAME +
+			" where name like '%" + querystr + "%' or suppcode like '%" + querystr + "%' order by id asc").QueryRows(&custs1)
 		if err != nil {
 			beego.Error(err)
 			return custs1
 		}
 		beego.Info("num1=", num)
-
-		num, err = OSQL.Raw("select * from "+
-			util.SUPPLIER_TABLE_NAME+
-			" where suppcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
-		if err != nil {
-			beego.Error(err)
-			return custs1
-		}
-		beego.Info("num2=", num)
 	} else {
 		num, err := OSQL.Raw("select * from " +
 			util.SUPPLIER_TABLE_NAME +
@@ -55,10 +48,6 @@ func QuerySupplier(querystr string) []Supplier {
 			beego.Error(err)
 		}
 		beego.Info("num=", num)
-	}
-
-	if len(custs2) > 0 {
-		custs1 = append(custs1, custs2...)
 	}
 
 	return custs1
@@ -100,7 +89,11 @@ func EditSupplierById(pa Supplier) (errorCode int64) {
 		return errorCode
 	}
 
+	pa.Id = temp.Id
+
 	args := editArgs_supp(pa)
+
+	beego.Info("args =", args)
 
 	num, err2 := OSQL.Update(&pa, args...)
 	if err2 != nil {

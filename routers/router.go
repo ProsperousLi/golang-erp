@@ -691,7 +691,7 @@ func Stock() {
 }
 
 func Supplier() {
-	beego.Router("/"+PROJECT+"/querySupplier",
+	beego.Router("/"+PROJECT+"/basedata/querySupplier",
 		&controllers.SupplierController{}, GET+":QuerySupplier")
 
 	beego.Router("/"+PROJECT+"/supplier/getSuppliers",
@@ -746,7 +746,7 @@ func Vehicle() {
 }
 
 func Warehouse() {
-	beego.Router("/"+PROJECT+"/queryWarehouse",
+	beego.Router("/"+PROJECT+"/basedata/queryWarehouse",
 		&controllers.WarehouseController{}, GET+":GetAllWarehouses")
 
 	beego.Router("/"+PROJECT+"/warehouse/getWarehouses",

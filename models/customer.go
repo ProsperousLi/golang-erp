@@ -23,27 +23,21 @@ type Customer struct {
 
 func QueryCustomer(querystr string) []Customer {
 	var (
-		custs1, custs2 []Customer
+		custs1 []Customer
 	)
 
+	beego.Info("querystr=", querystr)
+
 	if querystr != "" {
-		num, err := OSQL.Raw("select * from "+
-			util.CUSTOMER_TABLE_NAME+
-			" where name like '%?%' order by id asc", querystr).QueryRows(&custs1)
+		num, err := OSQL.Raw("select * from " +
+			util.CUSTOMER_TABLE_NAME +
+			" where name like '%" + querystr + "%' or custcode like '%" + querystr + "%' order by id asc").QueryRows(&custs1)
 		if err != nil {
 			beego.Error(err)
 			return custs1
 		}
 		beego.Info("num1=", num)
 
-		num, err = OSQL.Raw("select * from "+
-			util.CUSTOMER_TABLE_NAME+
-			" where custcode like '%?%' order by id asc", querystr).QueryRows(&custs2)
-		if err != nil {
-			beego.Error(err)
-			return custs1
-		}
-		beego.Info("num2=", num)
 	} else {
 		num, err := OSQL.Raw("select * from " +
 			util.CUSTOMER_TABLE_NAME +
@@ -54,10 +48,6 @@ func QueryCustomer(querystr string) []Customer {
 			beego.Error(err)
 		}
 		beego.Info("num=", num)
-	}
-
-	if len(custs2) > 0 {
-		custs1 = append(custs1, custs2...)
 	}
 
 	return custs1

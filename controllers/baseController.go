@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"io/ioutil"
-	"strings"
+	//"strings"
 
 	"erpweb/models"
 	"erpweb/util"
@@ -40,21 +40,21 @@ func (c *BaseController) Prepare() {
 
 	beego.Info("webToken=", webToken)
 
-	if !strings.HasPrefix(actions, "/api/login/") {
-		beego.Info("校验token")
-		err, code := c.checkToken(webToken)
-		if code != util.SUCESSFUL {
-			util.RetContent.Code = code
-			if err != nil {
-				util.RetContent.Message = err.Error()
-			}
-			c.Data["json"] = util.RetContent
-			c.ServeJSON()
-			c.StopRun()
-		}
-	} else {
-		beego.Info("login的登录相关接口，不需要校验token")
-	}
+	// if !strings.HasPrefix(actions, "/api/login/") {
+	// 	beego.Info("校验token")
+	// 	err, code := c.checkToken(webToken)
+	// 	if code != util.SUCESSFUL {
+	// 		util.RetContent.Code = code
+	// 		if err != nil {
+	// 			util.RetContent.Message = err.Error()
+	// 		}
+	// 		c.Data["json"] = util.RetContent
+	// 		c.ServeJSON()
+	// 		c.StopRun()
+	// 	}
+	// } else {
+	// 	beego.Info("login的登录相关接口，不需要校验token")
+	// }
 
 }
 
