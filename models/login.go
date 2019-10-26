@@ -298,36 +298,50 @@ type PermissionWeb struct {
 type UserInfoStruct struct {
 	UserInfo   UserInfoWeb   `json:"userInfo"`
 	Permission PermissionWeb `json:"permission"`
-	MenuList   WebMenu       `json:"menuList"`
+	MenuList   []WebMenu     `json:"menuList"`
 }
 
 func GetUserInfo(token string) (errorCode int64, userInfo UserInfoStruct) {
-	if cardId, ok := TokenMap[token]; ok {
-		if cardid, ok2 := AccsMap[cardId]; ok2 {
-			employee, code := GetEmployeeByCardid(cardid)
-			if code != util.SUCESSFUL {
-				return code, userInfo
-			}
-
-			userInfo.UserInfo.Cardid = employee.Cardid
-			userInfo.UserInfo.DeptID = employee.DeptID
-			userInfo.UserInfo.Id = employee.Id
-			userInfo.UserInfo.Name = employee.Name
-			userInfo.UserInfo.Sex = employee.Sex
-
-			permis, err := QueryPermission(cardId)
-			if err != nil {
-				return util.SUCESSFUL, userInfo
-			}
-
-			userInfo.Permission.Read = permis.Read
-			userInfo.Permission.Write = permis.Write
-
-			// var allPermis []int64
-			// allPermis = append(allPermis, permis.Read...)
-			// allPermis = append(allPermis, permis.Write...)
+	errorCode = util.SUCESSFUL
+	//if cardId, ok := TokenMap[token]; ok {
+	if cardid, ok2 := AccsMap[token]; ok2 {
+		employee, code := GetEmployeeByCardid(cardid)
+		if code != util.SUCESSFUL {
+			return code, userInfo
 		}
+
+		userInfo.UserInfo.Cardid = employee.Cardid
+		userInfo.UserInfo.DeptID = employee.DeptID
+		userInfo.UserInfo.Id = employee.Id
+		userInfo.UserInfo.Name = employee.Name
+		userInfo.UserInfo.Sex = employee.Sex
+
+		permis, err := QueryPermission(cardid)
+		if err != nil {
+			return util.SUCESSFUL, userInfo
+		}
+
+		userInfo.Permission.Read = permis.Read
+		userInfo.Permission.Write = permis.Write
+
+		var allPermis = make(map[int64]int)
+
+		//去除重复
+		for _, read := range permis.Read {
+			allPermis[read] = 1
+		}
+
+		for _, write := range permis.Write {
+			allPermis[write] = 1
+		}
+
+		userInfo.MenuList = GetMenusByLeafs(allPermis)
+
+		// var allPermis []int64
+		// allPermis = append(allPermis, permis.Read...)
+		// allPermis = append(allPermis, permis.Write...)
 	}
+	//}
 	return errorCode, userInfo
 }
 

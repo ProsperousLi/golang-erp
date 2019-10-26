@@ -25,21 +25,88 @@ type WebMenu struct {
 	Children  []*WebMenu `json:"children"`
 }
 
-func GetMenus() []*WebMenu {
+func GetMenusByLeafs(permisses map[int64]int) []WebMenu {
 	var (
-		menus []Menu
+		menus    []Menu
+		retMenus []WebMenu
+		//tempRetMaps = make(map[int64]WebMenu)
 	)
-	_, err := OSQL.Raw("select * from " + util.EMPLOYEE_TABLE_NAME + " order by menuID asc").QueryRows(&menus)
+	_, err := OSQL.Raw("select * from " + util.MENU_TABLE_NAME).QueryRows(&menus)
 	if err != nil {
 		beego.Error(err) //logs.Error(err)
 	}
 
-	retMenus := groupMenus(menus)
+	beego.Info("sql menus=", menus)
+
+	//tempMenus := groupMenus(menus)
+
+	// for _, temp := range tempMenus {
+	// 	var tempRet WebMenu
+	// 	tempRet = *temp
+	// 	retMenus = append(retMenus, tempRet)
+	// }
+
+	// for permissionleafId, _ := range permisses {
+	// 	// if LeafFindChild(permissionleafId, tempMenus) {
+
+	// 	// }
+
+	// 	for _, findTmp := range tempMenus {
+	// 		if LeafFindChild(permissionleafId, findTmp.Children) {
+	// 			tempRetMaps[findTmp.MenuID] = *findTmp
+	// 		}
+	// 	}
+	// }
+
+	// for _, value := range tempRetMaps {
+
+	// 	retMenus = append(retMenus, value)
+	// }
+
+	beego.Info("该用户所拥有的菜单=", retMenus)
 
 	return retMenus
 }
 
-func groupMenus(params []Menu) []*WebMenu {
+func LeafFindChild(permissionleafId int64, vs []*WebMenu) bool {
+	var retBool = false
+	for _, v2 := range vs {
+		if len(v2.Children) > 0 {
+			retBool = LeafFindChild(permissionleafId, v2.Children)
+		} else {
+			beego.Info("没有子节点了, local menuId=", v2.MenuID, " , need find id=", permissionleafId)
+			if v2.MenuID == permissionleafId {
+				retBool = true
+			}
+		}
+	}
+	return retBool
+}
+
+func GetMenus() []WebMenu {
+	var (
+		menus    []Menu
+		retMenus []WebMenu
+	)
+	_, err := OSQL.Raw("select * from " + util.MENU_TABLE_NAME).QueryRows(&menus)
+	if err != nil {
+		beego.Error(err) //logs.Error(err)
+	}
+
+	beego.Info("sql menus=", menus)
+
+	tempMenus := groupMenus(menus)
+
+	for _, temp := range tempMenus {
+		var tempRet WebMenu
+		tempRet = *temp
+		retMenus = append(retMenus, tempRet)
+	}
+
+	return retMenus
+}
+
+func groupMenus(params []Menu) (rets []*WebMenu) {
 	var tempWeb []WebMenu
 	for _, param := range params {
 		var tempWebone WebMenu
@@ -59,8 +126,23 @@ func groupMenus(params []Menu) []*WebMenu {
 		pdepts = append(pdepts, a)
 	}
 
-	makeTree(pdepts, pdepts[0])
-	return pdepts
+	for _, pdept := range pdepts {
+		if pdept != nil {
+			if pdept.ParentID == 0 {
+				makeTree(pdepts, pdept)
+			}
+		}
+	}
+
+	for _, pdept := range pdepts {
+		if pdept != nil {
+			if pdept.ParentID == 0 {
+				rets = append(rets, pdept)
+			}
+		}
+	}
+
+	return rets
 }
 
 func has(v1 WebMenu, vs []*WebMenu) bool {

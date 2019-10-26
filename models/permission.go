@@ -30,16 +30,20 @@ func convert2Web(param Permission) (ret WebPermission) {
 	reads := strings.Split(param.Read, ",")
 	for _, v := range reads {
 		read64, err := strconv.ParseInt(v, 10, 64)
-		if err != nil {
+		if err == nil {
 			ret.Read = append(ret.Read, read64)
+		} else {
+			beego.Error(err)
 		}
 	}
 
 	writes := strings.Split(param.Write, ",")
 	for _, v := range writes {
 		write64, err := strconv.ParseInt(v, 10, 64)
-		if err != nil {
+		if err == nil {
 			ret.Write = append(ret.Write, write64)
+		} else {
+			beego.Error(err)
 		}
 	}
 
@@ -227,6 +231,7 @@ func SetPermission(param AddPersionStruct) (errorCode int64, msg string) {
 }
 
 func QueryPermission(cardid string) (ret WebPermission, err error) {
+	beego.Info("cardid=", cardid)
 	var per Permission
 	per.Cardid = cardid
 	err = OSQL.Read(&per, "cardid")
@@ -234,6 +239,8 @@ func QueryPermission(cardid string) (ret WebPermission, err error) {
 		beego.Error(err)
 		return ret, err
 	}
+
+	beego.Info("ret=", per)
 
 	ret = convert2Web(per)
 

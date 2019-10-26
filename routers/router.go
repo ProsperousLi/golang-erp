@@ -393,7 +393,7 @@ func Matterplan() {
 
 func Menu() {
 	//api/permission/allmenu
-	beego.Router("/"+PROJECT+"/permissionallmenu",
+	beego.Router("/"+PROJECT+"/permission/allmenu",
 		&controllers.MenuController{}, GET+":GetMenus")
 }
 
